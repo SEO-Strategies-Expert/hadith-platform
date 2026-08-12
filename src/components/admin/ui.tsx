@@ -201,6 +201,30 @@ export function SubmitBar({
   );
 }
 
+export function HubGrid({
+  items,
+}: {
+  items: { href: string; label: string; desc?: string }[];
+}) {
+  return (
+    <div className="grid max-w-3xl gap-3 sm:grid-cols-2">
+      {items.map((it) => (
+        <Link
+          key={it.href}
+          href={it.href}
+          className="group rounded-2xl border border-black/5 bg-white p-5 shadow-sm transition hover:border-gold/50 hover:shadow-md"
+        >
+          <div className="flex items-center justify-between">
+            <b className="text-[15px] font-extrabold text-navy-900">{it.label}</b>
+            <span className="text-gold-3 transition group-hover:-translate-x-1">←</span>
+          </div>
+          {it.desc && <p className="mt-1 text-[12.5px] text-ink-soft">{it.desc}</p>}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export function EmptyState({ label }: { label: string }) {
   return (
     <div className="grid place-items-center px-6 py-16 text-center text-[14px] text-ink-soft">
