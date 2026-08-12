@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { LogIn, Loader2 } from "lucide-react";
-import { authenticate } from "@/app/login/actions";
+import { authenticate } from "@/app/(admin)/login/actions";
 
 export function LoginForm() {
   const [error, formAction, pending] = useActionState(authenticate, undefined);
