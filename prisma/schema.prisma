@@ -1,5 +1,7 @@
+// ==========================================================================
 // Prisma schema — الكلّية العليا للحديث النبوي — منصّة ولوحة التحكم
-// قاعدة البيانات: Vercel Postgres (Postgres)
+// قاعدة البيانات: Vercel Postgres. كل المحتوى ثنائي اللغة (…Ar / …En).
+// ==========================================================================
 
 generator client {
   provider = "prisma-client-js"
@@ -11,6 +13,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// ---------------------- المستخدمون والأدوار ----------------------
 enum Role {
   ADMIN
   EDITOR
@@ -33,4 +36,302 @@ model User {
   updatedAt    DateTime   @updatedAt
 
   @@map("users")
+}
+
+// ---------------------- الإعدادات العامة (key/value) ----------------------
+// أمثلة المفاتيح: site.nameAr, site.nameEn, contact.email, contact.phone,
+// contact.address, social.youtube, social.x, social.instagram, ...
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  group     String   @default("general") // general | contact | social | brand
+  labelAr   String?
+  value     Json // نص، أو {ar, en}، أو رابط
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+// ---------------------- التنقّل والقوائم ----------------------
+enum MenuKind {
+  HEADER
+  FOOTER
+  TOPBAR
+}
+
+model NavLink {
+  id       String    @id @default(cuid())
+  menu     MenuKind  @default(HEADER)
+  labelAr  String
+  labelEn  String
+  href     String
+  icon     String? // معرّف أيقونة مثل i-college
+  group    String? // لعمود الفوتر أو التجميع
+  parentId String?
+  parent   NavLink?  @relation("NavChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children NavLink[] @relation("NavChildren")
+  order    Int       @default(0)
+  visible  Boolean   @default(true)
+
+  @@index([menu, parentId, order])
+  @@map("nav_links")
+}
+
+// ---------------------- الهيئة العلمية ----------------------
+model Scholar {
+  id            String  @id @default(cuid())
+  nameAr        String
+  nameEn        String
+  rankAr        String?
+  rankEn        String?
+  specAr        String?
+  specEn        String?
+  bioAr         String?
+  bioEn         String?
+  photoUrl      String?
+  countryAr     String?
+  countryEn     String?
+  isCouncilHead Boolean @default(false)
+  isCouncil     Boolean @default(false) // عضو المجلس العلمي
+  order         Int     @default(0)
+  visible       Boolean @default(true)
+
+  @@map("scholars")
+}
+
+// ---------------------- البرامج والمراحل والمقرّرات ----------------------
+model ProgramStage {
+  id      String   @id @default(cuid())
+  key     String   @unique // foundation | advanced | research
+  numAr   String? // "المرحلة الأولى"
+  numEn   String?
+  titleAr String
+  titleEn String
+  metaAr  String?
+  metaEn  String?
+  descAr  String?
+  descEn  String?
+  items   Json? // ["مقدّمة ابن الصلاح", ...] ثنائي؟ نخزّن {ar:[],en:[]}
+  icon    String?
+  moreHref String?
+  order   Int      @default(0)
+  visible Boolean  @default(true)
+  courses Course[]
+
+  @@map("program_stages")
+}
+
+model Course {
+  id        String        @id @default(cuid())
+  titleAr   String
+  titleEn   String
+  descAr    String?
+  descEn    String?
+  category  String? // مفتاح فلترة
+  stageId   String?
+  stage     ProgramStage? @relation(fields: [stageId], references: [id], onDelete: SetNull)
+  order     Int           @default(0)
+  visible   Boolean       @default(true)
+
+  @@map("courses")
+}
+
+// ---------------------- الأخبار والفعاليات ----------------------
+model NewsItem {
+  id        String   @id @default(cuid())
+  slug      String?  @unique
+  titleAr   String
+  titleEn   String
+  excerptAr String?
+  excerptEn String?
+  bodyAr    String?
+  bodyEn    String?
+  imageUrl  String?
+  tagAr     String?
+  tagEn     String?
+  date      DateTime @default(now())
+  featured  Boolean  @default(false)
+  visible   Boolean  @default(true)
+  order     Int      @default(0)
+
+  @@map("news_items")
+}
+
+model Event {
+  id      String   @id @default(cuid())
+  titleAr String
+  titleEn String
+  descAr  String?
+  descEn  String?
+  whenAr  String?
+  whenEn  String?
+  date    DateTime
+  order   Int      @default(0)
+  visible Boolean  @default(true)
+
+  @@map("events")
+}
+
+// ---------------------- ديوان العلماء ----------------------
+model DiwanCategory {
+  id      String       @id @default(cuid())
+  key     String       @unique
+  labelAr String
+  labelEn String
+  order   Int          @default(0)
+  threads DiwanThread[]
+
+  @@map("diwan_categories")
+}
+
+model DiwanThread {
+  id         String         @id @default(cuid())
+  titleAr    String
+  titleEn    String
+  authorAr   String
+  authorEn   String
+  rankAr     String?
+  rankEn     String?
+  categoryId String?
+  category   DiwanCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  count      Int            @default(0)
+  pinned     Boolean        @default(false)
+  timeAr     String?
+  timeEn     String?
+  order      Int            @default(0)
+  visible    Boolean        @default(true)
+
+  @@map("diwan_threads")
+}
+
+// ---------------------- الإصدارات والمجلة ----------------------
+model JournalIssue {
+  id      String  @id @default(cuid())
+  nameAr  String
+  nameEn  String
+  subAr   String?
+  subEn   String?
+  noAr    String?
+  noEn    String?
+  dateAr  String?
+  dateEn  String?
+  tagAr   String?
+  tagEn   String?
+  coverUrl String?
+  isNew   Boolean @default(false)
+  order   Int     @default(0)
+  visible Boolean @default(true)
+
+  @@map("journal_issues")
+}
+
+model Paper {
+  id      String  @id @default(cuid())
+  no      String?
+  titleAr String
+  titleEn String
+  metaAr  String?
+  metaEn  String?
+  fileUrl String?
+  order   Int     @default(0)
+  visible Boolean @default(true)
+
+  @@map("papers")
+}
+
+// ---------------------- المكتبة والمصادر ----------------------
+model LibraryResource {
+  id       String  @id @default(cuid())
+  nameAr   String
+  nameEn   String
+  url      String?
+  category String?
+  descAr   String?
+  descEn   String?
+  icon     String?
+  tags     Json? // {ar:[],en:[]}
+  featured Boolean @default(false)
+  active   Boolean @default(true)
+  order    Int     @default(0)
+
+  @@map("library_resources")
+}
+
+// ---------------------- الصفحات والأقسام ----------------------
+enum PageStatus {
+  PUBLISHED
+  DRAFT
+}
+
+model Page {
+  id           String     @id @default(cuid())
+  slug         String     @unique // index, about, faculty, ...
+  template     String     @default("inner") // home | inner | portal
+  titleAr      String
+  titleEn      String
+  metaDescAr   String?
+  metaDescEn   String?
+  heroKickerAr String?
+  heroKickerEn String?
+  heroTitleAr  String?
+  heroTitleEn  String?
+  heroIntroAr  String?
+  heroIntroEn  String?
+  heroImage    String?
+  bodyHtmlAr   String? // محتوى <main> القابل للتحرير
+  bodyHtmlEn   String?
+  seoTitleAr   String?
+  seoTitleEn   String?
+  seoDescAr    String?
+  seoDescEn    String?
+  ogImage      String?
+  status       PageStatus @default(PUBLISHED)
+  order        Int        @default(0)
+  updatedAt    DateTime   @updatedAt
+
+  @@map("pages")
+}
+
+// ---------------------- الوسائط ----------------------
+model Media {
+  id        String   @id @default(cuid())
+  url       String
+  pathname  String?
+  filename  String
+  altAr     String?
+  altEn     String?
+  width     Int?
+  height    Int?
+  size      Int?
+  mime      String?
+  createdAt DateTime @default(now())
+
+  @@map("media")
+}
+
+// ---------------------- شرائح الهيرو (الصفحة الرئيسية) ----------------------
+model HeroSlide {
+  id       String  @id @default(cuid())
+  imageAr  String // مسار الصورة العربية
+  imageEn  String // مسار الصورة الإنجليزية
+  altAr    String?
+  altEn    String?
+  order    Int     @default(0)
+  visible  Boolean @default(true)
+
+  @@map("hero_slides")
+}
+
+// ---------------------- منصّات التواصل (روابط) ----------------------
+model SocialLink {
+  id      String  @id @default(cuid())
+  key     String  @unique // youtube, facebook, x, snapchat, tiktok, instagram, telegram, whatsapp
+  labelAr String
+  labelEn String
+  url     String  @default("#")
+  icon    String // s-yt, s-fb, ...
+  order   Int     @default(0)
+  visible Boolean @default(true)
+
+  @@map("social_links")
 }

@@ -9,8 +9,11 @@
     "lint": "eslint",
     "postinstall": "prisma generate",
     "seed": "node prisma/seed.mjs",
+    "import": "node prisma/import.mjs",
+    "import:dry": "node prisma/import.mjs --dry",
     "db:push": "prisma db push",
-    "db:migrate": "prisma migrate deploy"
+    "db:migrate": "prisma migrate deploy",
+    "db:setup": "prisma db push && node prisma/seed.mjs && node prisma/import.mjs"
   },
   "prisma": {
     "seed": "node prisma/seed.mjs"
@@ -34,6 +37,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cheerio": "^1.2.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "tailwindcss": "^4",

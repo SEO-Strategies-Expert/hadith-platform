@@ -20,12 +20,6 @@ async function safeCount(fn: () => Promise<number>) {
   }
 }
 
-const cards = [
-  { label: "الصفحات", value: "—", icon: FileText, color: "from-emerald-500 to-emerald-600" },
-  { label: "الأخبار", value: "—", icon: Newspaper, color: "from-sky-500 to-sky-600" },
-  { label: "أعضاء الهيئة", value: "—", icon: GraduationCap, color: "from-violet-500 to-violet-600" },
-];
-
 const quickLinks = [
   { label: "الصفحات والأقسام", href: "/admin/pages", icon: FileText },
   { label: "الهيئة العلمية", href: "/admin/faculty", icon: GraduationCap },
@@ -38,8 +32,19 @@ const quickLinks = [
 ];
 
 export default async function DashboardPage() {
-  const usersCount = await safeCount(() => prisma.user.count());
+  const [usersCount, pagesCount, newsCount, scholarsCount] = await Promise.all([
+    safeCount(() => prisma.user.count()),
+    safeCount(() => prisma.page.count()),
+    safeCount(() => prisma.newsItem.count()),
+    safeCount(() => prisma.scholar.count()),
+  ]);
   const dbReady = usersCount !== null;
+
+  const cards = [
+    { label: "الصفحات", value: pagesCount ?? "—", icon: FileText, color: "from-emerald-500 to-emerald-600" },
+    { label: "الأخبار", value: newsCount ?? "—", icon: Newspaper, color: "from-sky-500 to-sky-600" },
+    { label: "أعضاء الهيئة", value: scholarsCount ?? "—", icon: GraduationCap, color: "from-violet-500 to-violet-600" },
+  ];
 
   return (
     <div className="space-y-6">

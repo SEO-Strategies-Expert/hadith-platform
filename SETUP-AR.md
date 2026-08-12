@@ -29,12 +29,20 @@ openssl rand -base64 32
 انسخ `.env.example` إلى `.env.local` (للتطوير المحلي) واملأ القيم. وفي Vercel أضِفها من
 **Project → Settings → Environment Variables** (نفس المفاتيح).
 
-### 5) أنشئ الجداول وأوّل مدير
+### 5) أنشئ الجداول + المدير + رحّل محتوى الموقع الحالي (أمر واحد)
 ```bash
 npm install
-npm run db:push        # ينشئ الجداول في قاعدة البيانات
-npm run seed           # ينشئ حساب المدير من ADMIN_EMAIL/ADMIN_PASSWORD
+npm run db:setup       # = db:push (الجداول) + seed (المدير) + import (ترحيل كل المحتوى)
 ```
+أو خطوة بخطوة:
+```bash
+npm run db:push        # إنشاء الجداول
+npm run seed           # إنشاء حساب المدير من ADMIN_EMAIL/ADMIN_PASSWORD
+npm run import         # ترحيل محتوى الموقع الحالي (37 صفحة + الهيئة + الأخبار + الديوان + المكتبة + …)
+```
+> للتحقّق من الترحيل بلا قاعدة بيانات: `npm run import:dry`
+> **مُختبَر فعليًّا:** تمّ تشغيل db:push + seed + import على Postgres حقيقي بنجاح
+> (37 صفحة، 6 علماء، 12 مجلس ديوان، 36 رابط تنقّل، 7 مصادر…) وتسجيل الدخول يعمل.
 
 ### 6) شغّل محليًّا
 ```bash
