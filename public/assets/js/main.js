@@ -86,36 +86,9 @@
     var list = document.getElementById('threads');
     if (!list) return;
 
-    var DATA_EN = [
-      { t:'Refining the ruling on the addition of a reliable narrator when contradicting one more reliable', a:'Prof. Dr. Abd al-Jabbar al-Marrani', r:'Scientific Council member', c:'ilal', tag:'Defects & analysis', n:47, pin:true, d:'2 hours ago' },
-      { t:'The pivot of "Actions are but by intentions" and the claim of Yahya ibn Saʿid’s sole narration', a:'Dr. Muhammad ibn Salih al-Umari', r:'Professor of chains', c:'asanid', tag:'Chains & narrators', n:38, pin:true, d:'5 hours ago' },
-      { t:'Criteria for ruling a hadith as disturbed (mudtarib) among early and later scholars', a:'Dr. Ahmad ibn Abdullah al-Shihri', r:'Doctoral researcher', c:'ilal', tag:'Defects & analysis', n:31, d:'Yesterday' },
-      { t:'A manuscript of "al-Tamhid" in the Qarawiyyin library — description and collation', a:'Dr. al-Husayn Wuld Baba', r:'Professor of manuscript studies', c:'makhtut', tag:'Manuscripts & editing', n:26, d:'Yesterday' },
-      { t:'Is the sole narration of a truthful (saduq) narrator accepted in foundational matters?', a:'Dr. Umar ibn Yahya al-Humaydi', r:'Faculty member', c:'asanid', tag:'Chains & narrators', n:24, d:'2 days ago' },
-      { t:'The hidden mursal: defining its limit and its difference from tadlis', a:'Dr. Abd al-Rahman al-Kinani', r:'Researcher', c:'mustalah', tag:'Terminology & application', n:22, d:'2 days ago' },
-      { t:'The effect of manuscript variants on the wording of Sahih al-Bukhari', a:'Dr. Sayf al-Din al-Ansari', r:'Manuscript editor', c:'makhtut', tag:'Manuscripts & editing', n:19, d:'3 days ago' },
-      { t:'Student discussion: gathering and studying the chains of "no harm and no harming"', a:'Advanced Stage students', r:'Student discussion', c:'mustalah', tag:'Terminology & application', n:17, d:'3 days ago' },
-      { t:'The rule "who preserves is proof over who does not" — refinement and restriction', a:'Dr. Bashir ibn Ibrahim al-Nijiri', r:'Faculty member', c:'ilal', tag:'Defects & analysis', n:15, d:'4 days ago' },
-      { t:'Narrators al-Bukhari included despite criticism — the method of the two Shaykhs', a:'Dr. Khalid ibn Saʿid al-Qahtani', r:'Researcher', c:'asanid', tag:'Chains & narrators', n:14, d:'5 days ago' },
-      { t:'Hadith comprehension: the import of the bare imperative in the hadiths of prayer', a:'Dr. Tariq ibn Mansur', r:'Associate professor', c:'fiqh', tag:'Hadith comprehension', n:12, d:'a week ago' },
-      { t:'Iʿtibar, corroborations and witnesses — refining the terms with examples', a:'Dr. Anas ibn Yusuf al-Halabi', r:'Doctoral researcher', c:'asanid', tag:'Chains & narrators', n:11, d:'a week ago' }
-    ];
-
-    var DATA = isEN ? DATA_EN : [
-      { t:'تحرير القول في زيادة الثقة إذا خالف من هو أوثق منه', a:'أ.د. عبد الجبّار المرّاني', r:'عضو المجلس العلمي', c:'ilal', tag:'العلل والتعليل', n:47, pin:true, d:'قبل ساعتين' },
-      { t:'مدارُ حديث «إنما الأعمال بالنيّات» ودعوى تفرّد يحيى بن سعيد', a:'د. محمد بن صالح العُمري', r:'أستاذ الأسانيد', c:'asanid', tag:'الأسانيد والرواة', n:38, pin:true, d:'قبل خمس ساعات' },
-      { t:'ضوابط الحكم بالاضطراب عند المتقدّمين والمتأخّرين', a:'د. أحمد بن عبد الله الشِّهري', r:'باحث دكتوراه', c:'ilal', tag:'العلل والتعليل', n:31, d:'أمس' },
-      { t:'نسخة مخطوطة من «التمهيد» في خزانة القرويّين — وصفٌ ومقابلة', a:'د. الحسين ولد بابا', r:'أستاذ علوم المخطوطات', c:'makhtut', tag:'المخطوط والتحقيق', n:26, d:'أمس' },
-      { t:'هل يُقبل تفرّد الصدوق في الأصول؟ عرضٌ لأقوال أهل الصنعة', a:'د. عمر بن يحيى الحُميدي', r:'عضو هيئة التدريس', c:'asanid', tag:'الأسانيد والرواة', n:24, d:'منذ يومين' },
-      { t:'المرسَل الخفيّ: تحرير الحدّ والفرق بينه وبين التدليس', a:'د. عبد الرحمن الكِناني', r:'باحث', c:'mustalah', tag:'المصطلح والتطبيق', n:22, d:'منذ يومين' },
-      { t:'أثر اختلاف النسخ في ضبط ألفاظ صحيح البخاري', a:'د. سيف الدين الأنصاري', r:'محقّق مخطوطات', c:'makhtut', tag:'المخطوط والتحقيق', n:19, d:'منذ ثلاثة أيام' },
-      { t:'مذاكرة طلابية: جمع طرق حديث «لا ضرر ولا ضرار» ودراستها', a:'طلبة مرحلة التعمُّق', r:'مذاكرة طلابية', c:'mustalah', tag:'المصطلح والتطبيق', n:17, d:'منذ ثلاثة أيام' },
-      { t:'قاعدة «من حفظ حجّةٌ على من لم يحفظ» — تحريرٌ وتقييد', a:'د. بشير بن إبراهيم النِّيجيري', r:'عضو هيئة التدريس', c:'ilal', tag:'العلل والتعليل', n:15, d:'منذ أربعة أيام' },
-      { t:'رواةٌ أخرج لهم البخاري وتُكلِّم فيهم — منهج الشيخين', a:'د. خالد بن سعيد القحطاني', r:'باحث', c:'asanid', tag:'الأسانيد والرواة', n:14, d:'منذ خمسة أيام' },
-      { t:'فقه الحديث: دلالة الأمر المجرَّد في أحاديث الصلاة', a:'د. طارق بن منصور', r:'أستاذ مشارك', c:'fiqh', tag:'فقه الحديث', n:12, d:'منذ أسبوع' },
-      { t:'الاعتبار والمتابعات والشواهد — تحرير المصطلح بالأمثلة', a:'د. أنس بن يوسف الحلبي', r:'باحث دكتوراه', c:'asanid', tag:'الأسانيد والرواة', n:11, d:'منذ أسبوع' }
-    ];
-
+    // البيانات تُجلب من قاعدة البيانات عبر /api/diwan — القائمة الأوّلية مُصيَّرة
+    // مسبقًا من الخادم (SSR)، والجلب هنا يُفعِّل الفرز والتصفية فقط.
+    var DATA = null;
     var cat = 'all', sort = 'new';
 
     function initial(name) {
@@ -124,6 +97,7 @@
     }
 
     function render() {
+      if (!DATA) return;
       var rows = DATA.filter(function (x) { return cat === 'all' || x.c === cat; });
 
       if (sort === 'active') rows = rows.slice().sort(function (a, b) { return b.n - a.n; });
@@ -173,7 +147,12 @@
       });
     });
 
-    render();
+    // القائمة الأوّلية مُصيَّرة من الخادم بالفعل — نجلب البيانات بصمت لتفعيل
+    // أزرار التصفية والفرز فقط، دون استبدال المحتوى المعروض قبل أن يتفاعل المستخدم.
+    fetch('/api/diwan?lang=' + (isEN ? 'en' : 'ar'))
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (json) { DATA = json; })
+      .catch(function () {});
   })();
 
   /* ---------------------------------------------------------------

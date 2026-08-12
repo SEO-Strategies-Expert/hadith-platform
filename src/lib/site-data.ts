@@ -50,6 +50,35 @@ export async function getTickerItems(lang: Lang) {
   }));
 }
 
+export type DiwanRow = {
+  t: string;
+  a: string;
+  r: string | null;
+  c: string;
+  tag: string;
+  n: number;
+  pin: boolean;
+  d: string | null;
+};
+
+export async function getDiwanThreads(lang: Lang): Promise<DiwanRow[]> {
+  const threads = await prisma.diwanThread.findMany({
+    where: { visible: true },
+    orderBy: [{ pinned: "desc" }, { order: "asc" }],
+    include: { category: true },
+  });
+  return threads.map((t) => ({
+    t: lang === "ar" ? t.titleAr : t.titleEn,
+    a: lang === "ar" ? t.authorAr : t.authorEn,
+    r: lang === "ar" ? t.rankAr : t.rankEn,
+    c: t.category?.key ?? "",
+    tag: t.category ? (lang === "ar" ? t.category.labelAr : t.category.labelEn) : "",
+    n: t.count,
+    pin: t.pinned,
+    d: lang === "ar" ? t.timeAr : t.timeEn,
+  }));
+}
+
 export async function getHeroSlides() {
   return prisma.heroSlide.findMany({
     where: { visible: true },
