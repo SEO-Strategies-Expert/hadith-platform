@@ -1,26 +1,52 @@
 @import "tailwindcss";
 
+/* هوية الكلّية: أزرق كحلي + ذهبي + كريمي */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --navy-950: #071630;
+  --navy-900: #0b2144;
+  --navy-800: #123159;
+  --navy-700: #17406f;
+  --navy-600: #1d5089;
+  --cream-50: #fdfbf4;
+  --cream-100: #f8f2e3;
+  --ink: #132b4c;
+  --ink-soft: #45587a;
+  --gold-1: #f6e2a0;
+  --gold-2: #e2bc5e;
+  --gold-3: #c79a31;
+  --gold: #d9ae4b;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-navy-950: var(--navy-950);
+  --color-navy-900: var(--navy-900);
+  --color-navy-800: var(--navy-800);
+  --color-navy-700: var(--navy-700);
+  --color-navy-600: var(--navy-600);
+  --color-cream-50: var(--cream-50);
+  --color-cream-100: var(--cream-100);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-gold: var(--gold);
+  --color-gold-1: var(--gold-1);
+  --color-gold-2: var(--gold-2);
+  --color-gold-3: var(--gold-3);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  font-family: "IBM Plex Sans Arabic", "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #eef1f6;
+  color: var(--ink);
 }
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #c9cfda; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #aab3c2; }
