@@ -7,12 +7,6 @@ export const authConfig = {
   trustHost: true,
   providers: [],
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
-      const isOnAdmin = nextUrl.pathname.startsWith("/admin");
-      if (isOnAdmin) return isLoggedIn;
-      return true;
-    },
     jwt({ token, user }) {
       if (user) {
         token.role = (user as { role?: string }).role;

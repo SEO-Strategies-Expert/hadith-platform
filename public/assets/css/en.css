@@ -1,0 +1,48 @@
+/* ==========================================================================
+   English (LTR) layer — loaded only on /en pages after style.css + inner-pages.css
+   Keeps the exact visual system; adapts direction, Latin typography and arrows.
+   ========================================================================== */
+
+/* Latin typography for body + English display headings (Arabic display fonts
+   don't carry Latin glyphs, so map them to a refined serif/sans on EN pages). */
+body{font-family:'PlexAr','Segoe UI',system-ui,-apple-system,sans-serif;letter-spacing:.1px}
+.thuluth,.naskh,
+.section-title,.page-title,.brand-name-en,
+.section-cap h2,.split-copy h2,.inner-cta h2,.callout h3,
+.issue-name,.foot-brand .nm,.portal-copy h1,
+.stat b,.facts b,.stage-num,.track-card h3,.paper-no,.step-n,.agenda-list .date b{
+  font-family:Georgia,'Iowan Old Style','Times New Roman',serif !important;
+  line-height:1.32;
+}
+/* headings keep enough leading; remove the RTL thuluth clip padding on EN */
+.page-title{padding-top:0;line-height:1.14}
+.section-title{padding-top:0}
+
+/* Brand — English lockup replaces the Arabic thuluth name */
+.brand-copy{max-width:260px}
+.brand-name-en{display:block;font-size:clamp(14px,1.05vw,18px);font-weight:700;line-height:1.2;letter-spacing:.2px}
+.brand-sub-en{display:block;font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--gold-2);margin-top:3px}
+
+/* Skip-link is parked off-screen with a physical `right` (RTL); flip it for LTR
+   so it doesn't create a huge horizontal overflow. */
+.skip-link{right:auto;left:-9999px}
+.skip-link:focus{right:auto;left:20px}
+
+/* Directional (RTL-drawn) arrows flipped to point the LTR way */
+.more svg,.link-lg svg,.card-link svg,.paper-go,.info-card a.more::after,
+.hero-bar .btn svg[href*="i-arrow"],.facts-cta .btn svg{transform:scaleX(-1)}
+.link-lg:hover svg{transform:scaleX(-1) translateX(-5px)}
+.more:hover svg,.pcard:hover .more svg,.stage:hover .more svg{transform:scaleX(-1) translateX(-5px)}
+.papers a:hover .paper-go{transform:scaleX(-1) translateX(-5px)}
+/* back-to-list style arrows in info cards already use ← ; make it → on LTR */
+.info-card a.more::after{content:"\2192"}
+
+/* News list hover nudges the other way in LTR */
+.news-list li a:hover{transform:translateX(4px)}
+.papers a:hover,.diwan .thread:hover{}
+
+/* Foot column hover indent flips automatically via logical props; nothing needed */
+
+/* Keep numbers Western already in content; ensure tabular alignment stays LTR */
+.thread-stats b,.facts b,.stat b{direction:ltr}
