@@ -3,6 +3,7 @@ import type { Lang } from "@/lib/site-data";
 import { getDiwanThreads } from "@/lib/site-data";
 import { getPageBySlug } from "@/lib/site-content";
 import { injectDiwanThreads } from "@/lib/diwan-html";
+import { applyHeroOverrides } from "@/lib/page-hero";
 
 export async function PageRenderer({ slug, lang }: { slug: string; lang: Lang }) {
   const page = await getPageBySlug(slug);
@@ -15,6 +16,9 @@ export async function PageRenderer({ slug, lang }: { slug: string; lang: Lang })
   if (slug === "index" && html) {
     const rows = await getDiwanThreads(lang);
     html = injectDiwanThreads(html, rows, lang);
+  } else if (html) {
+    // الصفحات الداخلية: طبّق تعديلات الهيرو (العنوان/التمهيد/الصورة) من لوحة التحكم.
+    html = applyHeroOverrides(html, page, lang);
   }
 
   if (isPortal) {

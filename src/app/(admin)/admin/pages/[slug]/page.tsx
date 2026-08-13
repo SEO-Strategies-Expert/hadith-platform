@@ -1,14 +1,16 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Field, TextArea, Select } from "@/components/admin/ui";
+import { ImagePickerField } from "@/components/admin/ImagePickerField";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { updatePage } from "../actions";
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="mb-3 text-[14px] font-extrabold text-gold-3">{title}</h3>
-      <div className="grid gap-5 sm:grid-cols-2">{children}</div>
+      <h3 className="mb-1 text-[14px] font-extrabold text-gold-3">{title}</h3>
+      {desc && <p className="mb-3 text-[12px] text-ink-soft">{desc}</p>}
+      <div className={`grid gap-5 sm:grid-cols-2 ${desc ? "mt-3" : ""}`}>{children}</div>
     </div>
   );
 }
@@ -39,7 +41,14 @@ export default async function EditPagePage({
               </div>
             </Section>
 
-            <Section title="واجهة الصفحة (Hero)">
+            <Section
+              title="واجهة الصفحة (Hero)"
+              desc={
+                slug === "index"
+                  ? "الرئيسية لها تصميمٌ خاص — هذه الحقول لا تنطبق عليها؛ عدّل محتواها من قسم «محتوى الصفحة» أدناه."
+                  : "تُطبَّق هذه الحقول مباشرةً على شريط الواجهة أعلى الصفحة عند الحفظ."
+              }
+            >
               <Field label="التمهيد (عربي)" name="heroKickerAr" defaultValue={p.heroKickerAr} />
               <Field label="Kicker (English)" name="heroKickerEn" defaultValue={p.heroKickerEn} dir="ltr" />
               <Field label="عنوان الواجهة (عربي)" name="heroTitleAr" defaultValue={p.heroTitleAr} />
@@ -50,7 +59,9 @@ export default async function EditPagePage({
               <div className="sm:col-span-2">
                 <TextArea label="Hero intro (English)" name="heroIntroEn" defaultValue={p.heroIntroEn} dir="ltr" />
               </div>
-              <Field label="صورة الواجهة (مسار)" name="heroImage" defaultValue={p.heroImage} dir="ltr" />
+              <div className="sm:col-span-2">
+                <ImagePickerField label="صورة الواجهة" name="heroImage" defaultValue={p.heroImage} />
+              </div>
             </Section>
 
             <Section title="محتوى الصفحة (HTML)">
@@ -71,7 +82,9 @@ export default async function EditPagePage({
               <div className="sm:col-span-2">
                 <TextArea label="SEO description (English)" name="seoDescEn" defaultValue={p.seoDescEn} dir="ltr" />
               </div>
-              <Field label="صورة المشاركة (OG)" name="ogImage" defaultValue={p.ogImage} dir="ltr" />
+              <div className="sm:col-span-2">
+                <ImagePickerField label="صورة المشاركة (OG)" name="ogImage" defaultValue={p.ogImage} />
+              </div>
               <Select
                 label="الحالة"
                 name="status"

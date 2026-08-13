@@ -30,7 +30,14 @@ export async function uploadMedia(
         mime: file.type || null,
       },
     });
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "";
+    if (msg.includes("private store")) {
+      return (
+        "مخزن Blob على Vercel مضبوط كخاصّ (Private) فلا يمكن عرض الصور منه للزوّار. " +
+        "من لوحة Vercel: Storage → مخزن Blob → أنشئ مخزنًا جديدًا بوصول عام (Public) وحدِّث BLOB_READ_WRITE_TOKEN."
+      );
+    }
     return "تعذّر الرفع. حاول مجددًا.";
   }
   revalidatePath("/admin/media");

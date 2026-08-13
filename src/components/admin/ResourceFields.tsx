@@ -1,5 +1,6 @@
 import type { FieldDef } from "@/lib/resources";
 import { Field, TextArea, Select, Checkbox } from "@/components/admin/ui";
+import { ImagePickerField } from "@/components/admin/ImagePickerField";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -29,8 +30,9 @@ function renderField(f: FieldDef, record?: any) {
       return <TextArea label={f.label} name={f.name} defaultValue={val ?? undefined} dir="rtl" hint={f.hint} />;
     case "textarea-ltr":
       return <TextArea label={f.label} name={f.name} defaultValue={val ?? undefined} dir="ltr" hint={f.hint} />;
-    case "ltr":
     case "image":
+      return <ImagePickerField label={f.label} name={f.name} defaultValue={val ?? undefined} required={f.required} hint={f.hint} />;
+    case "ltr":
       return <Field label={f.label} name={f.name} defaultValue={val ?? undefined} dir="ltr" required={f.required} hint={f.hint} />;
     case "number":
       return <Field label={f.label} name={f.name} type="number" defaultValue={val ?? 0} required={f.required} hint={f.hint} />;

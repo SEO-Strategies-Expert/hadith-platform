@@ -1,5 +1,6 @@
 import type { Scholar } from "@prisma/client";
 import { Field, TextArea, Checkbox } from "@/components/admin/ui";
+import { ImagePickerField } from "@/components/admin/ImagePickerField";
 
 export function ScholarFields({ s }: { s?: Scholar }) {
   return (
@@ -11,15 +12,9 @@ export function ScholarFields({ s }: { s?: Scholar }) {
         <Field label="Rank (English)" name="rankEn" defaultValue={s?.rankEn} dir="ltr" />
         <Field label="التخصّص (عربي)" name="specAr" defaultValue={s?.specAr} dir="rtl" />
         <Field label="Specialty (English)" name="specEn" defaultValue={s?.specEn} dir="ltr" />
-        <Field
-          label="رابط الصورة"
-          name="photoUrl"
-          defaultValue={s?.photoUrl}
-          dir="ltr"
-          hint="مسار مثل assets/img/scholar-1.jpg — رفع الصور من مكتبة الوسائط لاحقًا"
-        />
         <Field label="الترتيب" name="order" type="number" defaultValue={s?.order ?? 0} />
       </div>
+      <ImagePickerField label="صورة العضو" name="photoUrl" defaultValue={s?.photoUrl} />
       <TextArea label="نبذة (عربي)" name="bioAr" defaultValue={s?.bioAr} dir="rtl" />
       <TextArea label="Bio (English)" name="bioEn" defaultValue={s?.bioEn} dir="ltr" />
       <div className="flex flex-wrap gap-6 pt-1">
