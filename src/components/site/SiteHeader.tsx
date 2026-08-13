@@ -7,8 +7,6 @@ const T = {
   ar: {
     platforms: "منصّات الكلّية",
     quickLinks: "روابط سريعة",
-    journal: "المجلة العلمية",
-    forum: "منتدى الطلاب",
     switchTo: "English",
     search: "بحث",
     searchAria: "بحث في الموقع",
@@ -17,12 +15,12 @@ const T = {
     login: "دخول الطالب",
     menu: "القائمة",
     home: "الرئيسية",
+    live: "البث المباشر",
+    uniSocial: "صفحات الجامعة",
   },
   en: {
     platforms: "College platforms",
     quickLinks: "Quick links",
-    journal: "Academic Journal",
-    forum: "Student Forum",
     switchTo: "العربية",
     search: "Search",
     searchAria: "Search the site",
@@ -31,6 +29,8 @@ const T = {
     login: "Student Login",
     menu: "Menu",
     home: "Home",
+    live: "Live broadcast",
+    uniSocial: "University social pages",
   },
 } as const;
 
@@ -43,6 +43,8 @@ export async function SiteHeader({ lang, currentSlug }: { lang: Lang; currentSlu
   const t = T[lang];
   const brandName = lang === "ar" ? settings.get("site.shortAr") : settings.get("site.shortEn");
   const brandFull = lang === "ar" ? settings.get("site.nameAr") : settings.get("site.nameEn");
+  const liveUrl = settings.get("header.liveUrl") || "#";
+  const uniSocialUrl = settings.get("header.universitySocialUrl") || "#";
 
   return (
     <header className="site-head">
@@ -68,18 +70,6 @@ export async function SiteHeader({ lang, currentSlug }: { lang: Lang; currentSlu
           </ul>
 
           <nav className="navbar-links" aria-label={t.quickLinks}>
-            <Link href={siteHref(lang, "publications.html")}>
-              <svg aria-hidden="true">
-                <use href="#i-journal" />
-              </svg>{" "}
-              {t.journal}
-            </Link>
-            <Link href={siteHref(lang, "student-login.html")}>
-              <svg aria-hidden="true">
-                <use href="#i-forum" />
-              </svg>{" "}
-              {t.forum}
-            </Link>
             <Link
               className="lang-switch"
               href={counterpartHref(lang, currentSlug)}
@@ -93,18 +83,46 @@ export async function SiteHeader({ lang, currentSlug }: { lang: Lang; currentSlu
             </Link>
           </nav>
 
-          <button
-            className="navbar-search"
-            type="button"
-            id="searchToggle"
-            aria-expanded="false"
-            aria-controls="searchPanel"
-            aria-label={t.search}
-          >
-            <svg aria-hidden="true">
-              <use href="#i-search" />
-            </svg>
-          </button>
+          <div className="navbar-icons">
+            <a
+              className="navbar-iconbtn navbar-live"
+              href={liveUrl}
+              target={liveUrl !== "#" ? "_blank" : undefined}
+              rel={liveUrl !== "#" ? "noopener noreferrer" : undefined}
+              aria-label={t.live}
+              title={t.live}
+            >
+              <span className="navbar-live-label">{t.live}</span>
+              <svg aria-hidden="true">
+                <use href="#i-live" />
+              </svg>
+              <span className="navbar-live-dot" aria-hidden="true" />
+            </a>
+            <a
+              className="navbar-iconbtn"
+              href={uniSocialUrl}
+              target={uniSocialUrl !== "#" ? "_blank" : undefined}
+              rel={uniSocialUrl !== "#" ? "noopener noreferrer" : undefined}
+              aria-label={t.uniSocial}
+              title={t.uniSocial}
+            >
+              <svg aria-hidden="true">
+                <use href="#i-social" />
+              </svg>
+            </a>
+            <button
+              className="navbar-iconbtn navbar-search"
+              type="button"
+              id="searchToggle"
+              aria-expanded="false"
+              aria-controls="searchPanel"
+              aria-label={t.search}
+            >
+              <svg aria-hidden="true">
+                <use href="#i-search" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className="search-panel" id="searchPanel" hidden>
@@ -156,21 +174,27 @@ export async function SiteHeader({ lang, currentSlug }: { lang: Lang; currentSlu
                 return (
                   <li key={item.id} className={item.children.length ? "has-drop" : undefined}>
                     <Link
-                      className="nav-item"
+                      className={item.href === "university.html" ? "nav-item nav-item-university" : "nav-item"}
                       href={siteHref(lang, item.href)}
                       aria-current={active ? "page" : undefined}
                     >
-                      <span className="ic">
-                        <svg aria-hidden="true">
-                          <use href={`#${item.icon ?? "i-arrow"}`} />
-                        </svg>
+                      <span className={item.href === "university.html" ? "ic ic-university" : "ic"}>
+                        {item.href === "university.html" ? (
+                          <img src="/assets/img/university-logo.png" alt="" className="nav-university-logo" />
+                        ) : (
+                          <svg aria-hidden="true">
+                            <use href={`#${item.icon ?? "i-arrow"}`} />
+                          </svg>
+                        )}
                       </span>
-                      <em>{lang === "ar" ? item.labelAr : item.labelEn}</em>
+                      <em className={item.href === "university.html" && lang === "ar" ? "thuluth gold-text" : undefined}>
+                        {lang === "ar" ? item.labelAr : item.labelEn}
+                      </em>
                     </Link>
                     {item.children.length > 0 && (
                       <div className="drop">
                         {item.children.map((c) => (
-                          <Link key={c.id} href={siteHref(lang, c.href)}>
+                          <Link key={c.id} href={siteHref(lang, c.href)} target={c.href.startsWith("http") ? "_blank" : undefined} rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}>
                             {lang === "ar" ? c.labelAr : c.labelEn}
                           </Link>
                         ))}
@@ -183,11 +207,13 @@ export async function SiteHeader({ lang, currentSlug }: { lang: Lang; currentSlu
           </nav>
 
           <div className="menubar-end">
-            <Link className="btn btn-gold" href={siteHref(lang, "student-login.html")}>
-              <svg aria-hidden="true">
-                <use href="#i-student" />
-              </svg>{" "}
-              {t.login}
+            <Link className="btn btn-gold btn-student" href={siteHref(lang, "student-login.html")}>
+              <span className="btn-student-ic">
+                <svg aria-hidden="true">
+                  <use href="#i-student" />
+                </svg>
+              </span>
+              <span className="btn-student-label">{t.login}</span>
             </Link>
             <button className="nav-toggle" type="button" aria-expanded="false" aria-controls="mainnav" aria-label={t.menu}>
               <svg aria-hidden="true">

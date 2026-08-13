@@ -16,6 +16,9 @@ const LABELS: Record<string, string> = {
   "contact.phone": "الهاتف",
   "contact.addressAr": "العنوان (عربي)",
   "contact.addressEn": "العنوان (إنجليزي)",
+  "header.liveUrl": "رابط البث المباشر",
+  "header.universityUrl": "رابط منصّة الجامعة",
+  "header.universitySocialUrl": "رابط صفحات الجامعة على التواصل",
 };
 
 const GROUP_TITLES: Record<string, string> = {
@@ -24,6 +27,7 @@ const GROUP_TITLES: Record<string, string> = {
   general: "عام",
   site: "الموقع",
   university: "الجامعة",
+  header: "روابط الهيدر (البث والجامعة)",
 };
 
 function isLtr(key: string) {

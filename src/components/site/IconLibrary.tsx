@@ -38,6 +38,10 @@ const ICONS = `<svg style="display:none" aria-hidden="true" xmlns="http://www.w3
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
   <symbol id="i-diglib" viewBox="0 0 24 24"><rect x="3.2" y="4.4" width="17.6" height="12" rx="1.8"/><path d="M8.4 20h7.2M12 16.4V20"/><path d="M7.2 8.2h9.6M7.2 11.2h6.4"/></symbol>
   <symbol id="i-accredit" viewBox="0 0 24 24"><path d="M12 3.2 5.5 5.8v5.2c0 4.3 2.9 7.5 6.5 8.8 3.6-1.3 6.5-4.5 6.5-8.8V5.8z"/><path d="m9.2 11.8 2 2 3.6-4"/></symbol>
+  <symbol id="i-lab" viewBox="0 0 24 24"><path d="M9.5 3h5"/><path d="M10.2 3v5.7L4.9 17a2 2 0 0 0 1.7 3h10.8a2 2 0 0 0 1.7-3l-5.3-8.3V3"/><path d="M7.6 14.3h8.8"/></symbol>
+  <symbol id="i-fee" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 7v10"/><path d="M9.4 9.2c0-1 1-1.7 2.6-1.7s2.6.7 2.6 1.6c0 2.2-5.2 1-5.2 3.2 0 .9 1 1.7 2.6 1.7s2.6-.8 2.6-1.8"/></symbol>
+  <symbol id="i-live" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.4"/><path d="M8 8a5.7 5.7 0 0 0 0 8M16 8a5.7 5.7 0 0 1 0 8"/><path d="M4.8 4.8a10.2 10.2 0 0 0 0 14.4M19.2 4.8a10.2 10.2 0 0 1 0 14.4"/></symbol>
+  <symbol id="i-social" viewBox="0 0 24 24"><circle cx="5.8" cy="12" r="2.3"/><circle cx="17.5" cy="5.8" r="2.3"/><circle cx="17.5" cy="18.2" r="2.3"/><path d="m7.9 10.8 7.6-3.6M7.9 13.2l7.6 3.6"/></symbol>
 </svg>`;
 
 export function IconLibrary() {

@@ -134,6 +134,16 @@ svg.brandicon{fill:currentColor;stroke:none}
 .btn-outline{color:var(--cream-50);background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.28)}
 .btn-outline:hover{border-color:var(--gold);color:var(--gold-1);transform:translateY(-2px)}
 
+/* زرّ دخول الطالب — بارزٌ ومميّزٌ في طرف المِنيو بار */
+.btn-student{position:relative;padding:10px 20px 10px 10px;gap:11px}
+.btn-student-ic{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;flex:none;
+  background:var(--navy-950);color:var(--gold-1);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5)}
+.btn-student-ic svg{width:17px;height:17px}
+.btn-student-label{white-space:nowrap}
+.btn-student::before{content:"";position:absolute;inset:-4px;border-radius:999px;z-index:-1;
+  background:radial-gradient(circle,rgba(217,174,75,.4),transparent 70%);opacity:0;transition:opacity .3s var(--ease)}
+.btn-student:hover::before{opacity:1}
+
 /* ==========================================================================
    1) الهيدر — طبقتان: ناف بار + مِنيو بار
    ========================================================================== */
@@ -148,14 +158,14 @@ svg.brandicon{fill:currentColor;stroke:none}
   transition:transform .22s var(--ease),box-shadow .22s var(--ease)}
 .platforms a svg{width:14px;height:14px}
 .platforms a:hover{transform:translateY(-2px) scale(1.07)}
-.platforms .yt{background:#FF0000}
-.platforms .fb{background:#1877F2}
-.platforms .x {background:#000;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)}
-.platforms .sc{background:#FFFC00;color:#111}
-.platforms .tk{background:linear-gradient(135deg,#25F4EE 0%,#111 48%,#FE2C55 100%)}
-.platforms .ig{background:radial-gradient(circle at 30% 107%,#FDF497 0%,#FD5949 45%,#D6249F 60%,#285AEB 90%)}
-.platforms .tg{background:linear-gradient(180deg,#37AEE2,#1E96C8)}
-.platforms .wa{background:#25D366}
+.platforms .youtube{background:#FF0000}
+.platforms .facebook{background:#1877F2}
+.platforms .x{background:#000;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)}
+.platforms .snapchat{background:#FFFC00;color:#111}
+.platforms .tiktok{background:linear-gradient(135deg,#25F4EE 0%,#111 48%,#FE2C55 100%)}
+.platforms .instagram{background:radial-gradient(circle at 30% 107%,#FDF497 0%,#FD5949 45%,#D6249F 60%,#285AEB 90%)}
+.platforms .telegram{background:linear-gradient(180deg,#37AEE2,#1E96C8)}
+.platforms .whatsapp{background:#25D366}
 .platforms a:hover{box-shadow:0 6px 16px rgba(0,0,0,.45)}
 
 .navbar-links{display:flex;align-items:center;gap:4px;padding-inline-start:14px;
@@ -172,11 +182,34 @@ svg.brandicon{fill:currentColor;stroke:none}
 .lang-switch:hover{background:var(--gold);border-color:var(--gold);color:var(--navy-950)}
 .lang-switch svg{width:15px;height:15px;color:var(--gold-2)}
 
-.navbar-search{margin-inline-start:auto;display:grid;place-items:center;width:29px;height:29px;border-radius:8px;
+/* أيقونات إضافية: البث المباشر، منصّة الجامعة، صفحات الجامعة، البحث */
+.navbar-icons{margin-inline-start:auto;display:flex;align-items:center;gap:8px;flex:none}
+.navbar-iconbtn{position:relative;display:grid;place-items:center;width:29px;height:29px;border-radius:8px;
   cursor:pointer;border:1px solid rgba(217,174,75,.3);background:rgba(255,255,255,.06);
   color:var(--gold-1);transition:.22s var(--ease);flex:none}
-.navbar-search svg{width:15px;height:15px}
-.navbar-search:hover,.navbar-search[aria-expanded="true"]{background:var(--gold);border-color:var(--gold);color:var(--navy-950)}
+.navbar-iconbtn svg{width:15px;height:15px}
+.navbar-iconbtn:hover,.navbar-iconbtn[aria-expanded="true"]{background:var(--gold);border-color:var(--gold);color:var(--navy-950)}
+.navbar-search{margin-inline-start:0}
+
+/* شارة البث المباشر — حمراء ثابتة، مع أيقونة ونقطة تومض بسرعة، ونصٌّ ظاهر بجانبها */
+.navbar-live{
+  position:relative;width:auto;height:24px;padding:0 9px 0 7px;gap:5px;border-radius:999px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#c81628,#ff3b3b);border-color:#ff3b3b;color:#fff;
+}
+.navbar-live svg{width:11px;height:11px;color:#fff;flex:none;animation:liveFlash .9s steps(1,end) infinite}
+.navbar-live:hover{background:linear-gradient(135deg,#ff3b3b,#c81628);border-color:#fff;color:#fff}
+.navbar-live-label{font-size:10.5px;font-weight:800;white-space:nowrap;letter-spacing:.1px;color:#fff}
+.navbar-live-dot{width:5px;height:5px;border-radius:50%;flex:none;
+  background:#fff;animation:liveFlash .9s steps(1,end) infinite}
+@keyframes liveFlash{
+  0%,45%{opacity:1}
+  50%,95%{opacity:.15}
+  100%{opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+  .navbar-live svg,.navbar-live-dot{animation:none}
+}
 
 .search-panel{background:var(--navy-900);border-top:1px solid rgba(217,174,75,.2);padding-block:13px}
 .search-panel form{display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.08);
@@ -199,7 +232,8 @@ svg.brandicon{fill:currentColor;stroke:none}
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cg fill='none' stroke='%23D9AE4B' stroke-width='.9'%3E%3Cpath d='M48 4 62 18 48 32 34 18z'/%3E%3Cpath d='M48 64 62 78 48 92 34 78z'/%3E%3Cpath d='M0 48 14 34 28 48 14 62z'/%3E%3Cpath d='M96 48 82 34 68 48 82 62z'/%3E%3C/g%3E%3C/svg%3E");
 }
 .menubar>.container{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;
-  gap:14px;padding-block:9px;position:relative;z-index:1;max-width:1460px}
+  gap:10px;padding-block:9px;position:relative;z-index:1;max-width:1460px}
+@media(min-width:1600px){.menubar>.container{max-width:1620px}}
 
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
 .brand-mark{position:relative;flex:none;display:grid;place-items:center}
@@ -210,27 +244,34 @@ svg.brandicon{fill:currentColor;stroke:none}
 .brand-emblem{width:70px;height:70px;object-fit:contain;position:relative;
   filter:drop-shadow(0 5px 14px rgba(0,0,0,.5));transition:transform .35s var(--ease)}
 .brand:hover .brand-emblem{transform:scale(1.05) rotate(-2deg)}
-.brand-copy{display:flex;flex-direction:column;justify-content:center;min-width:0;max-width:212px}
-/* الاسم الكامل مشكّلًا بخط الثلث — يلتفّ في سطرين مع مساحة كافية لعلامات التشكيل */
-.brand-name{font-size:clamp(13px,1.05vw,17.5px);margin:0;white-space:normal;line-height:1.72;padding-top:.06em}
+.brand-copy{display:flex;flex-direction:column;justify-content:center;min-width:0;flex:0 1 auto}
+/* الاسم الكامل مشكّلًا بخط الثلث — سطرٌ واحدٌ دائمًا، بلا التفافٍ أو اقتطاع */
+.brand-name{font-size:clamp(11px,1.05vw,17.5px);margin:0;white-space:nowrap;line-height:1.9;padding-top:.06em}
 .brand-mini,.brand-short,.brand-en{display:none}
 
 /* التنقّل الرئيسي — بين شعار الكلّية وزرّ دخول الطالب */
 .mainnav{min-width:0;display:flex;justify-content:center}
-.menubar-end{flex:none}
+/* justify-self:start يمنع تمدّد الطرف الثالث ليملأ مسار الشبكة المُفرَّغ حين يخرج .mainnav من التخطيط عند الطيّ */
+.menubar-end{flex:none;justify-self:start}
 .mainnav-list{display:flex;align-items:stretch;gap:1px;max-width:100%}
 .nav-collapsed .mainnav-list{visibility:hidden}
 .mainnav-list>li{position:relative;flex:0 0 auto}
 .nav-item{
-  height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  padding:7px 7px 6px;border-radius:11px;color:rgba(248,242,227,.9);text-align:center;
+  height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  padding:7px 4px 6px;border-radius:11px;color:rgba(248,242,227,.9);text-align:center;
   transition:background .22s var(--ease),color .22s var(--ease);position:relative;
 }
-.nav-item em{font-style:normal;font-size:11.8px;font-weight:700;line-height:1.3;white-space:nowrap}
-.nav-item .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;
+.nav-item em{font-style:normal;font-size:11.3px;font-weight:700;line-height:1.3;white-space:nowrap}
+.nav-item .ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;flex:none;
   background:rgba(255,255,255,.09);border:1px solid rgba(217,174,75,.22);
   transition:background .26s var(--ease),border-color .26s,transform .26s var(--ease)}
 .nav-item .ic svg{width:17px;height:17px;color:var(--gold-1);transition:color .24s}
+.nav-item .ic .nav-university-logo{width:100%;height:100%;object-fit:contain;border-radius:inherit;padding:2px}
+.nav-item em.thuluth{font-size:13.5px;line-height:1.35;white-space:nowrap}
+/* بند "جامعة أبو بكر إبراهيم" — شعارٌ واسمٌ جنبًا إلى جنب بدل التكديس الرأسي المعتاد */
+.nav-item-university{flex-direction:row;gap:9px;padding-inline:16px 12px}
+.nav-item-university .ic.ic-university{width:46px;height:46px}
+.nav-item-university em.thuluth{font-size:15px;padding-inline:4px;overflow:visible}
 .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
 .nav-item:hover .ic{background:linear-gradient(160deg,var(--gold-1),var(--gold-3));border-color:var(--gold);transform:translateY(-2px)}
 .nav-item:hover .ic svg{color:var(--navy-950)}
@@ -681,8 +722,7 @@ svg.brandicon{fill:currentColor;stroke:none}
 }
 @media(max-width:640px){
   .brand-en{display:none}
-  .brand-copy{max-width:200px}
-  .brand-name{font-size:12.5px;line-height:1.56}
+  .brand-name{font-size:11px;line-height:1.5}
   .brand-emblem{width:50px;height:50px}
   .brand{gap:9px}
   .nav-toggle{padding:8px 9px}
@@ -916,7 +956,6 @@ svg.brandicon{fill:currentColor;stroke:none}
 }
 @media(max-width:1320px){
   .brand-en{display:none}
-  .brand-copy{max-width:240px}
   .brand-name{font-size:13.5px;line-height:1.66}
 }
 @media(max-width:1240px){
@@ -949,7 +988,34 @@ svg.brandicon{fill:currentColor;stroke:none}
 .nav-collapsed .nav-item em{font-size:14.5px}
 .nav-collapsed .nav-item .ic{width:34px;height:34px}
 .nav-collapsed .nav-item .ic svg{width:18px;height:18px}
-.nav-collapsed .drop{display:none}
+
+/* عناصر القوائم الفرعية تبقى ظاهرةً ومباشرةً أسفل كل عنصرٍ رئيسي داخل اللوحة المطوية،
+   بدل اختفائها بالكامل — فبعد اعتماد 14 عنصرًا رئيسيًا صارت هذه اللوحة الوضع الافتراضي
+   حتى على الشاشات الكبيرة، فيجب أن تبقى كل الروابط الفرعية قابلةً للوصول منها. */
+.nav-collapsed .drop,
+.drop.drop-inline{
+  display:block;position:static;transform:none;opacity:1;visibility:visible;min-width:0;
+  background:none;border:0;border-radius:0;box-shadow:none;padding:2px 0 8px 46px;margin:0;
+}
+.nav-collapsed .drop a,
+.drop.drop-inline a{color:rgba(248,242,227,.75);font-size:13px;font-weight:600;padding:6px 10px}
+.nav-collapsed .drop a:hover,
+.drop.drop-inline a:hover{background:rgba(217,174,75,.14);color:var(--gold-1)}
+.nav-collapsed .drop a::before,
+.drop.drop-inline a::before{background:var(--gold-2)}
+
+/* لوحةٌ موسّعة (Mega Menu) بأعمدةٍ متعدّدة على الشاشات المتوسطة والكبيرة —
+   بما أنّ 14 عنصرًا لن تتّسع أفقيًا حتى على الشاشات الكبيرة، تصبح هذه اللوحة
+   واجهة التصفّح الأساسية لا استثناءً نادرًا، فيجب أن تكون مريحةً لا شبيهةً بقائمة جوّال ضيّقة. */
+@media(min-width:900px){
+  .nav-collapsed .mainnav.open{max-height:82vh}
+  .nav-collapsed .mainnav-list{
+    display:grid;width:100%;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    align-items:start;gap:2px 22px;padding:22px 28px 28px;
+  }
+  .nav-collapsed .mainnav-list>li{width:auto}
+  .nav-collapsed .nav-item{padding:10px 11px;gap:11px}
+}
 
 @media(max-width:1020px){
   .nav-toggle{display:block}
@@ -968,7 +1034,8 @@ svg.brandicon{fill:currentColor;stroke:none}
   .nav-item .ic svg{width:18px;height:18px}
   .drop{display:none}
   .menubar{position:relative}
-  .menubar-end .btn-gold span{display:none}
+  .menubar-end .btn-student-label{display:none}
+  .btn-student{padding:8px}
 }
 @media(max-width:760px){
   .navbar>.container{gap:10px;padding-inline:14px;min-height:40px}
@@ -977,6 +1044,11 @@ svg.brandicon{fill:currentColor;stroke:none}
   .platforms{gap:5px}
   .platforms a{width:25px;height:25px;border-radius:7px}
   .platforms a svg{width:13px;height:13px}
+  .navbar-icons{gap:5px}
+  .navbar-iconbtn{width:25px;height:25px;border-radius:7px}
+  .navbar-iconbtn svg{width:13px;height:13px}
+  .navbar-live{width:25px;height:25px;padding:0;border-radius:7px}
+  .navbar-live-label{display:none}
   .menubar>.container{padding-inline:14px;gap:10px;padding-block:8px}
   .brand-emblem{width:52px;height:52px}
   .brand-mark::before{inset:-5px}
@@ -1026,3 +1098,10 @@ svg.brandicon{fill:currentColor;stroke:none}
 /* (10) ضمان عدم اقتصاص عناوين الثلث المتدرّجة من الأعلى في كامل الموقع */
 .section-title.thuluth,.section-title.naskh{padding-top:.06em}
 .foot-brand .nm{padding-top:.06em}
+
+/* (11) ضمان عدم اقتصاص اسم "جامعة أبو بكر إبراهيم" بخط الثلث من طرفيه —
+   يُكتب هنا بأعلى أولويةٍ ممكنة كي لا تتجاوزه قواعد الاستجابة أو وضع الطيّ. */
+.nav-item.nav-item-university{padding-inline:20px 16px !important;gap:10px}
+.nav-collapsed .nav-item.nav-item-university,
+.nav-item.nav-item-university{overflow:visible}
+.nav-item.nav-item-university em.thuluth{padding-inline:8px;overflow:visible;letter-spacing:.2px}
