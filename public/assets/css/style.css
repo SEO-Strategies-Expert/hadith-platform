@@ -1184,6 +1184,15 @@ svg.brandicon{fill:currentColor;stroke:none}
   .menubar-end .btn-student-label{display:inline;font-size:12.5px}
   .nav-toggle{flex:none;width:38px;height:38px}
 }
+/* تحت 560px لا يتّسع الصفّ الواحد: الاسم كان ينضغط في ~56px وستّة أسطر.
+   صفّان: الشعار والاسم كاملًا، ثم زرّ الطالب والهامبرغر. */
+@media(max-width:560px){
+  .menubar>.container{flex-wrap:wrap;row-gap:9px}
+  .brand{flex:1 1 100%}
+  .brand-name{font-size:13px;line-height:1.75}
+  .menubar-end{flex:1 1 100%;justify-content:space-between}
+  .menubar-end .btn-student{flex:1 1 auto;justify-content:center}
+}
 
 /* ---------- (5) الشريط العلوي: يلتفّ بدل أن يتزاحم، ونصوصه تعود ---------- */
 @media(max-width:600px){
