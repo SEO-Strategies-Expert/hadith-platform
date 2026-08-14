@@ -1139,3 +1139,116 @@ svg.brandicon{fill:currentColor;stroke:none}
   .gcard{padding:28px 22px 24px}
   .gcard h3{font-size:20px}
 }
+
+/* ==========================================================================
+   جولة الاستجابة والتنظيم (2026-08-14)
+   قواعد ملزِمة: لا حذف، ولا إخفاء، ولا تغيير نصّ — تنسيق فقط.
+   كل ما هنا مُلحق في النهاية؛ التراجع = حذف هذه الكتلة كاملةً.
+   ========================================================================== */
+
+/* ---------- (1) الأزرار: تلفّ ولا تُقصّ ------------------------------------
+   السبب الأصلي: .btn-gold{overflow:hidden} (للمعان) + .btn{white-space:nowrap}
+   + انكماش فلكس الافتراضي ⇒ كان النصّ يُقصّ. نمنع الانكماش فقط، واللمعان باقٍ. */
+.btn{flex:0 0 auto;max-width:100%}
+
+/* ---------- (2) صفوف الأزرار تتكدّس بعرض كامل على الجوال ---------------- */
+@media(max-width:600px){
+  .hero-bar-actions,.admit-actions,.cta-actions,.page-actions,.inner-cta .actions,
+  .foot-cta,.form-actions{flex-direction:column;align-items:stretch;width:100%}
+  .hero-bar-actions .btn,.admit-actions .btn,.cta-actions .btn,.page-actions .btn,
+  .inner-cta .actions .btn,.form-actions .btn{width:100%;justify-content:center}
+}
+
+/* ---------- (3) اسم الكلّية ظاهر على كل الأجهزة (لا يُخفى أبدًا) --------- */
+@media(max-width:600px){
+  .brand-copy{display:flex}
+  .brand{gap:10px;flex:1 1 100%;min-width:0}
+  .brand-name{white-space:normal;font-size:13px;line-height:1.8}
+  .brand-emblem{width:48px;height:48px}
+}
+
+/* ---------- (4) صفّ الشعار: حيّز حقيقي لكل عنصر ------------------------
+   كان العمود الثالث في الشبكة يحسب 0px فينضغط زرّ الطالب ويُقصّ نصّه،
+   بينما يبقى نصف الصفّ فارغًا. نستبدل الشبكة بفلكس مرن. */
+@media(max-width:1020px){
+  .menubar>.container{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{flex:1 1 auto;min-width:0}
+  .menubar-end{flex:none;justify-self:auto}
+}
+@media(max-width:600px){
+  .menubar>.container{flex-wrap:wrap;row-gap:10px}
+  .menubar-end{flex:1 1 100%;justify-content:space-between;gap:10px}
+  .menubar-end .btn-student{flex:1 1 auto;justify-content:center;padding:10px 18px}
+  .menubar-end .btn-student-label{display:inline;font-size:15px}
+  .nav-toggle{flex:none}
+}
+
+/* ---------- (5) الشريط العلوي: يلتفّ بدل أن يتزاحم، ونصوصه تعود ---------- */
+@media(max-width:600px){
+  .navbar>.container{flex-wrap:wrap;justify-content:center;gap:8px;padding-block:7px}
+  .platforms{flex-wrap:wrap;justify-content:center;gap:8px}
+  .navbar-links{border-inline-start:0;margin-inline-start:0;padding-inline-start:0}
+  .navbar-links a:not(.lang-switch){display:inline-flex}
+  .navbar-links .lang-switch{font-size:13px;gap:7px;padding:7px 12px}
+  .navbar-live-label{display:inline;font-size:13px}
+  .ticker-tag span{display:inline}
+}
+
+/* ---------- (6) أهداف اللمس ≥ 44px (بلا تغيير الحجم البصري) ------------- */
+.platforms a,.navbar-iconbtn,.foot-social a{position:relative}
+.platforms a::after,.navbar-iconbtn::after,.foot-social a::after{
+  content:"";position:absolute;inset:-9px;border-radius:inherit}
+@media(max-width:760px){
+  .foot-col a{padding-block:9px;display:block}
+  .foot-bottom nav a{padding-block:8px;display:inline-block}
+}
+
+/* ---------- (7) تكبير النصوص — نصّ القراءة 18px على الجوال -------------- */
+@media(max-width:600px){
+  .section-lede,.lede-lg,.pcard p,.pcard-lead p,.feature-stack p,.track-card p,
+  .stage p,.gcard p,.news-lead p,.faq details p,.foot-brand p,.steps div span,
+  .rules li,.diwan-note span,.split-copy>p,.section-cap p,.info-card p,
+  .resource-card p,.news-mini p,.page-intro,.check-list li,.lab-list li,
+  .agenda-list div span,.scard-t,.rules-soon,.diwan-foot small{
+    font-size:18px;line-height:1.9}
+  .hero-bar-text,.hero-bar-text.naskh{font-size:18px;line-height:1.85}
+
+  /* عناوين فرعية وروابط داخل النصّ */
+  .faq summary,.news-list h4,.papers h4,.thread-title,.scard b,.person-body b,
+  .steps div b,.agenda-list div b,.foot-col a,.link-lg,.more,.card-foot,
+  .media-caption strong,.news-mini h3,.resource-card h3,.diwan-bar .t,
+  .diwan-side h4,.foot-col h5,.agenda-title{font-size:17px;line-height:1.75}
+
+  /* الحدّ الأدنى للنصّ الثانوي — لا شيء تحت 13.5px */
+  .person-rank,.person-spec,.thread-pin,.rank,.badge,.tag,.issue-date,.issue-sub,
+  .scard-badge,.navbar-live-label,.agenda-list .date i,.track-meta,.paper-meta,
+  .news-meta time,.page-meta span,.profile-role,.breadcrumbs,.lab-toolbar button,
+  .stat-box span,.option-card span,.media-caption span,.eyebrow,.kicker,
+  .facts-note,.facts span,.step-n,.track-num,.foot-bottom{font-size:13.5px;line-height:1.7}
+  .ticker-track a{font-size:13.5px}
+}
+
+/* ---------- (8) تنظيم الشبكات على الجوال: عمود واحد حيث تتزاحم ---------- */
+@media(max-width:600px){
+  .issues{grid-template-columns:1fr;max-width:320px;margin-inline:auto}
+  .student-grid,.card-grid,.card-grid.two,.card-grid.four,.stats-grid,
+  .profile-grid,.resource-grid,.news-feature .side{grid-template-columns:1fr}
+  .diwan-side .cat-list{display:grid;grid-template-columns:1fr}
+  .facts{grid-template-columns:1fr 1fr}
+}
+
+/* مجالس الديوان: العدّاد ينزل سطرًا بدل عمود ثالث ضيّق */
+@media(max-width:600px){
+  .thread{grid-template-columns:auto minmax(0,1fr);row-gap:10px}
+  .thread-stats{grid-column:1 / -1;justify-self:start;display:flex;gap:18px}
+}
+
+/* ---------- (9) مسافات أهدأ تعوّض زيادة حجم النصّ ---------------------- */
+@media(max-width:600px){
+  .section{padding-block:56px}
+  .head{margin-bottom:32px}
+  .container{padding-inline:16px}
+  .pcard-body{padding:28px 18px 22px}
+  .track-card,.gcard{padding:26px 20px 22px}
+  .inner-section{padding:52px 0}
+}
