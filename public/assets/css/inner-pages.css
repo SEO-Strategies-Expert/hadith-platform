@@ -173,3 +173,7 @@ body:not([data-page="home"]) .ticker{box-shadow:0 8px 24px rgba(7,22,48,.12)}
   .news-mini h3,.resource-card h3,.media-caption strong,.info-card a.more,
   .info-card h3,.data-table td{font-size:17px;line-height:1.75}
 }
+
+/* فقرات المحتوى داخل البطاقات بلا صنف (نصّ قراءة أيضًا) */
+@media(max-width:1120px){.inner-section p:not([class]),.inner-section .body p{font-size:17px;line-height:1.88}}
+@media(max-width:600px){.inner-section p:not([class]),.inner-section .body p{font-size:18px;line-height:1.9}}
