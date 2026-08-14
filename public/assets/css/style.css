@@ -1189,7 +1189,8 @@ svg.brandicon{fill:currentColor;stroke:none}
 @media(max-width:560px){
   .menubar>.container{flex-wrap:wrap;row-gap:9px}
   .brand{flex:1 1 100%}
-  .brand-name{font-size:13px;line-height:1.75}
+  /* الصفّ صار بعرض كامل، فالاسم يتّسع لحجم مقروء بخطّ الثلث */
+  .brand-name{font-size:16px;line-height:1.85}
   .menubar-end{flex:1 1 100%;justify-content:space-between}
   .menubar-end .btn-student{flex:1 1 auto;justify-content:center}
 }
