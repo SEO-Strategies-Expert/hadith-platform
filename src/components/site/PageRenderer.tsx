@@ -4,8 +4,17 @@ import { getDiwanThreads } from "@/lib/site-data";
 import { getPageBySlug } from "@/lib/site-content";
 import { injectDiwanThreads } from "@/lib/diwan-html";
 import { applyHeroOverrides } from "@/lib/page-hero";
+import { bindPageSections, type PageParams } from "@/lib/site-sections";
 
-export async function PageRenderer({ slug, lang }: { slug: string; lang: Lang }) {
+export async function PageRenderer({
+  slug,
+  lang,
+  params,
+}: {
+  slug: string;
+  lang: Lang;
+  params?: PageParams;
+}) {
   const page = await getPageBySlug(slug);
   if (!page || page.status !== "PUBLISHED") notFound();
 
@@ -19,6 +28,12 @@ export async function PageRenderer({ slug, lang }: { slug: string; lang: Lang })
   } else if (html) {
     // الصفحات الداخلية: طبّق تعديلات الهيرو (العنوان/التمهيد/الصورة) من لوحة التحكم.
     html = applyHeroOverrides(html, page, lang);
+  }
+
+  // ربط بقيّة الأقسام (أخبار، فعاليات، هيئة علمية، مراحل، إصدارات، مكتبة…)
+  // بجداول قاعدة البيانات، وتطبيع الروابط النسبية.
+  if (html) {
+    html = await bindPageSections(html, slug, lang, params);
   }
 
   if (isPortal) {

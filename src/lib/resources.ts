@@ -16,6 +16,8 @@ export interface FieldDef {
   type?: FieldType;
   required?: boolean;
   options?: { value: string; label: string }[];
+  /** قائمة اختيار تُملأ من جدول آخر (مثل ربط المقرّر بمرحلته). */
+  relation?: { model: string; labelField: string; emptyLabel?: string };
   hint?: string;
   half?: boolean; // نصف عرض في الشبكة
 }
@@ -92,7 +94,10 @@ export const resources: Record<string, ResourceConfig> = {
       ...bilingual("title", "العنوان", { required: true }),
       ...bilingual("desc", "الوصف"),
       ...bilingual("when", "التوقيت"),
+      ...bilingual("tag", "الوسم"),
       { name: "date", label: "التاريخ", type: "date", half: true, required: true },
+      { name: "href", label: "رابط الفعالية (اختياري)", type: "ltr", half: true, hint: "diwan.html أو رابط بثّ خارجي" },
+      { name: "imageUrl", label: "صورة الفعالية", type: "image" },
       ...commonTail,
     ],
   },
@@ -139,6 +144,8 @@ export const resources: Record<string, ResourceConfig> = {
       { name: "fileUrl", label: "رابط الملف", type: "ltr", half: true },
       ...bilingual("title", "العنوان", { required: true }),
       ...bilingual("meta", "بيانات (مؤلّف · محكّم · صفحات)"),
+      ...bilingual("tag", "المجال (رواية/دراية/تحقيق…)"),
+      { name: "imageUrl", label: "صورة البحث", type: "image" },
       ...commonTail,
     ],
   },
@@ -161,6 +168,7 @@ export const resources: Record<string, ResourceConfig> = {
       ...bilingual("date", "التاريخ"),
       ...bilingual("tag", "الوسم"),
       { name: "coverUrl", label: "رابط الغلاف", type: "image", half: true },
+      { name: "href", label: "رابط العدد (اختياري)", type: "ltr", half: true, hint: "published-research.html أو ملف PDF" },
       { name: "isNew", label: "صدر حديثًا", type: "bool" },
       ...commonTail,
     ],
@@ -187,6 +195,39 @@ export const resources: Record<string, ResourceConfig> = {
       ...bilingual("time", "التوقيت"),
       { name: "count", label: "عدد المشاركات", type: "number", half: true },
       { name: "pinned", label: "مثبّت", type: "bool" },
+      ...commonTail,
+    ],
+  },
+
+  courses: {
+    key: "courses",
+    model: "course",
+    titleAr: "المقرّرات الدراسية",
+    singularAr: "مقرّر",
+    descAr:
+      "مقرّرات المراحل الدراسية. المقرّر المرتبط بمرحلة يخدم خطّة المرحلة، والمقرّر بلا مرحلة يظهر بطاقةً في صفحة «الدورات العلمية».",
+    siblings: [{ href: "/admin/programs", label: "مراحل البرنامج" }],
+    orderBy: { order: "asc" },
+    columns: [
+      { name: "titleAr", label: "المقرّر" },
+      { name: "category", label: "التصنيف", kind: "badge" },
+      { name: "visible", label: "ظاهر", kind: "bool" },
+    ],
+    fields: [
+      ...bilingual("title", "اسم المقرّر", { required: true }),
+      {
+        name: "stageId",
+        label: "المرحلة",
+        type: "select",
+        half: true,
+        relation: { model: "programStage", labelField: "titleAr", emptyLabel: "— بلا مرحلة —" },
+      },
+      { name: "category", label: "التصنيف (مفتاح تصفية)", type: "text", half: true, hint: "تخريج / مخطوطات / بحث" },
+      { name: "descAr", label: "الوصف (عربي)", type: "textarea" },
+      { name: "descEn", label: "الوصف (إنجليزي)", type: "textarea-ltr" },
+      ...bilingual("meta", "بيان مختصر (عدد اللقاءات…)"),
+      { name: "href", label: "رابط الدورة (اختياري)", type: "ltr", half: true },
+      { name: "imageUrl", label: "صورة الدورة", type: "image", half: true },
       ...commonTail,
     ],
   },

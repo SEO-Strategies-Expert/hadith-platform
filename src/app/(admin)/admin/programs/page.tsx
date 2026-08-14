@@ -18,6 +18,14 @@ export default async function ProgramsPage() {
         desc="مراحل التخصّص الثلاث ومقرّراتها."
         action={{ href: "/admin/programs/new", label: "إضافة مرحلة" }}
       />
+      <div className="mb-4 flex flex-wrap gap-2">
+        <Link
+          href="/admin/courses"
+          className="rounded-lg border border-black/10 bg-white px-3.5 py-2 text-[12.5px] font-bold text-navy-700 hover:border-gold/50"
+        >
+          المقرّرات الدراسية ←
+        </Link>
+      </div>
       <Card>
         {stages.length === 0 ? (
           <EmptyState label="لا توجد مراحل بعد." />

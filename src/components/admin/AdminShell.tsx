@@ -40,7 +40,7 @@ export function AdminShell({
 
           <div className="mr-auto flex items-center gap-2">
             <a
-              href="https://hadith-faculty.vercel.app/"
+              href="/"
               target="_blank"
               rel="noreferrer"
               className="hidden items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-[13px] font-bold text-white hover:bg-emerald-700 sm:flex"

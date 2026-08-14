@@ -129,6 +129,10 @@ model Course {
   descAr    String?
   descEn    String?
   category  String? // مفتاح فلترة
+  metaAr    String? // "٦ لقاءات"
+  metaEn    String?
+  imageUrl  String?
+  href      String?
   stageId   String?
   stage     ProgramStage? @relation(fields: [stageId], references: [id], onDelete: SetNull)
   order     Int           @default(0)
@@ -159,16 +163,20 @@ model NewsItem {
 }
 
 model Event {
-  id      String   @id @default(cuid())
-  titleAr String
-  titleEn String
-  descAr  String?
-  descEn  String?
-  whenAr  String?
-  whenEn  String?
-  date    DateTime
-  order   Int      @default(0)
-  visible Boolean  @default(true)
+  id       String   @id @default(cuid())
+  titleAr  String
+  titleEn  String
+  descAr   String?
+  descEn   String?
+  whenAr   String?
+  whenEn   String?
+  tagAr    String?
+  tagEn    String?
+  imageUrl String?
+  href     String?
+  date     DateTime
+  order    Int      @default(0)
+  visible  Boolean  @default(true)
 
   @@map("events")
 }
@@ -219,6 +227,7 @@ model JournalIssue {
   tagAr   String?
   tagEn   String?
   coverUrl String?
+  href    String?
   isNew   Boolean @default(false)
   order   Int     @default(0)
   visible Boolean @default(true)
@@ -227,15 +236,18 @@ model JournalIssue {
 }
 
 model Paper {
-  id      String  @id @default(cuid())
-  no      String?
-  titleAr String
-  titleEn String
-  metaAr  String?
-  metaEn  String?
-  fileUrl String?
-  order   Int     @default(0)
-  visible Boolean @default(true)
+  id       String  @id @default(cuid())
+  no       String?
+  titleAr  String
+  titleEn  String
+  metaAr   String?
+  metaEn   String?
+  tagAr    String?
+  tagEn    String?
+  imageUrl String?
+  fileUrl  String?
+  order    Int     @default(0)
+  visible  Boolean @default(true)
 
   @@map("papers")
 }
