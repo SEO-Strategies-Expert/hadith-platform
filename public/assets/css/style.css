@@ -1284,3 +1284,12 @@ svg.brandicon{fill:currentColor;stroke:none}
   .track-card,.gcard{padding:26px 20px 22px}
   .inner-section{padding:52px 0}
 }
+
+/* ---------- (10) بقايا نصوص دون 12.5px — قواعدها الأصلية أعلى تخصيصًا ---- */
+@media(max-width:980px){
+  .cat-list button .n,.thread-meta .rank,.thread-stats span,.agenda-list .when,
+  .thread-pin,.thread-stats b{font-size:13.5px}
+}
+/* منطقة نقر أوسع لنقاط منزلق الهيرو دون تغيير حجمها البصري */
+.hero-nav .dots button{position:relative}
+.hero-nav .dots button::after{content:"";position:absolute;inset:-16px -6px}
