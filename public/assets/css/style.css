@@ -1314,3 +1314,29 @@ svg.brandicon{fill:currentColor;stroke:none}
   .menubar-end .btn-student-label{display:inline;font-size:14px}
   .menubar-end .btn-student{padding:9px 16px 9px 10px;gap:10px}
 }
+
+/* ---------- (13) ترتيب الهيدر على الجوال: هويّة ← إجراءات ← أدوات ← تواصل
+   لا شيء يُخفى؛ إعادة توزيع فقط لتحسين التسلسل البصري والتوازن.
+   كان: أيقونات التواصل أولًا واسم الكلّية ثالثًا، وصفوف بمحاذاة مختلفة
+   تترك فراغًا في نصفها. صار: الاسم أولًا، ثم صفّ الإجراءات، ثم الأدوات
+   والتواصل في سطرين موسَّطين. */
+@media(max-width:600px){
+  .site-head{display:flex;flex-direction:column}
+  .menubar{order:1}
+  .navbar{order:2;border-top:1px solid rgba(217,174,75,.18)}
+
+  /* صفّ الهويّة: الشعار والاسم بمحاذاة البداية */
+  .menubar>.container{align-items:center}
+  .brand{justify-content:flex-start}
+
+  /* صفّ الإجراءات: الهامبرغر تحت الشعار مباشرةً، والزرّ يملأ الباقي */
+  .menubar-end{justify-content:flex-start;gap:10px}
+  .nav-toggle{order:-1}
+  .menubar-end .btn-student{flex:1 1 auto}
+
+  /* شريط الأدوات: سطر للأدوات وسطر للتواصل، كلاهما موسَّط */
+  .navbar>.container{flex-wrap:wrap;justify-content:center;align-items:center;gap:7px 10px;padding-block:6px}
+  .navbar-icons{order:1}
+  .navbar-links{order:2}
+  .platforms{order:3;flex-basis:100%;justify-content:center}
+}
