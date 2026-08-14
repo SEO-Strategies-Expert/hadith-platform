@@ -1335,8 +1335,10 @@ svg.brandicon{fill:currentColor;stroke:none}
   .menubar-end .btn-student{flex:1 1 auto}
 
   /* شريط الأدوات: سطر للأدوات وسطر للتواصل، كلاهما موسَّط */
-  .navbar>.container{flex-wrap:wrap;justify-content:center;align-items:center;gap:7px 10px;padding-block:6px}
-  .navbar-icons{order:1}
+  .navbar>.container{flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 10px;padding-block:4px}
+  /* .navbar-icons عليه margin-inline-start:auto لدفعه للطرف على الشاشات
+     الكبيرة — على الجوال يبتلع المساحة ويمنع التوسيط. */
+  .navbar-icons{order:1;margin-inline-start:0}
   .navbar-links{order:2}
   .platforms{order:3;flex-basis:100%;justify-content:center}
 }
