@@ -63,8 +63,11 @@ export async function SiteFooter({ lang }: { lang: Lang }) {
             </div>
 
             {[...groups.entries()].map(([group, links]) => {
-              const heading = links.find((l) => (lang === "ar" ? l.labelAr : l.labelEn) && l.href === "");
-              const items = links.filter((l) => l.href !== "");
+              // صفّ العنوان لا يحمل وجهة. الترحيل/اللوحة قد يحفظان "#" بدل ""،
+              // فنعامل الاثنين معاملة واحدة حتى لا يظهر مفتاح المجموعة (col1) مكان العنوان.
+              const isHeading = (l: (typeof links)[number]) => !l.href || l.href === "#";
+              const heading = links.find((l) => (lang === "ar" ? l.labelAr : l.labelEn) && isHeading(l));
+              const items = links.filter((l) => !isHeading(l));
               return (
                 <div className="foot-col" key={group}>
                   <h5>{heading ? (lang === "ar" ? heading.labelAr : heading.labelEn) : group}</h5>
