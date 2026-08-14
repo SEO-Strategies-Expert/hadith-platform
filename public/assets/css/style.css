@@ -1295,3 +1295,4 @@ svg.brandicon{fill:currentColor;stroke:none}
 .hero-nav .dots button::after{content:"";position:absolute;inset:-16px -6px}
 /* السطر التعريفي الإنجليزي تحت اسم الكلّية: كان 11px */
 @media(max-width:1120px){.brand-sub-en{font-size:12.5px;line-height:1.45;letter-spacing:.3px}}
+@media(max-width:1120px){.track-num,.facts-note,.facts span,.step-n,.foot-bottom{font-size:13.5px}}
