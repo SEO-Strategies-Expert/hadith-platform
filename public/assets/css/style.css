@@ -1354,6 +1354,6 @@ svg.brandicon{fill:currentColor;stroke:none}
 .page-title.gold-text,
 .issue-name,
 .foot-brand .nm{
-  padding-block:.72em;
-  margin-block:-.72em;
+  padding-block:1em;
+  margin-block:-1em;
 }
