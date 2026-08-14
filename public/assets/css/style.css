@@ -1206,7 +1206,27 @@ svg.brandicon{fill:currentColor;stroke:none}
   .foot-bottom nav a{padding-block:8px;display:inline-block}
 }
 
-/* ---------- (7) تكبير النصوص — نصّ القراءة 18px على الجوال -------------- */
+/* ---------- (7) تكبير النصوص ------------------------------------------
+   طبقتان: التابلت 17px، والجوال 18px (كتلة الجوال تالية فتتغلّب عند التداخل). */
+@media(max-width:980px){
+  .section-lede,.lede-lg,.pcard p,.pcard-lead p,.feature-stack p,.track-card p,
+  .stage p,.gcard p,.news-lead p,.faq details p,.foot-brand p,.steps div span,
+  .rules li,.diwan-note span,.split-copy>p,.section-cap p,.info-card p,
+  .resource-card p,.news-mini p,.page-intro,.check-list li,.lab-list li,
+  .agenda-list div span,.scard-t,.rules-soon,.diwan-foot small{
+    font-size:17px;line-height:1.88}
+  .hero-bar-text,.hero-bar-text.naskh{font-size:17px;line-height:1.82}
+  .faq summary,.news-list h4,.papers h4,.thread-title,.scard b,.person-body b,
+  .steps div b,.agenda-list div b,.foot-col a,.link-lg,.more,.card-foot,
+  .media-caption strong,.news-mini h3,.resource-card h3,.diwan-bar .t,
+  .diwan-side h4,.foot-col h5,.agenda-title{font-size:16px;line-height:1.72}
+  .person-rank,.person-spec,.thread-pin,.rank,.badge,.tag,.issue-date,.issue-sub,
+  .scard-badge,.navbar-live-label,.agenda-list .date i,.track-meta,.paper-meta,
+  .news-meta time,.page-meta span,.profile-role,.breadcrumbs,.lab-toolbar button,
+  .stat-box span,.option-card span,.media-caption span,.eyebrow,.kicker,
+  .facts-note,.facts span{font-size:13.5px;line-height:1.68}
+}
+
 @media(max-width:600px){
   .section-lede,.lede-lg,.pcard p,.pcard-lead p,.feature-stack p,.track-card p,
   .stage p,.gcard p,.news-lead p,.faq details p,.foot-brand p,.steps div span,
