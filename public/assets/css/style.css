@@ -1296,3 +1296,13 @@ svg.brandicon{fill:currentColor;stroke:none}
 /* السطر التعريفي الإنجليزي تحت اسم الكلّية: كان 11px */
 @media(max-width:1120px){.brand-sub-en{font-size:12.5px;line-height:1.45;letter-spacing:.3px}}
 @media(max-width:1120px){.track-num,.facts-note,.facts span,.step-n,.foot-bottom{font-size:13.5px}}
+
+/* ---------- (11) بطاقات المرتكزات الجانبية: عمودية على الجوال -----------
+   .feature-stack .pcard كانت flex-direction:row فتنحصر النصوص في ~205px
+   بجانب صورة 136px — تكدّس واضح على الجوال. */
+@media(max-width:760px){
+  .feature-stack .pcard{flex-direction:column}
+  .feature-stack .pcard-media{flex:none;aspect-ratio:880/470}
+  .feature-stack .pcard-body{padding:34px 22px 24px}
+  .feature-stack .pcard-ic{inset-inline-start:auto;inset-inline-end:22px;top:-23px}
+}
