@@ -1310,7 +1310,7 @@ svg.brandicon{fill:currentColor;stroke:none}
 
 /* ---------- (12) نصّ زرّ «دخول الطالب» ظاهر على التابلت أيضًا -----------
    كان يُخفى داخل @media(max-width:1020px) فيبقى أيقونة بلا كلمة. */
-@media(max-width:1020px){
+@media(min-width:601px) and (max-width:1020px){
   .menubar-end .btn-student-label{display:inline;font-size:14px}
   .menubar-end .btn-student{padding:9px 16px 9px 10px;gap:10px}
 }
