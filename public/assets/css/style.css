@@ -1342,3 +1342,18 @@ svg.brandicon{fill:currentColor;stroke:none}
   .navbar-links{order:2}
   .platforms{order:3;flex-basis:100%;justify-content:center}
 }
+
+/* ---------- (14) إصلاح اقتصاص التشكيل في العناوين ذات التدرّج الذهبي ------
+   background-clip:text يُرسم داخل صندوق خلفية العنصر فقط. حروف الثلث مع
+   التشكيل تتجاوز الصندوق ١٠–١٣px أعلى وأسفل (القياس الفعلي)، فتُمحى
+   الفتحات والضمّات والشدّات. القاعدة السابقة padding-top:.06em توفّر ١.٦px فقط.
+   الحل: توسيع صندوق الخلفية بـpadding، وإلغاء أثره في التخطيط بـmargin سالب
+   مساوٍ — فلا يتغيّر ارتفاع أي صفّ ولا تباعد أي قسم. */
+.brand-name.gold-text,
+.section-title.gold-text,
+.page-title.gold-text,
+.issue-name,
+.foot-brand .nm{
+  padding-block:.72em;
+  margin-block:-.72em;
+}
