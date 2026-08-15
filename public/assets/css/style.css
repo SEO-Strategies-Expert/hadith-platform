@@ -1380,3 +1380,22 @@ svg.brandicon{fill:currentColor;stroke:none}
 html{scroll-padding-top:150px}
 @media(max-width:600px){html{scroll-padding-top:225px}}
 @media(min-width:601px) and (max-width:1366px){html{scroll-padding-top:140px}}
+
+/* ---------- (17) القائمة المنسدلة على الجوال/اللوحي: أكورديون في التدفّق --
+   قوائم .drop مصمَّمة لسطح المكتب: تُزاح بـtop:calc(100% + 9px) فتُرسم
+   خارج موضعها في التدفّق وتقع فوق عناصر القائمة التالية (قياس: تغطية
+   ١٤–١٤٠px لثمانية عناصر). على الشاشات المطوية نُلغي الإزاحة والتموضع
+   ونعرضها قائمةً متدرّجة تحت عنصرها. لا يُخفى أي رابط. */
+@media(max-width:1020px){
+  .mainnav .drop{
+    position:static!important;top:auto!important;bottom:auto!important;
+    inset-inline:auto!important;transform:none!important;
+    width:auto!important;min-width:0!important;max-width:none!important;
+    margin:4px 0 8px!important;padding:6px 0 6px 0!important;
+    background:transparent!important;border:0!important;box-shadow:none!important;
+    border-radius:0!important;opacity:1!important;visibility:visible!important;
+    border-inline-start:2px solid rgba(217,174,75,.28)!important;
+    padding-inline-start:14px!important;margin-inline-start:16px!important;
+  }
+  .mainnav .drop a{padding-block:10px!important;font-size:15px!important}
+}
