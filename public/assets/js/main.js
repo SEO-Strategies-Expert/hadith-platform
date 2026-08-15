@@ -266,20 +266,27 @@
 
     scan();
 
-    // إعادة الرصد عند استبدال محتوى الصفحة (تنقّل داخلي بلا تحميل كامل)
+    // إعادة الرصد عند استبدال محتوى الصفحة (تنقّل داخلي بلا تحميل كامل).
+    // ملاحظة: لا نستعمل requestAnimationFrame هنا لأنه لا يعمل والمستند
+    // مخفيّ (تبويب في الخلفية)، فيبقى الفحص معلّقًا ولا تظهر الصفحة أبدًا.
+    var pending = 0;
+    function schedule() {
+      if (pending) return;
+      pending = setTimeout(function () { pending = 0; scan(); }, 60);
+    }
+
     if ('MutationObserver' in window) {
-      var pending = false;
       new MutationObserver(function (muts) {
-        if (pending) return;
         for (var i = 0; i < muts.length; i++) {
-          if (muts[i].addedNodes.length) {
-            pending = true;
-            requestAnimationFrame(function () { pending = false; scan(); });
-            break;
-          }
+          if (muts[i].addedNodes.length) { schedule(); break; }
         }
       }).observe(document.body, { childList: true, subtree: true });
     }
+
+    // وعند عودة التبويب للظهور، لأن المراقب لا يُطلق نداءاته وهو مخفيّ
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') schedule();
+    });
   })();
 
   /* ---------------------------------------------------------------
