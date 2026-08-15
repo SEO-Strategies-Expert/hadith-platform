@@ -6,6 +6,7 @@ import { PageHeader, Card, Select, TextArea } from "@/components/admin/ui";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { getInbox, FEE_LABELS, STATUS_OPTIONS } from "@/lib/inbox";
 import { updateEntry } from "../../actions";
+import { createStudentFromApplication } from "../../../students/actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -87,6 +88,20 @@ export default async function InboxEntryPage({
               </dd>
             </div>
           </dl>
+
+          {cfg.key === "admissions" && (
+            <form action={createStudentFromApplication.bind(null, id)} className="mt-6">
+              <button
+                type="submit"
+                className="rounded-xl bg-gradient-to-l from-gold-1 to-gold-3 px-5 py-2.5 text-[13.5px] font-extrabold text-navy-950 shadow-md hover:brightness-105"
+              >
+                إنشاء حساب طالب من هذا الطلب
+              </button>
+              <span className="mr-3 text-[12px] text-ink-soft">
+                يُنشئ الحساب بكلمة مرور مؤقّتة تُحفظ في ملاحظة الطلب.
+              </span>
+            </form>
+          )}
 
           {row.email || row.authorEmail ? (
             <a

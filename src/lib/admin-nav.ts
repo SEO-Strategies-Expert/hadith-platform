@@ -14,6 +14,10 @@ import {
   Search,
   Users,
   Inbox,
+  LayoutGrid,
+  HelpCircle,
+  ListOrdered,
+  Table,
 } from "lucide-react";
 
 export type NavItem = {
@@ -39,6 +43,10 @@ export const adminNav: NavSection[] = [
     title: "المحتوى",
     items: [
       { label: "الصفحات والأقسام", href: "/admin/pages", icon: FileText },
+      { label: "بطاقات الصفحات", href: "/admin/cards", icon: LayoutGrid },
+      { label: "الأسئلة الشائعة", href: "/admin/faqs", icon: HelpCircle },
+      { label: "خطوات المسارات", href: "/admin/steps", icon: ListOrdered },
+      { label: "الجداول (الاعتماد والخطة)", href: "/admin/curriculum", icon: Table },
       { label: "التنقّل والقوائم", href: "/admin/navigation", icon: Navigation },
       { label: "الهيئة العلمية", href: "/admin/faculty", icon: GraduationCap },
       { label: "البرامج والمقرّرات", href: "/admin/programs", icon: BookOpen },
@@ -52,6 +60,7 @@ export const adminNav: NavSection[] = [
   {
     title: "النظام",
     items: [
+      { label: "حسابات الطلاب", href: "/admin/students", icon: GraduationCap },
       { label: "الإعدادات العامة", href: "/admin/settings", icon: Settings },
       { label: "تحسين محركات البحث", href: "/admin/seo", icon: Search },
       { label: "المستخدمون والأدوار", href: "/admin/users", icon: Users, adminOnly: true },

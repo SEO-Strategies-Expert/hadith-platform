@@ -628,6 +628,144 @@ const bindCourses: Binder = async ($, lang) => {
   );
 };
 
+/* ------------------- قوائم محتوى الصفحات الداخلية (جداول عامّة) ------------------- */
+
+/** أول شبكة بطاقات تحتوي بطاقات صور — لتجنّب شبكات البطاقات التعريفية (info-card). */
+function imageCardGrid($: CheerioAPI) {
+  const grids = $(".card-grid").filter((_, el) => $(el).find("article.image-card").length > 0);
+  return grids.first();
+}
+
+/** بطاقات الشبكة في صفحةٍ ما ← جدول ContentCard حسب مفتاح القسم. */
+function cardsBinder(section: string): Binder {
+  return async ($, lang) => {
+    const grid = imageCardGrid($);
+    if (grid.length === 0) return;
+    const rows = await prisma.contentCard.findMany({
+      where: { section, visible: true },
+      orderBy: { order: "asc" },
+    });
+    if (rows.length === 0) return;
+
+    grid.html(
+      rows
+        .map((c, i) =>
+          imageCard(
+            {
+              href: link(lang, c.href, "#"),
+              image: mediaUrl(c.imageUrl, fallbackImage(i)),
+              title: lang === "ar" ? c.titleAr : c.titleEn,
+              desc: lang === "ar" ? c.descAr : c.descEn,
+              tag: lang === "ar" ? c.tagAr : c.tagEn,
+              foot: lang === "ar" ? c.metaAr : c.metaEn,
+              external: isExternal(c.href),
+            },
+            lang
+          )
+        )
+        .join("")
+    );
+  };
+}
+
+/** الأسئلة الشائعة ← جدول Faq. */
+function faqBinder(section: string): Binder {
+  return async ($, lang) => {
+    const box = $(".accordion").first();
+    if (box.length === 0) return;
+    const rows = await prisma.faq.findMany({
+      where: { section, visible: true },
+      orderBy: { order: "asc" },
+    });
+    if (rows.length === 0) return;
+
+    box.html(
+      rows
+        .map(
+          (f) =>
+            `<details><summary>${esc(lang === "ar" ? f.questionAr : f.questionEn)}</summary>` +
+            `<div class="answer">${esc(lang === "ar" ? f.answerAr : f.answerEn)}</div></details>`
+        )
+        .join("")
+    );
+  };
+}
+
+/** الخط الزمني للمسار ← جدول ProcessStep. */
+function stepsBinder(section: string): Binder {
+  return async ($, lang) => {
+    const box = $(".timeline").first();
+    if (box.length === 0) return;
+    const rows = await prisma.processStep.findMany({
+      where: { section, visible: true },
+      orderBy: { order: "asc" },
+    });
+    if (rows.length === 0) return;
+
+    box.html(
+      rows
+        .map((s, i) => {
+          const desc = lang === "ar" ? s.descAr : s.descEn;
+          return (
+            `<article class="timeline-item"><span class="step">${i + 1}</span>` +
+            `<h3>${esc(lang === "ar" ? s.titleAr : s.titleEn)}</h3>` +
+            (desc ? `<p>${esc(desc)}</p>` : "") +
+            `</article>`
+          );
+        })
+        .join("")
+    );
+  };
+}
+
+/** جدول «وثيقة الاعتماد» (بند/قيمة) ← جدول InfoRow. */
+const bindInfoRows: Binder = async ($, lang) => {
+  const table = $(".data-table").first();
+  if (table.length === 0) return;
+  const rows = await prisma.infoRow.findMany({
+    where: { section: "accreditation", visible: true },
+    orderBy: { order: "asc" },
+  });
+  if (rows.length === 0) return;
+
+  const body = table.find("tbody").length > 0 ? table.find("tbody") : table;
+  body.html(
+    rows
+      .map(
+        (r) =>
+          `<tr><th>${esc(lang === "ar" ? r.labelAr : r.labelEn)}</th>` +
+          `<td>${esc((lang === "ar" ? r.valueAr : r.valueEn) ?? "")}</td></tr>`
+      )
+      .join("")
+  );
+};
+
+/** جدول الخطة الدراسية ← جدول CurriculumRow. */
+const bindCurriculum: Binder = async ($, lang) => {
+  const table = $(".data-table").first();
+  if (table.length === 0) return;
+  const rows = await prisma.curriculumRow.findMany({
+    where: { visible: true },
+    orderBy: { order: "asc" },
+  });
+  if (rows.length === 0) return;
+
+  const cell = (ar: string | null, en: string | null) => `<td>${esc((lang === "ar" ? ar : en) ?? "")}</td>`;
+  const body = table.find("tbody").length > 0 ? table.find("tbody") : table;
+  body.html(
+    rows
+      .map(
+        (r) =>
+          `<tr><td>${esc(lang === "ar" ? r.stageAr : r.stageEn)}</td>` +
+          cell(r.axesAr, r.axesEn) +
+          cell(r.practiceAr, r.practiceEn) +
+          cell(r.outcomeAr, r.outcomeEn) +
+          `</tr>`
+      )
+      .join("")
+  );
+};
+
 /* --------------------------- شبكة الفعاليات في الأخبار --------------------------- */
 
 const bindNewsEvents: Binder = async ($, lang) => {
@@ -709,7 +847,20 @@ const BINDERS: Record<string, Binder[]> = {
   library: [bindLibraryGrid],
   "hadith-research-sites": [bindSiteGrid],
   diwan: [bindDiwanEvents],
+
+  // قوائم الصفحات الداخلية
+  programs: [cardsBinder("programs")],
+  ijazat: [cardsBinder("ijazat")],
+  "paid-books": [cardsBinder("paid-books")],
+  research: [cardsBinder("research")],
+  admissions: [stepsBinder("admissions"), faqBinder("admissions")],
+  "publication-rules": [faqBinder("publication-rules")],
+  accreditation: [bindInfoRows],
+  curricula: [bindCurriculum],
 };
+
+// صفحة الإصدارات تجمع بطاقات الأعداد وخطّ مسار النشر.
+BINDERS.publications.push(stepsBinder("publications"));
 
 /**
  * ينفّذ رابطي القسم على محتوى الصفحة المخزَّن ثم يطبّع الروابط.

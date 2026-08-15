@@ -5,9 +5,18 @@ export async function currentUser() {
   return session?.user ?? null;
 }
 
+/** أي مستخدم مسجَّل (يشمل الطلاب) — لبوابة الطلاب. */
+export async function requireSession() {
+  const user = await currentUser();
+  if (!user) throw new Error("UNAUTHENTICATED");
+  return user;
+}
+
+/** مستخدمو اللوحة فقط (مدير أو محرّر) — حسابات الطلاب ممنوعة. */
 export async function requireUser() {
   const user = await currentUser();
   if (!user) throw new Error("UNAUTHENTICATED");
+  if (user.role !== "ADMIN" && user.role !== "EDITOR") throw new Error("FORBIDDEN");
   return user;
 }
 

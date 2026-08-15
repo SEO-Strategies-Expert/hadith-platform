@@ -14,7 +14,11 @@ export default async function UsersPage() {
     redirect("/admin");
   }
 
-  const users = await prisma.user.findMany({ orderBy: { createdAt: "desc" } });
+  // حسابات الطلاب لها قسمها الخاصّ — هذه الشاشة لطاقم اللوحة.
+  const users = await prisma.user.findMany({
+    where: { role: { in: ["ADMIN", "EDITOR"] } },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <div>

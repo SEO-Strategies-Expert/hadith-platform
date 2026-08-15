@@ -9,6 +9,9 @@ export default async function AdminLayout({
 }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
+  // حسابات الطلاب لا تدخل اللوحة (الوسيط يحوّلها، وهذا حاجزٌ ثانٍ).
+  if (session.user.role === "STUDENT") redirect("/student");
+  const role = session.user.role;
 
   async function doSignOut() {
     "use server";
@@ -20,7 +23,7 @@ export default async function AdminLayout({
       user={{
         name: session.user.name,
         email: session.user.email,
-        role: session.user.role,
+        role,
       }}
       signOutAction={doSignOut}
     >

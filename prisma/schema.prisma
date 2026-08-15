@@ -18,6 +18,7 @@ datasource db {
 enum Role {
   ADMIN
   EDITOR
+  STUDENT // حساب طالب — بوابة الطلاب فقط، لا وصول للوحة
 }
 
 enum UserStatus {
@@ -33,6 +34,11 @@ model User {
   role         Role       @default(EDITOR)
   status       UserStatus @default(ACTIVE)
   avatarUrl    String?
+  // بيانات الطالب (تُستخدم عند role = STUDENT)
+  studentNo    String?
+  phone        String?
+  country      String?
+  program      String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
@@ -303,6 +309,93 @@ model Page {
   updatedAt    DateTime   @updatedAt
 
   @@map("pages")
+}
+
+// ---------------------- قوائم محتوى الصفحات الداخلية ----------------------
+// جداول عامّة يميّزها حقل `section` (مفتاح القسم في الموقع)، تُغني عن
+// تكرار موديل لكل شبكة بطاقات أو جدول أو قائمة أسئلة.
+
+/// بطاقات الشبكات: programs | ijazat | paid-books | research
+model ContentCard {
+  id       String  @id @default(cuid())
+  section  String
+  titleAr  String
+  titleEn  String
+  descAr   String?
+  descEn   String?
+  tagAr    String?
+  tagEn    String?
+  metaAr   String? // سطر أسفل البطاقة
+  metaEn   String?
+  imageUrl String?
+  href     String?
+  order    Int     @default(0)
+  visible  Boolean @default(true)
+
+  @@index([section, order])
+  @@map("content_cards")
+}
+
+/// الأسئلة الشائعة: admissions | publication-rules
+model Faq {
+  id         String  @id @default(cuid())
+  section    String
+  questionAr String
+  questionEn String
+  answerAr   String
+  answerEn   String
+  order      Int     @default(0)
+  visible    Boolean @default(true)
+
+  @@index([section, order])
+  @@map("faqs")
+}
+
+/// خطوات المسارات (خط زمني): admissions | publications
+model ProcessStep {
+  id      String  @id @default(cuid())
+  section String
+  titleAr String
+  titleEn String
+  descAr  String?
+  descEn  String?
+  order   Int     @default(0)
+  visible Boolean @default(true)
+
+  @@index([section, order])
+  @@map("process_steps")
+}
+
+/// جدول بيانات من عمودين (تسمية/قيمة): accreditation
+model InfoRow {
+  id      String  @id @default(cuid())
+  section String
+  labelAr String
+  labelEn String
+  valueAr String?
+  valueEn String?
+  order   Int     @default(0)
+  visible Boolean @default(true)
+
+  @@index([section, order])
+  @@map("info_rows")
+}
+
+/// جدول الخطة الدراسية في صفحة المناهج
+model CurriculumRow {
+  id         String  @id @default(cuid())
+  stageAr    String
+  stageEn    String
+  axesAr     String?
+  axesEn     String?
+  practiceAr String?
+  practiceEn String?
+  outcomeAr  String?
+  outcomeEn  String?
+  order      Int     @default(0)
+  visible    Boolean @default(true)
+
+  @@map("curriculum_rows")
 }
 
 // ---------------------- نماذج الموقع العام (إدخال الزوّار) ----------------------

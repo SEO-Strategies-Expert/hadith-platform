@@ -5,7 +5,8 @@ import { uploadFile, MEDIA_PREFIX } from "@/lib/blob";
 
 export async function POST(request: Request) {
   const session = await auth();
-  if (!session?.user) {
+  const role = session?.user?.role;
+  if (role !== "ADMIN" && role !== "EDITOR") {
     return NextResponse.json({ error: "غير مصرَّح" }, { status: 401 });
   }
 

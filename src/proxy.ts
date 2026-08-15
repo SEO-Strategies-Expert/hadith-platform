@@ -4,18 +4,32 @@ import { authConfig } from "@/auth.config";
 
 const { auth } = NextAuth(authConfig);
 
-// وظيفتان: 1) حماية /admin لغير المسجَّلين  2) تمرير المسار/اللغة الحاليَين
-// كترويسة داخلية ليقرأها التخطيط الجذري لمجموعة (site) ويضبط lang/dir.
+// ثلاث وظائف: 1) حماية /admin لطاقم اللوحة  2) حماية بوابة الطالب
+// 3) تمرير المسار/اللغة الحاليَين كترويسة داخلية ليقرأها تخطيط (site).
 export default auth((req) => {
   const { pathname } = req.nextUrl;
+  const role = req.auth?.user?.role;
+  const isEnglish = pathname === "/en" || pathname.startsWith("/en/");
 
-  if (pathname.startsWith("/admin") && !req.auth) {
-    const loginUrl = new URL("/login", req.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
+  if (pathname.startsWith("/admin")) {
+    if (!req.auth) {
+      const loginUrl = new URL("/login", req.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    // الطالب ليس من طاقم اللوحة — يُحوَّل إلى بوابته.
+    if (role === "STUDENT") {
+      return NextResponse.redirect(new URL("/student", req.url));
+    }
   }
 
-  const isEnglish = pathname === "/en" || pathname.startsWith("/en/");
+  const isStudentArea = pathname === "/student" || pathname === "/en/student";
+  if (isStudentArea && !req.auth) {
+    return NextResponse.redirect(
+      new URL(isEnglish ? "/en/student-login.html" : "/student-login.html", req.url)
+    );
+  }
+
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-pathname", pathname);
   requestHeaders.set("x-lang", isEnglish ? "en" : "ar");
