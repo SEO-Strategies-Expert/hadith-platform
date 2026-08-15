@@ -1369,3 +1369,11 @@ svg.brandicon{fill:currentColor;stroke:none}
 .nav-item em.thuluth.gold-text,
 .nav-item-university em.thuluth,
 .drop .gold-text{padding-block:1.2em;margin-block:-1.2em}
+
+/* ---------- (16) إزاحة الروابط الداخلية بمقدار ارتفاع الهيدر اللاصق -----
+   html{scroll-padding-top:120px} بينما الهيدر اللاصق 211px على الجوال
+   و127px على اللوحيات — فعند فتح رابط مثل about.html#vision يختفي أعلى
+   القسم خلف الهيدر. نضبط الإزاحة على الارتفاع الفعلي لكل مقاس. */
+html{scroll-padding-top:150px}
+@media(max-width:600px){html{scroll-padding-top:225px}}
+@media(min-width:601px) and (max-width:1366px){html{scroll-padding-top:140px}}
