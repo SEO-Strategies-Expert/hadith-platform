@@ -1349,8 +1349,10 @@ svg.brandicon{fill:currentColor;stroke:none}
    الفتحات والضمّات والشدّات. القاعدة السابقة padding-top:.06em توفّر ١.٦px فقط.
    الحل: توسيع صندوق الخلفية بـpadding، وإلغاء أثره في التخطيط بـmargin سالب
    مساوٍ — فلا يتغيّر ارتفاع أي صفّ ولا تباعد أي قسم. */
-.gold-text,
-.issue-name{
+/* تكرار الصنف يرفع التخصيص إلى (0,2,0) ليتغلّب على .section-title.thuluth
+   وأمثالها التي تضبط padding-top بقيمة صغيرة. */
+.gold-text.gold-text,
+.issue-name.issue-name{
   padding-block:1em;
   margin-block:-1em;
 }
