@@ -963,7 +963,7 @@ svg.brandicon{fill:currentColor;stroke:none}
   .nav-item .ic{width:28px;height:28px}
   .nav-item .ic svg{width:16px;height:16px}
 }
-@media(max-width:1120px){
+@media(max-width:1366px){
   .menubar>.container{gap:11px}
   .nav-item{padding:6px 7px 5px;gap:3px}
   .nav-item em{font-size:10.6px}
@@ -1218,7 +1218,7 @@ svg.brandicon{fill:currentColor;stroke:none}
 
 /* ---------- (7) تكبير النصوص ------------------------------------------
    طبقتان: التابلت 17px، والجوال 18px (كتلة الجوال تالية فتتغلّب عند التداخل). */
-@media(max-width:1120px){
+@media(max-width:1366px){
   .section-lede,.lede-lg,.pcard p,.pcard-lead p,.feature-stack p,.track-card p,
   .stage p,.gcard p,.news-lead p,.faq details p,.foot-brand p,.steps div span,
   .rules li,.diwan-note span,.split-copy>p,.section-cap p,.info-card p,
@@ -1287,7 +1287,7 @@ svg.brandicon{fill:currentColor;stroke:none}
 }
 
 /* ---------- (10) بقايا نصوص دون 12.5px — قواعدها الأصلية أعلى تخصيصًا ---- */
-@media(max-width:1120px){
+@media(max-width:1366px){
   .cat-list button .n,.thread-meta .rank,.thread-stats span,.agenda-list .when,
   .thread-pin,.thread-stats b{font-size:13.5px}
 }
@@ -1295,8 +1295,8 @@ svg.brandicon{fill:currentColor;stroke:none}
 .hero-nav .dots button{position:relative}
 .hero-nav .dots button::after{content:"";position:absolute;inset:-16px -6px}
 /* السطر التعريفي الإنجليزي تحت اسم الكلّية: كان 11px */
-@media(max-width:1120px){.brand-sub-en{font-size:12.5px;line-height:1.45;letter-spacing:.3px}}
-@media(max-width:1120px){.track-num,.facts-note,.facts span,.step-n,.foot-bottom{font-size:13.5px}}
+@media(max-width:1366px){.brand-sub-en{font-size:12.5px;line-height:1.45;letter-spacing:.3px}}
+@media(max-width:1366px){.track-num,.facts-note,.facts span,.step-n,.foot-bottom{font-size:13.5px}}
 
 /* ---------- (11) بطاقات المرتكزات الجانبية: عمودية على الجوال -----------
    .feature-stack .pcard كانت flex-direction:row فتنحصر النصوص في ~205px
@@ -1357,3 +1357,16 @@ svg.brandicon{fill:currentColor;stroke:none}
   padding-block:1em;
   margin-block:-1em;
 }
+
+/* ---------- (15) الأجهزة اللوحية: إغلاق فجوتين -------------------------
+   (أ) شبكة الأخبار كانت عمودين حتى 1180px، فينحصر عنوان الخبر في ~191px
+       على اللوحيات الصغيرة (768–900). عمود واحد يمنحه العرض الكامل.
+   (ب) عنصر «جامعة أبو بكر إبراهيم» في القائمة نصّه بتدرّج ذهبي وكان
+       يقتصّ تشكيله كبقيّة العناوين الذهبية. */
+@media(max-width:900px){
+  .news-grid{grid-template-columns:1fr}
+  .news-list li a{grid-template-columns:132px minmax(0,1fr)}
+}
+.nav-item em.thuluth.gold-text,
+.nav-item-university em.thuluth,
+.drop .gold-text{padding-block:.9em;margin-block:-.9em}

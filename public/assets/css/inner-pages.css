@@ -146,7 +146,7 @@ body:not([data-page="home"]) .ticker{box-shadow:0 8px 24px rgba(7,22,48,.12)}
 .inner-cta{padding:58px 0;background:linear-gradient(140deg,var(--navy-700),var(--navy-950));color:var(--cream-50)}
 .inner-cta .row{display:flex;align-items:center;justify-content:space-between;gap:28px}.inner-cta h2{font-size:clamp(30px,4vw,50px);line-height:1.7;margin:0;color:var(--gold-1)}.inner-cta p{margin:4px 0 0;color:rgba(248,242,227,.82);max-width:720px}.inner-cta .actions{display:flex;gap:10px;flex-wrap:wrap;flex:none}
 
-@media(max-width:1120px){.card-grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-shell{grid-template-columns:230px minmax(0,1fr)}.lab-notes{grid-column:1/-1;border-right:0;border-top:1px solid rgba(217,174,75,.2)}.portal-shell{grid-template-columns:1fr 390px}}
+@media(max-width:1366px){.card-grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-shell{grid-template-columns:230px minmax(0,1fr)}.lab-notes{grid-column:1/-1;border-right:0;border-top:1px solid rgba(217,174,75,.2)}.portal-shell{grid-template-columns:1fr 390px}}
 @media(max-width:900px){.page-hero{min-height:470px}.content-split,.content-split.reverse{grid-template-columns:1fr}.content-split.reverse .split-copy,.content-split.reverse .split-media{order:initial}.card-grid,.profile-grid,.resource-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.news-feature{grid-template-columns:1fr}.news-feature .side{grid-template-columns:repeat(2,minmax(0,1fr))}.portal-shell{grid-template-columns:1fr}.portal-visual{min-height:480px}.portal-panel{padding:46px 26px}.inner-cta .row{align-items:flex-start;flex-direction:column}}
 @media(max-width:700px){.page-hero .container{padding-block:66px 48px}.page-title{font-size:42px}.breadcrumbs{top:18px}.inner-section{padding:64px 0}.card-grid,.card-grid.two,.card-grid.four,.profile-grid,.resource-grid,.news-feature .side{grid-template-columns:1fr}.form-grid,.option-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.lab-shell{grid-template-columns:1fr}.lab-sidebar{border-left:0;border-bottom:1px solid rgba(217,174,75,.2)}.lab-document{padding:22px;font-size:18px}.news-mini{grid-template-columns:110px 1fr}.news-mini img{width:110px;height:100px}.portal-visual{padding:42px 26px;min-height:430px}.portal-copy h1{font-size:40px}.inner-cta .actions{width:100%}.inner-cta .actions .btn{flex:1;justify-content:center}.timeline-item{padding-right:70px}.timeline::before{right:24px}.timeline-item .step{right:4px}.split-media::before{inset:12px -10px -10px 10px}}
 @media(max-width:480px){.page-meta{gap:7px}.page-meta span{font-size:12px;padding:7px 10px}.news-mini{grid-template-columns:1fr}.news-mini img{width:100%;height:180px}.form-panel{padding:22px}.stats-grid{grid-template-columns:1fr 1fr}.stat-box strong{font-size:30px}}
@@ -157,7 +157,7 @@ body:not([data-page="home"]) .ticker{box-shadow:0 8px 24px rgba(7,22,48,.12)}
    المحدِّدات. نفس التدرّج: تابلت 17px / جوال 18px، ولا شيء تحت 12.5px.
    لا حذف ولا إخفاء — تنسيق فقط. التراجع = حذف هذه الكتلة.
    ========================================================================== */
-@media(max-width:1120px){
+@media(max-width:1366px){
   .split-copy>p,.section-cap p,.resource-card p,.news-mini p,.lab-list li,
   .option-card span,.info-card p,.check-list li,.page-intro{font-size:17px;line-height:1.88}
   .news-mini h3,.resource-card h3,.media-caption strong,.info-card a.more,
@@ -175,5 +175,5 @@ body:not([data-page="home"]) .ticker{box-shadow:0 8px 24px rgba(7,22,48,.12)}
 }
 
 /* فقرات المحتوى داخل البطاقات بلا صنف (نصّ قراءة أيضًا) */
-@media(max-width:1120px){.inner-section p:not([class]),.inner-section .body p{font-size:17px;line-height:1.88}}
+@media(max-width:1366px){.inner-section p:not([class]),.inner-section .body p{font-size:17px;line-height:1.88}}
 @media(max-width:600px){.inner-section p:not([class]),.inner-section .body p{font-size:18px;line-height:1.9}}
