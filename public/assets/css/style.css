@@ -1353,8 +1353,8 @@ svg.brandicon{fill:currentColor;stroke:none}
    وأمثالها التي تضبط padding-top بقيمة صغيرة. */
 .gold-text.gold-text,
 .issue-name.issue-name{
-  padding-block:1em;
-  margin-block:-1em;
+  padding-block:1em!important;
+  margin-block:-1em!important;
 }
 
 /* ---------- (15) الأجهزة اللوحية: إغلاق فجوتين -------------------------
