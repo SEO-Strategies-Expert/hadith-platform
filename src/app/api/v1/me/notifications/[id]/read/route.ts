@@ -6,7 +6,7 @@
  * والعمليّة **آمنة للتكرار**: إشعارٌ مقروءٌ سلفًا يُردّ بحاله ولا يُعاد ختمه.
  */
 import { prisma } from "@/lib/prisma";
-import { requireApiStudent, ApiError } from "@/lib/api-auth";
+import { requireApiUser, ApiError } from "@/lib/api-auth";
 import { ok, fail } from "../../../../_lib";
 import { cors, preflight, requireId } from "../../../../_http";
 
@@ -21,7 +21,7 @@ export async function OPTIONS(req: Request) {
 
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const identity = await requireApiStudent(req);
+    const identity = await requireApiUser(req);
     const id = requireId((await ctx.params).id, "معرّف الإشعار");
 
     await prisma.notification.updateMany({

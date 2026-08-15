@@ -7,14 +7,17 @@ import { useI18n } from '../../src/i18n';
 import { WEBSITE_URL } from '../../src/config';
 import { colors, spacing } from '../../src/theme';
 import { Button } from '../../src/ui/Button';
-import { Badge, Card, Divider, InfoRow, PressableCard, Row, Screen, Txt } from '../../src/ui/kit';
+import { Badge, Card, InfoRow, NavyPanel, PressableCard, Row, Screen, Txt } from '../../src/ui/kit';
+import { GoldTitle, OrnamentRule } from '../../src/ui/gold';
 import { RequireAuth } from '../../src/ui/RequireAuth';
 import { openExternal } from '../../src/ui/openLink';
+import { useInstructorText } from '../../src/instructor/ui';
 
 type LinkRow = { label: string; href: Href; icon: React.ComponentProps<typeof Ionicons>['name']; badge?: string };
 
 export default function AccountScreen() {
   const { t, n, date } = useI18n();
+  const instructorText = useInstructorText();
   const { status, me, signOut } = useAuth();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -22,6 +25,27 @@ export default function AccountScreen() {
   const authed = status === 'authed';
   const unread = me?.counts.unreadNotifications ?? 0;
 
+  /**
+   * مدخل لوحة الأكاديميين — لا يظهر إلّا لصاحب الدور.
+   *
+   * الإخفاء هنا **راحةٌ لا حراسة**: الخادم يردّ ٤٠٣ لكل مسار من مسارات اللوحة
+   * لغير `INSTRUCTOR`/`ADMIN` مهما فُتحت الشاشة. لكنّ عرض مدخلٍ ينتهي برسالة
+   * منعٍ عبثٌ بالطالب، وإخفاؤه يبقي حسابه على شاشاته وحدها.
+   */
+  const isInstructor = me?.role === 'INSTRUCTOR' || me?.role === 'ADMIN';
+
+  const instructorLinks: LinkRow[] = [
+    { label: instructorText.console, href: '/instructor', icon: 'easel-outline' },
+  ];
+
+  /**
+   * شاشات الطالب تبقى ظاهرةً للمحاضر ولا تُخفى.
+   *
+   * السبب أنّ الدور والتسجيل شيئان مختلفان: عضو الهيئة قد يكون دارسًا في
+   * برنامجٍ آخر بالكلّية، وله عندئذٍ واجبات ووثائق ورسوم حقيقيّة. وإخفاء
+   * الشاشات على أساس الدور يمنعه من بياناته هو. وإن لم يكن كذلك فالشاشات
+   * تعرض حالاتها الفارغة المكتوبة — وهي رسالةٌ مفهومة لا شاشةٌ بيضاء.
+   */
   const studentLinks: LinkRow[] = [
     { label: t('assignmentsTitle'), href: '/assignments', icon: 'document-text-outline' },
     { label: t('certificatesTitle'), href: '/certificates', icon: 'ribbon-outline' },
@@ -86,32 +110,41 @@ export default function AccountScreen() {
   return (
     <Screen>
       {authed && me ? (
+        <NavyPanel style={{ gap: spacing.sm }}>
+          {/* اسم الطالب بخطّ الثلث مذهَّبًا — الترويسة الاحتفاليّة للحساب. */}
+          <GoldTitle variant="ceremonial" align="center">
+            {me.name}
+          </GoldTitle>
+          <OrnamentRule />
+          <Row gap={spacing.xl} justify="center">
+            <View style={{ alignItems: 'center' }}>
+              <GoldTitle variant="numeral">{n(me.counts.courses)}</GoldTitle>
+              <Txt variant="tinyStrong" color={colors.textOnNavyMuted}>
+                {t('accountCourses')}
+              </Txt>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <GoldTitle variant="numeral">{n(me.counts.certificates)}</GoldTitle>
+              <Txt variant="tinyStrong" color={colors.textOnNavyMuted}>
+                {t('accountCertificates')}
+              </Txt>
+            </View>
+          </Row>
+        </NavyPanel>
+      ) : null}
+
+      {authed && me ? (
         <Card style={{ gap: spacing.md }}>
-          <Txt variant="title">{me.name}</Txt>
-          <Divider />
           <InfoRow label={t('accountEmail')} value={me.email} />
           {me.studentNo ? <InfoRow label={t('accountStudentNo')} value={n(me.studentNo)} /> : null}
           {me.program ? <InfoRow label={t('accountProgram')} value={me.program} /> : null}
           {me.country ? <InfoRow label={t('accountCountry')} value={me.country} /> : null}
           {me.phone ? <InfoRow label={t('accountPhone')} value={n(me.phone)} /> : null}
           <InfoRow label={t('accountJoined')} value={date(me.createdAt)} />
-          <Divider />
-          <Row gap={spacing.xl}>
-            <View>
-              <Txt variant="title">{n(me.counts.courses)}</Txt>
-              <Txt variant="tiny" color={colors.textMuted}>
-                {t('accountCourses')}
-              </Txt>
-            </View>
-            <View>
-              <Txt variant="title">{n(me.counts.certificates)}</Txt>
-              <Txt variant="tiny" color={colors.textMuted}>
-                {t('accountCertificates')}
-              </Txt>
-            </View>
-          </Row>
         </Card>
       ) : null}
+
+      {authed && isInstructor ? renderLinks(instructorLinks) : null}
 
       {authed ? renderLinks(studentLinks) : <RequireAuth>{null}</RequireAuth>}
 

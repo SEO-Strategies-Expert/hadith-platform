@@ -11,8 +11,10 @@ import {
   View,
   type ViewStyle,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
-import { colors, fontFamily, radius, shadow, spacing, typography } from '../theme';
+import { colors, goldHairline, radius, shadow, spacing, typography } from '../theme';
+import { GoldRule, OrnamentRule, ThuluthText } from './gold';
 
 /* ————— نصّ ————— */
 
@@ -29,8 +31,8 @@ export function Txt({
     <Text
       {...rest}
       style={[
-        { fontFamily, color: color ?? colors.text },
         typography[variant],
+        { color: color ?? colors.text },
         align ? { textAlign: align } : null,
         style,
       ]}
@@ -61,11 +63,13 @@ export function PressableCard({
   onPress,
   style,
   disabled,
+  padded = true,
 }: {
   children: React.ReactNode;
   onPress: () => void;
   style?: ViewStyle | ViewStyle[];
   disabled?: boolean;
+  padded?: boolean;
 }) {
   return (
     <Pressable
@@ -73,15 +77,45 @@ export function PressableCard({
       disabled={disabled}
       style={({ pressed }) => [
         styles.card,
-        { padding: spacing.lg },
+        padded ? { padding: spacing.lg } : null,
         shadow.card as ViewStyle,
-        pressed && !disabled ? { opacity: 0.72 } : null,
+        pressed && !disabled ? { opacity: 0.78, transform: [{ scale: 0.995 }] } : null,
         disabled ? { opacity: 0.6 } : null,
         style,
       ]}
     >
       {children}
     </Pressable>
+  );
+}
+
+/**
+ * لوحٌ كحليّ مزخرف — قاعدة الأقسام الاحتفاليّة (النبذة، الإحصاءات،
+ * دعوة الدخول). التدرّج والحدّ الذهبيّ منقولان عن أشرطة الموقع.
+ */
+export function NavyPanel({
+  children,
+  style,
+  padded = true,
+}: {
+  children: React.ReactNode;
+  style?: ViewStyle;
+  padded?: boolean;
+}) {
+  return (
+    <LinearGradient
+      colors={[colors.navyMid, colors.navyDeep]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      style={[
+        styles.navyPanel,
+        padded ? { padding: spacing.xl } : null,
+        shadow.raised as ViewStyle,
+        style,
+      ]}
+    >
+      {children}
+    </LinearGradient>
   );
 }
 
@@ -124,23 +158,35 @@ export function Row({
 
 /* ————— وسوم ————— */
 
-export type BadgeTone = 'neutral' | 'gold' | 'success' | 'danger' | 'warning';
+export type BadgeTone = 'neutral' | 'gold' | 'goldSolid' | 'success' | 'danger' | 'warning';
 
-const badgeTones: Record<BadgeTone, { bg: string; fg: string }> = {
-  neutral: { bg: '#EEF1F6', fg: colors.navy },
-  gold: { bg: colors.goldLight, fg: '#6B5115' },
-  success: { bg: colors.successBg, fg: colors.success },
-  danger: { bg: colors.dangerBg, fg: colors.danger },
-  warning: { bg: colors.warningBg, fg: colors.warning },
+const badgeTones: Record<BadgeTone, { bg: string; fg: string; border: string }> = {
+  neutral: { bg: '#EEF1F6', fg: colors.navy, border: '#DDE3EC' },
+  gold: { bg: colors.goldLight, fg: '#6B5115', border: colors.gold },
+  /** ذهبيّ صريح — للشارات فوق الصور والأسطح الكحليّة. */
+  goldSolid: { bg: colors.gold, fg: colors.navyDeep, border: colors.goldHi },
+  success: { bg: colors.successBg, fg: colors.success, border: '#CBE6D8' },
+  danger: { bg: colors.dangerBg, fg: colors.danger, border: '#E7D6D6' },
+  warning: { bg: colors.warningBg, fg: colors.warning, border: '#EADCC0' },
 };
 
 export function Badge({ label, tone = 'neutral' }: { label: string; tone?: BadgeTone }) {
   const c = badgeTones[tone];
   return (
-    <View style={[styles.badge, { backgroundColor: c.bg }]}>
-      <Txt variant="tiny" color={c.fg} style={{ fontWeight: '600' }}>
+    <View style={[styles.badge, { backgroundColor: c.bg, borderColor: c.border }]}>
+      <Txt variant="tinyStrong" color={c.fg}>
         {label}
       </Txt>
+    </View>
+  );
+}
+
+/** نقطةٌ نابضة تسبق شارة «يُبثّ الآن». */
+export function LivePulse({ color = colors.navyDeep }: { color?: string }) {
+  return (
+    <View style={styles.pulseHost}>
+      <View style={[styles.pulseHalo, { backgroundColor: color }]} />
+      <View style={[styles.pulseCore, { backgroundColor: color }]} />
     </View>
   );
 }
@@ -152,12 +198,17 @@ export function ProgressBar({ pct, label }: { pct: number; label?: string }) {
   return (
     <View style={{ gap: spacing.xs }}>
       {label ? (
-        <Txt variant="tiny" color={colors.textMuted}>
+        <Txt variant="tinyStrong" color={colors.textMuted}>
           {label}
         </Txt>
       ) : null}
       <View style={styles.track}>
-        <View style={[styles.fill, { width: `${clamped}%` }]} />
+        <LinearGradient
+          colors={[colors.goldDark, colors.gold, colors.goldHi]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={[styles.fill, { width: `${clamped}%` }]}
+        />
       </View>
     </View>
   );
@@ -201,12 +252,43 @@ export function Screen({
   );
 }
 
-export function SectionTitle({ title, action }: { title: string; action?: React.ReactNode }) {
+/**
+ * عنوان قسم بخطّ الثلث فوق خلفيّةٍ كريميّة، ويعلوه فاصلٌ ذهبيّ رفيع
+ * كما في أقسام الموقع.
+ */
+export function SectionTitle({
+  title,
+  action,
+  ornate = true,
+}: {
+  title: string;
+  action?: React.ReactNode;
+  ornate?: boolean;
+}) {
   return (
-    <Row justify="space-between">
-      <Txt variant="heading">{title}</Txt>
-      {action}
-    </Row>
+    <View style={{ gap: spacing.sm }}>
+      <Row justify="space-between" align="flex-end" gap={spacing.md}>
+        <View style={{ flexShrink: 1 }}>
+          <ThuluthText variant="ceremonial" color={colors.navy} numberOfLines={2}>
+            {title}
+          </ThuluthText>
+        </View>
+        {action}
+      </Row>
+      {ornate ? <GoldRule height={2} style={{ width: 88 }} /> : null}
+    </View>
+  );
+}
+
+/** عنوان قسمٍ فوق سطحٍ كحليّ — بتدرّجٍ ذهبيّ وزخرفة تحته. */
+export function SectionTitleOnNavy({ title }: { title: string }) {
+  return (
+    <View style={{ gap: spacing.xs, alignItems: 'center' }}>
+      <ThuluthText variant="ceremonial" color={colors.goldLight} align="center">
+        {title}
+      </ThuluthText>
+      <OrnamentRule />
+    </View>
   );
 }
 
@@ -218,15 +300,15 @@ export function InfoRow({ label, value }: { label: string; value: string }) {
       <Txt variant="small" color={colors.textMuted}>
         {label}
       </Txt>
-      <Txt variant="small" style={{ flexShrink: 1, fontWeight: '600' }}>
+      <Txt variant="smallStrong" style={{ flexShrink: 1 }}>
         {value}
       </Txt>
     </Row>
   );
 }
 
-export function Spinner({ small }: { small?: boolean }) {
-  return <ActivityIndicator size={small ? 'small' : 'large'} color={colors.navy} />;
+export function Spinner({ small, gold }: { small?: boolean; gold?: boolean }) {
+  return <ActivityIndicator size={small ? 'small' : 'large'} color={gold ? colors.gold : colors.navy} />;
 }
 
 const styles = StyleSheet.create({
@@ -236,18 +318,32 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  navyPanel: {
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: goldHairline,
+    overflow: 'hidden',
   },
   badge: {
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.md,
     paddingVertical: 3,
     borderRadius: radius.pill,
+    borderWidth: 1,
     alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
+  pulseHost: { width: 10, height: 10, alignItems: 'center', justifyContent: 'center' },
+  pulseHalo: { position: 'absolute', width: 10, height: 10, borderRadius: 5, opacity: 0.3 },
+  pulseCore: { width: 5, height: 5, borderRadius: 3 },
   track: {
     height: 8,
     borderRadius: radius.pill,
-    backgroundColor: '#E9E4D6',
+    backgroundColor: colors.cream200,
     overflow: 'hidden',
   },
-  fill: { height: '100%', backgroundColor: colors.gold, borderRadius: radius.pill },
+  fill: { height: '100%', borderRadius: radius.pill },
 });

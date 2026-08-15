@@ -1,15 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import { colors, spacing } from '../theme';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, radius, spacing } from '../theme';
 import { messageOf } from '../api/client';
 import { useI18n } from '../i18n';
 import { Button } from './Button';
-import { Card, Spinner, Txt } from './kit';
+import { Card, Row, Spinner, Txt } from './kit';
+import { OrnamentRule } from './gold';
 
 /**
  * حالات الشبكة الثلاث موحّدة في مكان واحد، فلا تُترك شاشة بيضاء صامتة:
  * تحميل، وخطأ بزرّ إعادة محاولة، وحالة فارغة مكتوبة.
  */
+
+export type StateIcon = React.ComponentProps<typeof Ionicons>['name'];
 
 export function LoadingState({ label }: { label?: string }) {
   const { t } = useI18n();
@@ -27,9 +31,12 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
   const { t } = useI18n();
   return (
     <Card style={{ gap: spacing.md, borderColor: '#E7D6D6', backgroundColor: colors.dangerBg }}>
-      <Txt variant="heading" color={colors.danger}>
-        {t('errorTitle')}
-      </Txt>
+      <Row gap={spacing.sm}>
+        <Ionicons name="alert-circle-outline" size={20} color={colors.danger} />
+        <Txt variant="heading" color={colors.danger}>
+          {t('errorTitle')}
+        </Txt>
+      </Row>
       <Txt variant="small" color={colors.text}>
         {message}
       </Txt>
@@ -38,9 +45,36 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
   );
 }
 
-export function EmptyState({ text, action }: { text: string; action?: React.ReactNode }) {
+/**
+ * الفراغ حالةٌ مقصودة لا عطل: ميداليّةٌ ذهبيّة بأيقونة، وفاصلٌ زخرفيّ،
+ * وجملةٌ مكتوبة، وإجراءٌ مقترح إن وُجد.
+ */
+export function EmptyState({
+  text,
+  action,
+  icon = 'sparkles-outline',
+}: {
+  text: string;
+  action?: React.ReactNode;
+  icon?: StateIcon;
+}) {
   return (
     <Card style={{ gap: spacing.md, alignItems: 'center', paddingVertical: spacing.xl }}>
+      <View
+        style={{
+          width: 62,
+          height: 62,
+          borderRadius: radius.pill,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.cream100,
+          borderWidth: 1,
+          borderColor: colors.gold,
+        }}
+      >
+        <Ionicons name={icon} size={26} color={colors.goldDark} />
+      </View>
+      <OrnamentRule />
       <Txt variant="small" color={colors.textMuted} align="center">
         {text}
       </Txt>
@@ -201,18 +235,22 @@ export function PagedView<T>({
   state,
   emptyText,
   emptyAction,
+  emptyIcon,
   children,
 }: {
   state: PagedState<T>;
   emptyText: string;
   emptyAction?: React.ReactNode;
+  emptyIcon?: StateIcon;
   children: (items: T[]) => React.ReactNode;
 }) {
   if (state.loading) return <LoadingState />;
   if (state.error && state.items.length === 0) {
     return <ErrorState message={state.error} onRetry={state.reload} />;
   }
-  if (state.items.length === 0) return <EmptyState text={emptyText} action={emptyAction} />;
+  if (state.items.length === 0) {
+    return <EmptyState text={emptyText} action={emptyAction} icon={emptyIcon} />;
+  }
   return (
     <>
       {children(state.items)}
@@ -230,6 +268,7 @@ export function QueryView<T>({
   isEmpty,
   emptyText,
   emptyAction,
+  emptyIcon,
   loadingLabel,
   children,
 }: {
@@ -237,6 +276,7 @@ export function QueryView<T>({
   isEmpty?: (data: T) => boolean;
   emptyText?: string;
   emptyAction?: React.ReactNode;
+  emptyIcon?: StateIcon;
   loadingLabel?: string;
   children: (data: T) => React.ReactNode;
 }) {
@@ -253,7 +293,7 @@ export function QueryView<T>({
       {/* خطأ أثناء التحديث مع وجود بيانات سابقة: نُبقي المعروض ونُنبّه فوقه. */}
       {query.error ? <ErrorState message={query.error} onRetry={query.reload} /> : null}
       {empty && emptyText ? (
-        <EmptyState text={emptyText} action={emptyAction} />
+        <EmptyState text={emptyText} action={emptyAction} icon={emptyIcon} />
       ) : (
         children(query.data)
       )}

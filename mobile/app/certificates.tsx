@@ -25,7 +25,7 @@ function CertificatesList() {
   const list = usePagedQuery((cursor) => getCertificates({ limit: 20, cursor }), []);
 
   return (
-    <PagedView state={list} emptyText={t('certificatesEmpty')}>
+    <PagedView state={list} emptyText={t('certificatesEmpty')} emptyIcon="ribbon-outline">
       {(items) => (
         <View style={{ gap: spacing.md }}>
           {items.map((cert) => (

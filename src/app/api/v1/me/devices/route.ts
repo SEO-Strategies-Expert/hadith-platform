@@ -12,7 +12,7 @@
  * وعند الحذف نشترط `userId` مع `token`: لا يلغي أحدٌ تسجيل جهاز غيره ولو عرف رمزه.
  */
 import { prisma } from "@/lib/prisma";
-import { requireApiStudent, ApiError } from "@/lib/api-auth";
+import { requireApiUser, ApiError } from "@/lib/api-auth";
 import { ok, fail, body } from "../../_lib";
 import { cors, preflight, text, query } from "../../_http";
 
@@ -39,7 +39,7 @@ function readToken(v: unknown): string {
 
 export async function POST(req: Request) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     const b = await body<{ token?: unknown; platform?: unknown; deviceId?: unknown; appVersion?: unknown }>(req);
 
     const token = readToken(b.token);
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     // نقبل الرمز في الجسم أو في `?token=`: بعض عملاء HTTP لا يرسلون جسمًا مع DELETE.
     const b = await body<{ token?: unknown }>(req);
     const token = readToken(b.token ?? query(req, "token"));

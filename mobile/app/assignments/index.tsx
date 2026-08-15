@@ -29,7 +29,7 @@ function AssignmentsList() {
   const list = usePagedQuery((cursor) => getAssignments({ limit: 20, cursor }), []);
 
   return (
-    <PagedView state={list} emptyText={t('assignmentsEmpty')}>
+    <PagedView state={list} emptyText={t('assignmentsEmpty')} emptyIcon="document-text-outline">
       {(items) => (
         <View style={{ gap: spacing.md }}>
           {items.map((item) => (
@@ -59,7 +59,7 @@ function AssignmentsList() {
                   {t('assignmentDue')}: {item.dueAt ? date(item.dueAt) : t('assignmentNoDue')}
                 </Txt>
                 {item.submission?.score !== null && item.submission?.score !== undefined ? (
-                  <Txt variant="tiny" style={{ fontWeight: '700' }}>
+                  <Txt variant="tinyStrong">
                     {n(item.submission.score)} / {n(item.maxScore)}
                   </Txt>
                 ) : null}

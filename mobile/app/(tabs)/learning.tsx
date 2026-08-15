@@ -7,7 +7,7 @@ import { getMyCourses } from '../../src/api/endpoints';
 import type { EnrollmentStatus } from '../../src/api/types';
 import { spacing } from '../../src/theme';
 import { Button } from '../../src/ui/Button';
-import { Screen } from '../../src/ui/kit';
+import { Screen, SectionTitle } from '../../src/ui/kit';
 import { CourseTile } from '../../src/ui/cards';
 import { RequireAuth } from '../../src/ui/RequireAuth';
 import { PagedView, usePagedQuery } from '../../src/ui/states';
@@ -24,10 +24,11 @@ function MyCourses() {
     <PagedView
       state={enrolled}
       emptyText={t('myCoursesEmpty')}
-      emptyAction={<Button label={t('coursesTitle')} kind="ghost" onPress={() => router.push('/courses')} />}
+      emptyIcon="school-outline"
+      emptyAction={<Button label={t('emptyBrowseCourses')} kind="ghost" onPress={() => router.push('/courses')} />}
     >
       {(items) => (
-        <View style={{ gap: spacing.md }}>
+        <View style={{ gap: spacing.lg }}>
           {items.map((row) => (
             <CourseTile
               key={row.enrollmentId}
@@ -54,8 +55,10 @@ function MyCourses() {
 
 export default function LearningScreen() {
   const { status } = useAuth();
+  const { t } = useI18n();
   return (
     <Screen>
+      <SectionTitle title={t('tabLearning')} />
       <RequireAuth>{status === 'authed' ? <MyCourses /> : null}</RequireAuth>
     </Screen>
   );

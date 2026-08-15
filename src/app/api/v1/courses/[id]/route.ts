@@ -32,7 +32,8 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
       where: { id },
       select: { published: true, visible: true },
     });
-    if (!gate || !gate.published || !gate.visible) throw new ApiError(404, "المقرّر غير موجود");
+    // `visible` وحده كالموقع — انظر التعليق في `courses/route.ts`.
+    if (!gate || !gate.visible) throw new ApiError(404, "المقرّر غير موجود");
 
     const course = await getCourseTree(id);
     if (!course) throw new ApiError(404, "المقرّر غير موجود");

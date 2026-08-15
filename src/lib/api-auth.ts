@@ -216,7 +216,14 @@ export async function requireApiUser(req: Request): Promise<ApiIdentity> {
   return id;
 }
 
-/** يفرض أن يكون طالبًا (أو مديرًا للتفقّد). */
+/**
+ * يفرض أن يكون طالبًا (أو مديرًا للتفقّد).
+ *
+ * ⚠️ **لا تستعملها في مسارات `/me/**`.** «أنا» تعني صاحب الجلسة أيًّا كان دوره،
+ * وكل استعلام هناك مقيَّد بـ`userId` أصلًا فالعزل قائم بلا حاجة لبوّابة دور.
+ * حين كانت مستعملةً هناك كان عضو هيئة التدريس يسجّل دخوله في التطبيق بنجاح
+ * ثمّ يُرفض بـ403 عند أوّل نداء لملفّه الشخصي — فلا يعمل التطبيق له إطلاقًا.
+ */
 export async function requireApiStudent(req: Request): Promise<ApiIdentity> {
   const id = await requireApiUser(req);
   if (id.role !== "STUDENT" && id.role !== "ADMIN") throw new ApiError(403, "ممنوع");

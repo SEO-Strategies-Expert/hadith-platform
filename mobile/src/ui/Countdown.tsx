@@ -28,7 +28,7 @@ export function Countdown({ deadline, label }: { deadline: string | null; label:
   const urgent = remaining <= 120;
 
   return (
-    <Txt variant="small" color={urgent ? colors.danger : colors.textMuted} style={{ fontWeight: '600' }}>
+    <Txt variant="smallStrong" color={urgent ? colors.danger : colors.textMuted}>
       {label}: {n(String(minutes).padStart(2, '0'))}:{n(String(seconds).padStart(2, '0'))}
     </Txt>
   );

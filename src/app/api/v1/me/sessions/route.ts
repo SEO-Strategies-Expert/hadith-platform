@@ -7,7 +7,7 @@
  * و`zoomStartUrl` غير مذكور فيها أصلًا.
  */
 import { getUpcomingSessions } from "@/lib/lms";
-import { requireApiStudent } from "@/lib/api-auth";
+import { requireApiUser } from "@/lib/api-auth";
 import { ok, fail } from "../../_lib";
 import { cors, preflight, paging } from "../../_http";
 import { sessionForStudent } from "../../_dto";
@@ -23,7 +23,7 @@ export async function OPTIONS(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     // نافذةٌ زمنيّة مقيَّدة بالحدّ الأقصى، بلا مؤشّر: «القادم» مجموعةٌ متحرّكة.
     const { limit } = paging(req);
     const rows = await getUpcomingSessions(id.userId, limit);

@@ -10,7 +10,7 @@
  *  ٣) لحظة البدء `startedAt` من القاعدة لا من العميل — عليها تُبنى المهلة كلّها.
  */
 import { prisma } from "@/lib/prisma";
-import { requireApiStudent, ApiError } from "@/lib/api-auth";
+import { requireApiUser, ApiError } from "@/lib/api-auth";
 import { ok, fail } from "../../../../_lib";
 import { cors, preflight, requireId } from "../../../../_http";
 import { loadQuizForStudent, quizCard, openAttemptPayload } from "../../../../_quiz-access";
@@ -26,7 +26,7 @@ export async function OPTIONS(req: Request) {
 
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     const quizId = requireId((await ctx.params).id, "معرّف الاختبار");
     const quiz = await loadQuizForStudent(id.userId, quizId);
 

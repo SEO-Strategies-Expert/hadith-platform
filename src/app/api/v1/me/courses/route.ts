@@ -9,7 +9,7 @@
  * صغيرة مقيَّدة به أصلًا، والمقصود تحديد حجم الردّ لا تخفيف الاستعلام.
  */
 import { getStudentCourses } from "@/lib/lms";
-import { requireApiStudent } from "@/lib/api-auth";
+import { requireApiUser } from "@/lib/api-auth";
 import { ok, fail } from "../../_lib";
 import { cors, preflight, paging, slicePage } from "../../_http";
 import { courseCard } from "../../_dto";
@@ -25,7 +25,7 @@ export async function OPTIONS(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     const enrollments = await getStudentCourses(id.userId);
     const { items, nextCursor } = slicePage(enrollments, paging(req));
 

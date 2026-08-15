@@ -1,12 +1,12 @@
 import React from 'react';
-import { View } from 'react-native';
 import { Stack } from 'expo-router';
+import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '../src/auth/AuthContext';
 import { I18nProvider, ensureRTL, useI18n } from '../src/i18n';
-import { colors, fontFamily } from '../src/theme';
-import { Spinner } from '../src/ui/kit';
+import { colors, fonts } from '../src/theme';
+import { BrandSplash } from '../src/ui/Splash';
 
 ensureRTL();
 
@@ -14,22 +14,17 @@ function Navigator() {
   const { t } = useI18n();
   const { status } = useAuth();
 
-  // ريثما تُقرأ الرموز ويُتحقّق منها: شاشة انتظار بدل وميض الحالات.
-  if (status === 'loading') {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.navyDark, alignItems: 'center', justifyContent: 'center' }}>
-        <Spinner />
-      </View>
-    );
-  }
+  // ريثما تُقرأ الرموز ويُتحقّق منها: شاشة الهويّة بدل وميض الحالات.
+  if (status === 'loading') return <BrandSplash />;
 
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: colors.navyDark },
+        headerStyle: { backgroundColor: colors.navyDeep },
         headerTintColor: colors.goldLight,
-        headerTitleStyle: { fontFamily, fontSize: 16, fontWeight: '700', color: colors.textOnNavy },
+        headerTitleStyle: { fontFamily: fonts.naskhBold, fontSize: 16, color: colors.goldLight },
         headerBackTitle: t('back'),
+        headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.cream },
       }}
     >
@@ -54,12 +49,27 @@ function Navigator() {
 }
 
 export default function RootLayout() {
+  /**
+   * خطوط الموقع نفسها. خطّ الثلث أبرز ما يميّز هويّة الكلّية، فلا
+   * تُصيَّر الواجهة قبل تحميله — وإلّا ظهر العنوان بخطّ النظام ثمّ قفز.
+   */
+  const [fontsLoaded, fontError] = useFonts({
+    [fonts.thuluth]: require('../assets/fonts/thuluth-400.ttf'),
+    [fonts.thuluthBold]: require('../assets/fonts/thuluth-700.ttf'),
+    [fonts.naskh]: require('../assets/fonts/naskh-400.ttf'),
+    [fonts.naskhBold]: require('../assets/fonts/naskh-700.ttf'),
+    [fonts.body]: require('../assets/fonts/plex-400.ttf'),
+    [fonts.bodyMedium]: require('../assets/fonts/plex-600.ttf'),
+    [fonts.bodyBold]: require('../assets/fonts/plex-700.ttf'),
+  });
+
   return (
     <SafeAreaProvider>
       <I18nProvider>
         <AuthProvider>
           <StatusBar style="light" />
-          <Navigator />
+          {/* عند إخفاق التحميل نمضي بخطّ النظام بدل تعليق التطبيق. */}
+          {fontsLoaded || fontError ? <Navigator /> : <BrandSplash />}
         </AuthProvider>
       </I18nProvider>
     </SafeAreaProvider>

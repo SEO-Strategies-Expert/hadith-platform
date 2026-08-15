@@ -19,10 +19,11 @@ export async function GET(req: Request) {
     const stage = query(req, "stage");
 
     const rows = await prisma.course.findMany({
-      // «المنشورة الظاهرة»: شرطان لا واحد — `published` قرار المحرّر،
-      // و`visible` مفتاح الإخفاء السريع.
+      // نفس شرط الموقع: `visible` وحده. العقد يوجب «مزامنة كاملة ومحتوى
+      // موحّد»، واشتراط `published` كان يُخفي عن التطبيق ما يعرضه الموقع
+      // (تسعة مقرّرات ظاهرة مقابل صفر منشور). أمّا `published` فمعناه
+      // «التسجيل مفتوح» ويُعاد في الحمولة ليعرضه التطبيق شارةً، لا أن يحجب.
       where: {
-        published: true,
         visible: true,
         // نقبل مفتاح المرحلة (`foundation`) ومعرّفها معًا؛ التطبيق قد يملك أيّهما.
         ...(stage ? { OR: [{ stageId: stage }, { stage: { key: stage } }] } : {}),

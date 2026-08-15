@@ -5,7 +5,7 @@ import { useI18n } from '../../src/i18n';
 import { getCourses } from '../../src/api/endpoints';
 import { spacing } from '../../src/theme';
 import { Button } from '../../src/ui/Button';
-import { Screen } from '../../src/ui/kit';
+import { Screen, SectionTitle } from '../../src/ui/kit';
 import { CourseTile } from '../../src/ui/cards';
 import { PagedView, usePagedQuery } from '../../src/ui/states';
 
@@ -16,9 +16,11 @@ export default function CoursesScreen() {
 
   return (
     <Screen>
-      <PagedView state={courses} emptyText={t('coursesEmpty')}>
+      <SectionTitle title={t('coursesTitle')} />
+
+      <PagedView state={courses} emptyText={t('coursesEmpty')} emptyIcon="library-outline">
         {(items) => (
-          <View style={{ gap: spacing.md }}>
+          <View style={{ gap: spacing.lg }}>
             {items.map((course) => (
               <CourseTile
                 key={course.id}

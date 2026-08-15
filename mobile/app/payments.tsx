@@ -57,7 +57,7 @@ function PaymentsList() {
         </>
       ) : null}
 
-      <PagedView state={list} emptyText={t('paymentsEmpty')}>
+      <PagedView state={list} emptyText={t('paymentsEmpty')} emptyIcon="card-outline">
         {(items) => (
           <View style={{ gap: spacing.md }}>
             {items.map((payment) => (

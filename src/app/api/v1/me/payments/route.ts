@@ -8,7 +8,7 @@
  * ولا يخرج `note` (ملاحظة إداريّة) ولا `provider`/`providerRef` (معرّفات بوّابة).
  */
 import { prisma } from "@/lib/prisma";
-import { requireApiStudent } from "@/lib/api-auth";
+import { requireApiUser } from "@/lib/api-auth";
 import { summarizeByCurrency, minorToPlain, type PaymentTotals } from "@/lib/payments";
 import { ok, fail } from "../../_lib";
 import { cors, preflight, paging, cursorArgs, page } from "../../_http";
@@ -38,7 +38,7 @@ function totalsForApi(t: PaymentTotals) {
 
 export async function GET(req: Request) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     const { limit, cursor } = paging(req);
 
     const rows = await prisma.payment.findMany({

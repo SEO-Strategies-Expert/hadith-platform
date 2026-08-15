@@ -6,7 +6,7 @@
  * ذلك لجاءت تسليمات زملائه مع الواجب.
  */
 import { prisma } from "@/lib/prisma";
-import { requireApiStudent } from "@/lib/api-auth";
+import { requireApiUser } from "@/lib/api-auth";
 import { ACTIVE_ENROLLMENT } from "@/lib/lms";
 import { ok, fail } from "../../_lib";
 import { cors, preflight, paging, cursorArgs, page, query } from "../../_http";
@@ -22,7 +22,7 @@ export async function OPTIONS(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     const { limit, cursor } = paging(req);
     const courseId = query(req, "courseId");
 

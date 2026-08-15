@@ -79,7 +79,7 @@ function NotificationsList() {
         />
       </Row>
 
-      <PagedView state={list} emptyText={t('notificationsEmpty')}>
+      <PagedView state={list} emptyText={t('notificationsEmpty')} emptyIcon="notifications-outline">
         {(items) => (
           <View style={{ gap: spacing.sm }}>
             {items.map((item) => (

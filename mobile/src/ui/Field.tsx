@@ -12,7 +12,7 @@ export function Field({
 }: TextInputProps & { label: string; hint?: string }) {
   return (
     <View style={{ gap: spacing.xs }}>
-      <Txt variant="small" color={colors.textMuted} style={{ fontWeight: '600' }}>
+      <Txt variant="smallStrong" color={colors.navy}>
         {label}
       </Txt>
       <TextInput

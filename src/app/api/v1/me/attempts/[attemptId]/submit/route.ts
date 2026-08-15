@@ -9,7 +9,7 @@
  * مفتوحةً أن يبحث ثمّ يسلّم.
  */
 import { prisma } from "@/lib/prisma";
-import { requireApiStudent, ApiError } from "@/lib/api-auth";
+import { requireApiUser, ApiError } from "@/lib/api-auth";
 import { gradeQuiz, isSubmitTooLate, type QuizAnswers } from "@/lib/quiz";
 import { ok, fail, body } from "../../../../_lib";
 import { cors, preflight, requireId } from "../../../../_http";
@@ -39,7 +39,7 @@ function sanitize(raw: unknown): QuizAnswers {
 
 export async function POST(req: Request, ctx: { params: Promise<{ attemptId: string }> }) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     const attemptId = requireId((await ctx.params).attemptId, "معرّف المحاولة");
     const { attempt, quiz } = await loadAttemptForStudent(id.userId, attemptId);
 

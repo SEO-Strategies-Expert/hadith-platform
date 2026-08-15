@@ -14,6 +14,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   if (status !== 'authed') {
     return (
       <EmptyState
+        icon="lock-closed-outline"
         text={t('guestNotice')}
         action={<Button label={t('goToLogin')} onPress={() => router.push('/login')} />}
       />

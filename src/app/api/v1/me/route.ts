@@ -6,7 +6,7 @@
  * التطبيق رموزه بدل أن يظلّ يعمل بجلسةٍ سُحبت.
  */
 import { prisma } from "@/lib/prisma";
-import { requireApiStudent, ApiError } from "@/lib/api-auth";
+import { requireApiUser, ApiError } from "@/lib/api-auth";
 import { ok, fail } from "../_lib";
 import { cors, preflight } from "../_http";
 
@@ -21,7 +21,7 @@ export async function OPTIONS(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
 
     const user = await prisma.user.findUnique({
       where: { id: id.userId },

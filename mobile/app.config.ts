@@ -6,7 +6,7 @@ import type { ExpoConfig } from 'expo/config';
  * ويُقرأ في الكود من `src/config.ts` وحده — لا رابط مكتوب داخل أيّ شاشة.
  */
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL?.trim() || 'http://localhost:3000';
-const websiteUrl = process.env.EXPO_PUBLIC_WEBSITE_URL?.trim() || 'https://hadith-faculty.vercel.app';
+const websiteUrl = process.env.EXPO_PUBLIC_WEBSITE_URL?.trim() || 'https://hadith-platform-hassan67844-4138s-projects.vercel.app';
 const easProjectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID?.trim() || undefined;
 
 const NAVY_DARK = '#01183A';
@@ -48,6 +48,21 @@ const config: ExpoConfig = {
     'expo-router',
     'expo-secure-store',
     'expo-video',
+    // خطوط الكلّية تُضمَّن في الحزمة الأصليّة، ويُحمّلها `useFonts` وقت الإقلاع.
+    [
+      'expo-font',
+      {
+        fonts: [
+          './assets/fonts/thuluth-400.ttf',
+          './assets/fonts/thuluth-700.ttf',
+          './assets/fonts/naskh-400.ttf',
+          './assets/fonts/naskh-700.ttf',
+          './assets/fonts/plex-400.ttf',
+          './assets/fonts/plex-600.ttf',
+          './assets/fonts/plex-700.ttf',
+        ],
+      },
+    ],
     // عربيّة أوّلًا: يُثبَّت اتّجاه RTL على مستوى النظام وقت البناء،
     // فلا يحتاج التطبيق إلى إعادة تشغيل لضبط الاتّجاه.
     ['expo-localization', { supportsRTL: true, forcesRTL: true }],

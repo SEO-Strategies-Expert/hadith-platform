@@ -48,6 +48,35 @@ export const strings = {
     seeAll: 'عرض الكلّ',
     welcome: 'أهلًا بك',
 
+    // الهيرو
+    heroVision: 'إسنادٌ متّصل، ومنهجُ نقدٍ راسخ، وتعليمٌ يبلغ طالب العلم حيث كان.',
+    heroExplore: 'استكشف البرامج',
+
+    // شريط الإحصاءات
+    statStages: 'مراحل التخصّص',
+    statCourses: 'المقرّرات',
+    statFaculty: 'أعضاء الهيئة',
+    statSessions: 'مجالس الديوان',
+
+    // المرتكزات
+    pillarsTitle: 'مرتكزات الكلّية',
+    pillarCurricTitle: 'الخطّة الدراسيّة',
+    pillarCurricBody: 'مناهج متدرّجة من التأسيس إلى التعمّق فالبحث العلمي.',
+    pillarScholarsTitle: 'الهيئة العلميّة',
+    pillarScholarsBody: 'أساتذةٌ متخصّصون في العلل والأسانيد وتحقيق المخطوط.',
+    pillarDiwanTitle: 'ديوان العلماء',
+    pillarDiwanBody: 'مجالسُ علميّة تُناقَش فيها المسائل وتُعرَض البحوث.',
+    pillarLibraryTitle: 'المكتبة الرقميّة',
+    pillarLibraryBody: 'مصادرُ مفهرسة وأصولٌ مصوّرة في متناول الطالب.',
+    pillarResearchTitle: 'البحث العلمي',
+    pillarResearchBody: 'إشرافٌ على الرسائل ومشاريع التحقيق والتخريج.',
+    pillarAlamiyaTitle: 'العالميّة والإجازات',
+    pillarAlamiyaBody: 'إجازاتٌ مسندة ووثائقُ يُتحقَّق منها على الموقع.',
+
+    // حالات فارغة
+    emptyNoSessionAction: 'تصفّح المجالس العامّة',
+    emptyBrowseCourses: 'تصفّح كتالوج المقرّرات',
+
     // الدخول
     loginTitle: 'الدخول إلى حسابك',
     loginSubtitle: 'أدخل بريدك وكلمة مرورك للوصول إلى مقرّراتك ومجالسك.',
@@ -297,6 +326,31 @@ export const strings = {
     homeNoSession: 'No session is currently scheduled.',
     seeAll: 'See all',
     welcome: 'Welcome',
+
+    heroVision: 'Connected chains, a rooted method of criticism, and teaching that reaches the student wherever he is.',
+    heroExplore: 'Explore the programmes',
+
+    statStages: 'Stages',
+    statCourses: 'Courses',
+    statFaculty: 'Academic staff',
+    statSessions: 'Sessions',
+
+    pillarsTitle: 'Foundations of the college',
+    pillarCurricTitle: 'Study plan',
+    pillarCurricBody: 'A graded curriculum from foundation to depth to research.',
+    pillarScholarsTitle: 'Academic staff',
+    pillarScholarsBody: 'Specialists in hidden defects, chains and manuscript editing.',
+    pillarDiwanTitle: 'Scholars’ Forum',
+    pillarDiwanBody: 'Scholarly sessions where questions are debated and papers presented.',
+    pillarLibraryTitle: 'Digital Library',
+    pillarLibraryBody: 'Indexed sources and imaged originals within the student’s reach.',
+    pillarResearchTitle: 'Research',
+    pillarResearchBody: 'Supervision of theses, editing projects and documentation work.',
+    pillarAlamiyaTitle: 'Alamiyya & ijazahs',
+    pillarAlamiyaBody: 'Chained ijazahs and documents verifiable on the website.',
+
+    emptyNoSessionAction: 'Browse public sessions',
+    emptyBrowseCourses: 'Browse the course catalogue',
 
     loginTitle: 'Sign in',
     loginSubtitle: 'Enter your email and password to reach your courses and sessions.',

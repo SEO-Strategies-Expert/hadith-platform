@@ -5,7 +5,7 @@
  * ولا أن يكون المقرّر منشورًا. ولذلك يُفحص التسجيل **قبل** بناء الشجرة، لا بعده.
  */
 import { getCourseTree, isEnrolled, flattenLessons, getProgressMap } from "@/lib/lms";
-import { requireApiStudent, ApiError } from "@/lib/api-auth";
+import { requireApiUser, ApiError } from "@/lib/api-auth";
 import { ok, fail } from "../../../_lib";
 import { cors, preflight, requireId } from "../../../_http";
 import { courseCard, moduleTree } from "../../../_dto";
@@ -21,7 +21,7 @@ export async function OPTIONS(req: Request) {
 
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     const courseId = requireId((await ctx.params).id, "معرّف المقرّر");
 
     if (!(await isEnrolled(id.userId, courseId))) {

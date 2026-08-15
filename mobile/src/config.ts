@@ -20,7 +20,7 @@ export const API_V1 = `${API_BASE_URL}/api/v1`;
 export const WEBSITE_URL = stripTrailingSlash(extra.websiteUrl ?? API_BASE_URL);
 
 /** صفحة طلب الالتحاق: لا تسجيل ذاتيّ داخل التطبيق، فالقبول يمرّ بالموقع. */
-export const APPLY_URL = `${WEBSITE_URL}/apply.html`;
+export const APPLY_URL = `${WEBSITE_URL}/admissions.html`;
 export const CONTACT_URL = `${WEBSITE_URL}/contact.html`;
 
 /** معرّف مشروع EAS — يلزم لاستخراج رمز إشعارات Expo. */

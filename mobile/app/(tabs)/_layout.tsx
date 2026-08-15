@@ -2,30 +2,46 @@ import React from 'react';
 import type { ColorValue } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useI18n } from '../../src/i18n';
-import { colors, fontFamily } from '../../src/theme';
+import { colors, fonts, goldHairline } from '../../src/theme';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
+/** ارتفاع منطقة التبويب دون هامش النظام السفلي. */
+const TAB_BAR_CONTENT_HEIGHT = 66;
+
 export default function TabsLayout() {
   const { t } = useI18n();
+  const insets = useSafeAreaInsets();
 
   const icon =
     (name: IconName, active: IconName) =>
-    ({ color, size, focused }: { color: ColorValue; size: number; focused: boolean }) => (
-      <Ionicons name={focused ? active : name} size={size} color={color} />
+    ({ color, focused }: { color: ColorValue; size: number; focused: boolean }) => (
+      <Ionicons name={focused ? active : name} size={21} color={color} />
     );
 
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: colors.navyDark },
+        headerStyle: { backgroundColor: colors.navyDeep },
         headerTintColor: colors.goldLight,
-        headerTitleStyle: { fontFamily, fontSize: 16, fontWeight: '700', color: colors.textOnNavy },
-        tabBarActiveTintColor: colors.navy,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
-        tabBarLabelStyle: { fontFamily, fontSize: 11 },
+        headerTitleStyle: { fontFamily: fonts.naskhBold, fontSize: 16, color: colors.goldLight },
+        headerShadowVisible: false,
+        // شريط التبويبات بألوان الكلّية: قاعدةٌ كحليّة وذهبٌ للمُحدَّد.
+        tabBarActiveTintColor: colors.gold,
+        tabBarInactiveTintColor: colors.textOnNavyMuted,
+        // الارتفاع الافتراضي لا يتّسع لسطرٍ عربيّ كامل، فتُقتصّ نواتئ
+        // الحروف. نحسبه صراحةً ونضيف هامش النظام السفلي إليه.
+        tabBarStyle: {
+          backgroundColor: colors.navyDeep,
+          borderTopColor: goldHairline,
+          borderTopWidth: 1,
+          height: TAB_BAR_CONTENT_HEIGHT + insets.bottom,
+          paddingTop: 4,
+          paddingBottom: insets.bottom + 4,
+        },
+        tabBarLabelStyle: { fontFamily: fonts.bodyMedium, fontSize: 10.5, lineHeight: 17 },
         sceneStyle: { backgroundColor: colors.cream },
       }}
     >

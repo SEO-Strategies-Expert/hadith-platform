@@ -6,7 +6,7 @@
  * لأنّه ما يُملى في المجالس ويُكتب باليد.
  */
 import { getStudentCertificates, formatVerifyCode, verifyPath } from "@/lib/certificates";
-import { requireApiStudent } from "@/lib/api-auth";
+import { requireApiUser } from "@/lib/api-auth";
 import { ok, fail } from "../../_lib";
 import { cors, preflight, paging, slicePage } from "../../_http";
 
@@ -21,7 +21,7 @@ export async function OPTIONS(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     const rows = await getStudentCertificates(id.userId);
     const { items, nextCursor } = slicePage(rows, paging(req));
 

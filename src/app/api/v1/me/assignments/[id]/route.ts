@@ -9,7 +9,7 @@
  *  • **المتأخّر لا يُمنع**: قبولُه قرارٌ إداريّ؛ نعلّمه `overdue` ونمضي.
  */
 import { prisma } from "@/lib/prisma";
-import { requireApiStudent, ApiError } from "@/lib/api-auth";
+import { requireApiUser, ApiError } from "@/lib/api-auth";
 import { isEnrolled } from "@/lib/lms";
 import { ok, fail, body } from "../../../_lib";
 import { cors, preflight, requireId, text, safeUrl } from "../../../_http";
@@ -80,7 +80,7 @@ function shape(a: Assignment, submission: { submittedAt: Date | null } | null) {
 
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     const assignmentId = requireId((await ctx.params).id, "معرّف الواجب");
     const assignment = await loadAssignment(id.userId, assignmentId);
 
@@ -97,7 +97,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
 
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     const assignmentId = requireId((await ctx.params).id, "معرّف الواجب");
     const assignment = await loadAssignment(id.userId, assignmentId);
 

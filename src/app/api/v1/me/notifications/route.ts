@@ -1,6 +1,6 @@
 // إشعارات الطالب. `?unread=1` للتصفية، و`unreadCount` لشارة التطبيق.
 import { prisma } from "@/lib/prisma";
-import { requireApiStudent } from "@/lib/api-auth";
+import { requireApiUser } from "@/lib/api-auth";
 import { ok, fail } from "../../_lib";
 import { cors, preflight, paging, cursorArgs, page, queryFlag } from "../../_http";
 
@@ -15,7 +15,7 @@ export async function OPTIONS(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     const { limit, cursor } = paging(req);
     const unreadOnly = queryFlag(req, "unread");
 

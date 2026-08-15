@@ -6,7 +6,7 @@
  * وعلى كل حال: لا `correct` ولا `explain` في أيّ فرعٍ من هذا المسار.
  */
 import { prisma } from "@/lib/prisma";
-import { requireApiStudent } from "@/lib/api-auth";
+import { requireApiUser } from "@/lib/api-auth";
 import { ok, fail } from "../../../_lib";
 import { cors, preflight, requireId } from "../../../_http";
 import { loadQuizForStudent, quizCard, openAttemptPayload, attemptBrief } from "../../../_quiz-access";
@@ -22,7 +22,7 @@ export async function OPTIONS(req: Request) {
 
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     const quizId = requireId((await ctx.params).id, "معرّف الاختبار");
     const quiz = await loadQuizForStudent(id.userId, quizId);
 

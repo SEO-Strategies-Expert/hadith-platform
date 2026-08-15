@@ -5,7 +5,7 @@
  * إجاباتها الصحيحة — وإلّا صار بابًا خلفيًّا لرؤية الحلّ قبل التسليم.
  * ولذلك يُردّ في تلك الحالة وصفُ المحاولة الجارية بلا سؤالٍ ولا إجابة.
  */
-import { requireApiStudent } from "@/lib/api-auth";
+import { requireApiUser } from "@/lib/api-auth";
 import { attemptDeadline, isAttemptExpired } from "@/lib/quiz";
 import { ok, fail } from "../../../_lib";
 import { cors, preflight, requireId } from "../../../_http";
@@ -22,7 +22,7 @@ export async function OPTIONS(req: Request) {
 
 export async function GET(req: Request, ctx: { params: Promise<{ attemptId: string }> }) {
   try {
-    const id = await requireApiStudent(req);
+    const id = await requireApiUser(req);
     const attemptId = requireId((await ctx.params).attemptId, "معرّف المحاولة");
     const { attempt, quiz } = await loadAttemptForStudent(id.userId, attemptId);
 

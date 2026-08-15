@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../src/auth/AuthContext';
@@ -7,8 +7,11 @@ import { useI18n } from '../../src/i18n';
 import { ApiError } from '../../src/api/client';
 import { getCourse, getMyCourse } from '../../src/api/endpoints';
 import type { CourseDetailPublic, CourseDetailStudent, Lesson } from '../../src/api/types';
-import { colors, radius, spacing } from '../../src/theme';
-import { Badge, Card, Divider, ProgressBar, Row, Screen, Txt } from '../../src/ui/kit';
+import { colors, spacing } from '../../src/theme';
+import { Badge, Card, Divider, ProgressBar, Row, Screen, SectionTitle, Txt } from '../../src/ui/kit';
+import { GoldRule, ThuluthText } from '../../src/ui/gold';
+import { RemoteImage } from '../../src/ui/RemoteImage';
+import { courseImage } from '../../src/ui/assets';
 import { QueryView, useQuery } from '../../src/ui/states';
 
 type Loaded =
@@ -87,20 +90,17 @@ export default function CourseDetailScreen() {
           <>
             <Stack.Screen options={{ title: pick(course.titleAr, course.titleEn) }} />
 
-            {course.imageUrl ? (
-              <Image
-                source={{ uri: course.imageUrl }}
-                style={{ width: '100%', height: 170, borderRadius: radius.lg, backgroundColor: colors.border }}
-                resizeMode="cover"
-              />
-            ) : null}
+            <RemoteImage uri={courseImage(course.imageUrl, course.id)} height={180} />
 
             <View style={{ gap: spacing.sm }}>
               <Row gap={spacing.sm} wrap>
                 {course.stage ? <Badge label={pick(course.stage.titleAr, course.stage.titleEn)} tone="gold" /> : null}
                 {course.category ? <Badge label={course.category} /> : null}
               </Row>
-              <Txt variant="title">{pick(course.titleAr, course.titleEn)}</Txt>
+              <ThuluthText variant="ceremonial" color={colors.navy}>
+                {pick(course.titleAr, course.titleEn)}
+              </ThuluthText>
+              <GoldRule height={2} style={{ width: 72 }} />
               {course.descAr || course.descEn ? (
                 <Txt variant="body" color={colors.textMuted}>
                   {pick(course.descAr, course.descEn)}
@@ -109,22 +109,34 @@ export default function CourseDetailScreen() {
             </View>
 
             <Card style={{ gap: spacing.md }}>
+              {/* رقم المرحلة حقلٌ يُرسله الخادم دائمًا — وهو أوفى ما يملأ
+                  هذه اللوحة حين تغيب بقيّة الحقول. */}
+              {course.stage?.numAr ? (
+                <Row justify="space-between">
+                  <Txt variant="small" color={colors.textMuted}>
+                    {pick('المرحلة', 'Stage')}
+                  </Txt>
+                  <Txt variant="smallStrong">
+                    {pick(course.stage.numAr, course.stage.numEn ?? course.stage.numAr)}
+                  </Txt>
+                </Row>
+              ) : null}
               {course.instructor ? (
                 <Row justify="space-between">
                   <Txt variant="small" color={colors.textMuted}>
                     {t('instructor')}
                   </Txt>
-                  <Txt variant="small" style={{ fontWeight: '600' }}>
+                  <Txt variant="smallStrong">
                     {pick(course.instructor.nameAr, course.instructor.nameEn)}
                   </Txt>
                 </Row>
               ) : null}
-              {course.hours !== null ? (
+              {course.hours ? (
                 <Row justify="space-between">
                   <Txt variant="small" color={colors.textMuted}>
                     {t('hours')}
                   </Txt>
-                  <Txt variant="small" style={{ fontWeight: '600' }}>
+                  <Txt variant="smallStrong">
                     {n(course.hours)}
                   </Txt>
                 </Row>
@@ -134,7 +146,7 @@ export default function CourseDetailScreen() {
                   <Txt variant="small" color={colors.textMuted}>
                     {t('startsOn')}
                   </Txt>
-                  <Txt variant="small" style={{ fontWeight: '600' }}>
+                  <Txt variant="smallStrong">
                     {date(course.startsOn)}
                   </Txt>
                 </Row>
@@ -163,7 +175,7 @@ export default function CourseDetailScreen() {
               )}
             </Card>
 
-            <Txt variant="heading">{t('courseModules')}</Txt>
+            <SectionTitle title={t('courseModules')} />
 
             {course.modules.length === 0 ? (
               <Card>

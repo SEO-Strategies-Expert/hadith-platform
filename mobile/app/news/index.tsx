@@ -4,8 +4,8 @@ import { useI18n } from '../../src/i18n';
 import { getNews } from '../../src/api/endpoints';
 import { spacing } from '../../src/theme';
 import { Button } from '../../src/ui/Button';
-import { Screen } from '../../src/ui/kit';
-import { NewsTile } from '../../src/ui/cards';
+import { Screen, SectionTitle } from '../../src/ui/kit';
+import { NewsLeadTile, NewsTile } from '../../src/ui/cards';
 import { PagedView, usePagedQuery } from '../../src/ui/states';
 
 export default function NewsListScreen() {
@@ -14,10 +14,14 @@ export default function NewsListScreen() {
 
   return (
     <Screen>
-      <PagedView state={list} emptyText={t('newsEmpty')}>
+      <SectionTitle title={t('newsTitle')} />
+
+      <PagedView state={list} emptyText={t('newsEmpty')} emptyIcon="newspaper-outline">
         {(items) => (
           <View style={{ gap: spacing.md }}>
-            {items.map((item) => (
+            {/* أوّل خبر بصورةٍ رئيسة، وما بعده بصورٍ مصغّرة. */}
+            {items[0] ? <NewsLeadTile item={items[0]} /> : null}
+            {items.slice(1).map((item) => (
               <NewsTile key={item.id} item={item} />
             ))}
             {list.hasMore ? (

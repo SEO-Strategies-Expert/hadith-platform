@@ -84,9 +84,9 @@ EXPO_PUBLIC_API_URL=http://localhost:3000
 # EXPO_PUBLIC_API_URL=http://192.168.1.10:3000
 
 # إنتاج
-# EXPO_PUBLIC_API_URL=https://hadith-faculty.vercel.app
+# EXPO_PUBLIC_API_URL=https://hadith-platform-hassan67844-4138s-projects.vercel.app
 
-EXPO_PUBLIC_WEBSITE_URL=https://hadith-faculty.vercel.app
+EXPO_PUBLIC_WEBSITE_URL=https://hadith-platform-hassan67844-4138s-projects.vercel.app
 
 # يلزم لإشعارات Push — يُملأ بعد `eas init`
 # EXPO_PUBLIC_EAS_PROJECT_ID=…
