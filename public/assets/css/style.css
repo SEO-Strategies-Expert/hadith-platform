@@ -1203,7 +1203,10 @@ svg.brandicon{fill:currentColor;stroke:none}
   .navbar-links{border-inline-start:0;margin-inline-start:0;padding-inline-start:0}
   .navbar-links a:not(.lang-switch){display:inline-flex}
   .navbar-links .lang-switch{font-size:13px;gap:7px;padding:7px 12px}
-  .navbar-live-label{display:inline;font-size:13px}
+  /* إظهار نصّ «البث المباشر» يستلزم إعادة الشارة إلى شكل الحبّة الممتدّة؛
+     كانت مضبوطة على 25×25 كزرّ أيقونة فيخرج النصّ والنقطة خارج حدودها. */
+  .navbar-live{width:auto;height:24px;padding:0 9px 0 7px;border-radius:999px;gap:5px;flex:none}
+  .navbar-live-label{display:inline;font-size:13px;line-height:1}
   .ticker-tag span{display:inline}
 }
 
