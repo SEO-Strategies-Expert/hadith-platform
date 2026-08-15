@@ -7,6 +7,8 @@ import { longDate, mediaUrl } from "@/lib/site-format";
 import { siteHref } from "@/lib/site-links";
 import { studentLogout } from "@/app/(site)/student-actions";
 import { StudentCourses, StudentSessions } from "@/components/site/StudentCourses";
+import { StudentCertificates } from "@/components/site/StudentCertificates";
+import { StudentPayments } from "@/components/site/StudentPayments";
 
 const T = {
   ar: {
@@ -161,6 +163,8 @@ export async function StudentDashboard({ lang }: { lang: Lang }) {
       {/* المقرّرات والمجالس من `lib/lms.ts` — مرتبطة بالطالب لا قوائم عامّة */}
       <StudentCourses lang={lang} userId={user.id} />
       <StudentSessions lang={lang} userId={user.id} />
+      <StudentCertificates lang={lang} userId={user.id} />
+      <StudentPayments lang={lang} />
 
       <section className="inner-section cream orn-cream">
         <div className="container">

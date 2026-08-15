@@ -1,6 +1,8 @@
 import type { DefaultSession } from "next-auth";
 
-type AppRole = "ADMIN" | "EDITOR" | "STUDENT";
+// يجب أن يطابق enum Role في prisma/schema.prisma — إضافة دور هناك بلا إضافته
+// هنا تكسر البناء عند أوّل إسناد للدور القادم من قاعدة البيانات.
+type AppRole = "ADMIN" | "EDITOR" | "STUDENT" | "INSTRUCTOR";
 
 declare module "next-auth" {
   interface Session {

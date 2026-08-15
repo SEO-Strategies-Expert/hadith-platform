@@ -21,6 +21,11 @@ import {
   Layers,
   Radio,
   UserCheck,
+  FileQuestion,
+  ClipboardList,
+  ScrollText,
+  Wallet,
+  UserCog,
 } from "lucide-react";
 
 export type NavItem = {
@@ -70,9 +75,22 @@ export const adminNav: NavSection[] = [
     ],
   },
   {
+    title: "التعليم",
+    items: [
+      { label: "المقرّرات ومحتواها", href: "/admin/courses", icon: Layers },
+      { label: "المجالس المباشرة", href: "/admin/sessions", icon: Radio },
+      { label: "تسجيل الطلاب", href: "/admin/enrollments", icon: UserCheck },
+      { label: "الاختبارات", href: "/admin/quizzes", icon: FileQuestion },
+      { label: "الواجبات", href: "/admin/assignments", icon: ClipboardList },
+      { label: "الشهادات والإجازات", href: "/admin/certificates", icon: ScrollText },
+      { label: "الرسوم والمدفوعات", href: "/admin/payments", icon: Wallet },
+    ],
+  },
+  {
     title: "النظام",
     items: [
       { label: "حسابات الطلاب", href: "/admin/students", icon: GraduationCap },
+      { label: "أعضاء هيئة التدريس", href: "/admin/instructors", icon: UserCog, adminOnly: true },
       { label: "الإعدادات العامة", href: "/admin/settings", icon: Settings },
       { label: "تحسين محركات البحث", href: "/admin/seo", icon: Search },
       { label: "المستخدمون والأدوار", href: "/admin/users", icon: Users, adminOnly: true },

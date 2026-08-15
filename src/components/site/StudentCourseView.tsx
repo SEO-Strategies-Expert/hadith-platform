@@ -15,6 +15,7 @@ import {
   isEnrolled,
   title,
 } from "@/lib/lms";
+import { StudentQuizAssignmentLinks } from "@/components/site/StudentQuizAssignmentLinks";
 import { ProgressBar, Pill, studentHref, num, clampPct } from "@/components/site/StudentPortalKit";
 
 const T = {
@@ -220,6 +221,7 @@ export async function StudentCourseView({ lang, courseId }: { lang: Lang; course
           )}
         </div>
       </section>
-    </main>
+          <StudentQuizAssignmentLinks lang={lang} courseId={courseId} />
+</main>
   );
 }

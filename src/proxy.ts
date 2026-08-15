@@ -21,6 +21,22 @@ export default auth((req) => {
     if (role === "STUDENT") {
       return NextResponse.redirect(new URL("/student", req.url));
     }
+    // وكذلك عضو هيئة التدريس: صلاحيّاته في لوحته وحدها.
+    if (role === "INSTRUCTOR") {
+      return NextResponse.redirect(new URL("/instructor", req.url));
+    }
+  }
+
+  // لوحة الأكاديميين: للمحاضر، ويدخلها المدير للتفقّد. غيرهما يُصرَف عنها.
+  if (pathname === "/instructor" || pathname.startsWith("/instructor/")) {
+    if (!req.auth) {
+      const loginUrl = new URL("/login", req.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    if (role !== "INSTRUCTOR" && role !== "ADMIN") {
+      return NextResponse.redirect(new URL(role === "STUDENT" ? "/student" : "/admin", req.url));
+    }
   }
 
   // بادئة لا تطابقًا تامًّا: `/student/course/…` و`/student/lesson/…` كانت خارج

@@ -19,6 +19,7 @@ enum Role {
   ADMIN
   EDITOR
   STUDENT // حساب طالب — بوابة الطلاب فقط، لا وصول للوحة
+  INSTRUCTOR // عضو هيئة تدريس — لوحته وحدها: مقرّراته ومجالسه وتصحيح طلابه
 }
 
 enum UserStatus {
@@ -47,6 +48,12 @@ model User {
   role         Role       @default(EDITOR)
   status       UserStatus @default(ACTIVE)
   avatarUrl    String?
+  // ملفّ عضو الهيئة (يُستخدم عند role = INSTRUCTOR) — يربط الحساب بسيرته
+  // المعروضة في الموقع، فتُشتقّ مقرّراته ومجالسه منه بلا تكرار بيانات.
+  /// بلا قيد تفرّد في القاعدة (إضافته تتطلّب علمًا مسبقًا بغياب التكرار)؛
+  /// «حساب واحد لكل عضو هيئة» تُفرَض في كود اللوحة بالبحث قبل الإسناد.
+  scholarId    String?
+  scholar      Scholar?   @relation(fields: [scholarId], references: [id], onDelete: SetNull)
   // بيانات الطالب (تُستخدم عند role = STUDENT)
   studentNo    String?
   phone        String?
@@ -99,6 +106,8 @@ model NavLink {
 
 // ---------------------- الهيئة العلمية ----------------------
 model Scholar {
+  accounts User[]
+
   courses  Course[]
   sessions LiveSession[]
 
