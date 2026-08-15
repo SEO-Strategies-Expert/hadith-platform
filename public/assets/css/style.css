@@ -1399,3 +1399,16 @@ html{scroll-padding-top:150px}
   }
   .mainnav .drop a{padding-block:10px!important;font-size:15px!important}
 }
+
+/* ---------- (18) حالة «مفتوح» للقائمة على الشاشات المطوية ----------------
+   القياس: .mainnav.open ارتفاعها الفعلي 2px (max-height لم تُرفع)، و.nav-item
+   بقي عموديًّا بارتفاع 178px، و.mainnav-list لم تتحوّل إلى عمود — فالعناصر
+   تفيض خارج اللوحة وتُرسم فوق بعضها. نثبّت الحالة الثلاث صراحةً. */
+@media(max-width:1020px){
+  .mainnav.open{max-height:78vh!important;overflow-y:auto!important;opacity:1!important;visibility:visible!important}
+  .mainnav-list{flex-direction:column!important;align-items:stretch!important;flex-wrap:nowrap!important;gap:0!important}
+  .mainnav-list>li{width:100%!important;flex:none!important}
+  .nav-item{flex-direction:row!important;justify-content:flex-start!important;align-items:center!important;
+    gap:12px!important;padding:12px!important;height:auto!important;min-height:0!important;text-align:start!important}
+  .nav-item .ic{flex:none!important}
+}

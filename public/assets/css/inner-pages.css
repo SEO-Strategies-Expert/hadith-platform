@@ -183,3 +183,15 @@ body:not([data-page="home"]) .ticker{box-shadow:0 8px 24px rgba(7,22,48,.12)}
    (مثل .callout h2 التي كانت تضبط padding-top:3px فتُلغي الإصلاح). */
 .gold-text.gold-text,
 .issue-name.issue-name{padding-block:1em!important;margin-block:-1em!important}
+
+/* عناوين الأقسام الفرعية في الصفحات الداخلية بخطّ ThuluthAlt (أوضح للقراءة
+   من خطّ الثلث المزخرف) — نفس خطّ عناوين أقسام الرئيسية. */
+.split-copy h2.thuluth,
+.section-cap h2.thuluth,
+.callout h2.thuluth,
+.inner-cta h2.thuluth,
+.content-split h2.thuluth{
+  font-family:'ThuluthAlt','NaskhQ',serif!important;
+  font-weight:700!important;
+  line-height:1.95!important;
+}
