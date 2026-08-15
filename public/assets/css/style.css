@@ -1412,3 +1412,20 @@ html{scroll-padding-top:150px}
     gap:12px!important;padding:12px!important;height:auto!important;min-height:0!important;text-align:start!important}
   .nav-item .ic{flex:none!important}
 }
+
+/* ---------- (19) ضمان ظهور المحتوى ولو لم يُشغَّل مراقب الظهور ----------
+   عناصر .reveal تبدأ opacity:0 وينتظر ظهورَها IntersectionObserver في
+   main.js، وهو يُهيَّأ مرّة واحدة عند التحميل الكامل. وتنقّل Next بين
+   الصفحات يستبدل الـDOM بلا إعادة تهيئة، فتبقى العناصر شفّافة والصفحة
+   تبدو فارغة حتى يُحدِّث المستخدم الصفحة (أُعيد إنتاجه: ٧ من ٧ عناصر
+   بـopacity:0 بعد تنقّل داخلي).
+   الحل بلا اعتماد على الجافاسكربت: حركة ذاتية تنتهي بالظهور دائمًا. */
+.reveal{animation:revealFallback .7s var(--ease-out) both}
+@keyframes revealFallback{
+  from{opacity:0;transform:translateY(26px)}
+  to{opacity:1;transform:none}
+}
+.reveal.in{opacity:1;transform:none;animation:none}
+@media(prefers-reduced-motion:reduce){
+  .reveal{animation:none;opacity:1;transform:none}
+}
