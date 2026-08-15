@@ -177,3 +177,9 @@ body:not([data-page="home"]) .ticker{box-shadow:0 8px 24px rgba(7,22,48,.12)}
 /* فقرات المحتوى داخل البطاقات بلا صنف (نصّ قراءة أيضًا) */
 @media(max-width:1366px){.inner-section p:not([class]),.inner-section .body p{font-size:17px;line-height:1.88}}
 @media(max-width:600px){.inner-section p:not([class]),.inner-section .body p{font-size:18px;line-height:1.9}}
+
+/* إصلاح اقتصاص التشكيل في العناوين الذهبية داخل الصفحات الداخلية.
+   هذا الملف يُحمَّل بعد style.css، فقواعد padding هنا تتغلّب على نظيرتها هناك
+   (مثل .callout h2 التي كانت تضبط padding-top:3px فتُلغي الإصلاح). */
+.gold-text.gold-text,
+.issue-name.issue-name{padding-block:1em;margin-block:-1em}
