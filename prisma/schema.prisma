@@ -305,6 +305,68 @@ model Page {
   @@map("pages")
 }
 
+// ---------------------- نماذج الموقع العام (إدخال الزوّار) ----------------------
+enum SubmissionStatus {
+  NEW // جديد
+  IN_PROGRESS // قيد المعالجة
+  DONE // منجز
+  ARCHIVED // مؤرشف
+}
+
+model ContactMessage {
+  id         String           @id @default(cuid())
+  name       String
+  email      String
+  department String?
+  message    String
+  lang       String           @default("ar")
+  status     SubmissionStatus @default(NEW)
+  note       String?
+  createdAt  DateTime         @default(now())
+
+  @@index([status, createdAt])
+  @@map("contact_messages")
+}
+
+model AdmissionApplication {
+  id         String           @id @default(cuid())
+  name       String
+  email      String
+  phone      String?
+  country    String?
+  program    String?
+  background String?
+  feeOption  String? // full | reduced | free
+  lang       String           @default("ar")
+  status     SubmissionStatus @default(NEW)
+  note       String?
+  createdAt  DateTime         @default(now())
+
+  @@index([status, createdAt])
+  @@map("admission_applications")
+}
+
+model ResearchSubmission {
+  id          String           @id @default(cuid())
+  authorName  String
+  authorEmail String
+  title       String
+  paperType   String?
+  field       String?
+  abstract    String?
+  docPath     String? // مسار Blob خاصّ — يُنزَّل من اللوحة برابط موقَّع
+  docName     String?
+  pdfPath     String?
+  pdfName     String?
+  lang        String           @default("ar")
+  status      SubmissionStatus @default(NEW)
+  note        String?
+  createdAt   DateTime         @default(now())
+
+  @@index([status, createdAt])
+  @@map("research_submissions")
+}
+
 // ---------------------- الوسائط ----------------------
 model Media {
   id        String   @id @default(cuid())

@@ -13,6 +13,7 @@ import {
   Settings,
   Search,
   Users,
+  Inbox,
 } from "lucide-react";
 
 export type NavItem = {
@@ -29,7 +30,10 @@ export type NavSection = {
 
 export const adminNav: NavSection[] = [
   {
-    items: [{ label: "لوحة القيادة", href: "/admin", icon: LayoutDashboard }],
+    items: [
+      { label: "لوحة القيادة", href: "/admin", icon: LayoutDashboard },
+      { label: "صندوق الوارد", href: "/admin/inbox", icon: Inbox },
+    ],
   },
   {
     title: "المحتوى",

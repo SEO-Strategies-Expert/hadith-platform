@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { put } from "@vercel/blob";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { uploadFile, MEDIA_PREFIX } from "@/lib/blob";
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -25,31 +25,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "الحجم الأقصى 8 ميجابايت." }, { status: 400 });
   }
 
-  const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
   try {
-    const blob = await put(`media/${Date.now()}-${safe}`, file, { access: "public" });
+    const stored = await uploadFile(MEDIA_PREFIX, file, file.name);
     await prisma.media.create({
       data: {
-        url: blob.url,
-        pathname: blob.pathname,
+        url: stored.url,
+        pathname: stored.pathname,
         filename: file.name,
         size: file.size,
         mime: file.type || null,
       },
     });
-    return NextResponse.json({ url: blob.url });
+    return NextResponse.json({ url: stored.url });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "";
-    if (msg.includes("private store")) {
-      return NextResponse.json(
-        {
-          error:
-            "مخزن Blob على Vercel مضبوط كخاصّ (Private) فلا يمكن عرض الصور منه للزوّار. " +
-            "من لوحة Vercel: Storage → مخزن Blob → أنشئ مخزنًا جديدًا بوصول عام (Public)، أو فعّل الوصول العام إن توفّر، وحدِّث BLOB_READ_WRITE_TOKEN.",
-        },
-        { status: 500 }
-      );
-    }
+    console.error("[upload] فشل الرفع", e);
     return NextResponse.json({ error: "تعذّر الرفع. حاول مجددًا." }, { status: 500 });
   }
 }

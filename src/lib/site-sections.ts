@@ -16,6 +16,7 @@ import { prisma } from "@/lib/prisma";
 import type { Lang } from "@/lib/site-data";
 import { siteHref } from "@/lib/site-links";
 import { esc, isoDate, longDate, mediaUrl, searchText, shortDateParts } from "@/lib/site-format";
+import { activateForm } from "@/lib/site-forms";
 
 /* ------------------------------- عبارات ثابتة ------------------------------ */
 
@@ -732,6 +733,9 @@ export async function bindPageSections(
       console.error(`[site-sections] فشل ربط قسم في «${slug}»:`, e);
     }
   }
+
+  // نماذج الزوّار (تواصل / التحاق / إرسال بحث) تُحوَّل إلى نماذج حقيقية تحفظ في DB.
+  activateForm($, slug, lang, siteHref(lang, `${slug}.html`), params);
 
   normalizeUrls($, lang);
   return $.html();
