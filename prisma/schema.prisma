@@ -27,6 +27,19 @@ enum UserStatus {
 }
 
 model User {
+  // --- نظام التعلّم ---
+  enrollments      Enrollment[]
+  stageEnrollments StageEnrollment[]
+  lessonProgress   LessonProgress[]
+  attendance       Attendance[]
+  assignmentWork   AssignmentSubmission[] @relation("StudentWork")
+  gradedWork       AssignmentSubmission[] @relation("GradedBy")
+  quizAttempts     QuizAttempt[]
+  certificates     Certificate[]          @relation("CertificateHolder")
+  issuedCerts      Certificate[]          @relation("CertificateIssuer")
+  payments         Payment[]
+  notifications    Notification[]
+
   id           String     @id @default(cuid())
   name         String
   email        String     @unique
@@ -86,6 +99,9 @@ model NavLink {
 
 // ---------------------- الهيئة العلمية ----------------------
 model Scholar {
+  courses  Course[]
+  sessions LiveSession[]
+
   id            String  @id @default(cuid())
   nameAr        String
   nameEn        String
@@ -108,41 +124,60 @@ model Scholar {
 
 // ---------------------- البرامج والمراحل والمقرّرات ----------------------
 model ProgramStage {
-  id      String   @id @default(cuid())
-  key     String   @unique // foundation | advanced | research
-  numAr   String? // "المرحلة الأولى"
-  numEn   String?
-  titleAr String
-  titleEn String
-  metaAr  String?
-  metaEn  String?
-  descAr  String?
-  descEn  String?
-  items   Json? // ["مقدّمة ابن الصلاح", ...] ثنائي؟ نخزّن {ar:[],en:[]}
-  icon    String?
+  stageEnrollments StageEnrollment[]
+  sessions         LiveSession[]
+  certificates     Certificate[]
+
+  id       String   @id @default(cuid())
+  key      String   @unique // foundation | advanced | research
+  numAr    String? // "المرحلة الأولى"
+  numEn    String?
+  titleAr  String
+  titleEn  String
+  metaAr   String?
+  metaEn   String?
+  descAr   String?
+  descEn   String?
+  items    Json? // ["مقدّمة ابن الصلاح", ...] ثنائي؟ نخزّن {ar:[],en:[]}
+  icon     String?
   moreHref String?
-  order   Int      @default(0)
-  visible Boolean  @default(true)
-  courses Course[]
+  order    Int      @default(0)
+  visible  Boolean  @default(true)
+  courses  Course[]
 
   @@map("program_stages")
 }
 
 model Course {
-  id        String        @id @default(cuid())
-  titleAr   String
-  titleEn   String
-  descAr    String?
-  descEn    String?
-  category  String? // مفتاح فلترة
-  metaAr    String? // "٦ لقاءات"
-  metaEn    String?
-  imageUrl  String?
-  href      String?
-  stageId   String?
-  stage     ProgramStage? @relation(fields: [stageId], references: [id], onDelete: SetNull)
-  order     Int           @default(0)
-  visible   Boolean       @default(true)
+  // --- تفاصيل المقرّر ونظام التعلّم ---
+  summaryAr    String?
+  summaryEn    String?
+  hours        Int?
+  startsOn     DateTime?
+  published    Boolean       @default(false)
+  instructorId String?
+  instructor   Scholar?      @relation(fields: [instructorId], references: [id], onDelete: SetNull)
+  modules      Module[]
+  enrollments  Enrollment[]
+  sessions     LiveSession[]
+  assignments  Assignment[]
+  quizzes      Quiz[]
+  certificates Certificate[]
+
+  id       String        @id @default(cuid())
+  titleAr  String
+  titleEn  String
+  descAr   String?
+  descEn   String?
+  category String? // مفتاح فلترة
+  metaAr   String? // "٦ لقاءات"
+  metaEn   String?
+  imageUrl String?
+  href     String?
+  stageId  String?
+  stage    ProgramStage? @relation(fields: [stageId], references: [id], onDelete: SetNull)
+  order    Int           @default(0)
+  visible  Boolean       @default(true)
 
   @@map("courses")
 }
@@ -189,11 +224,11 @@ model Event {
 
 // ---------------------- ديوان العلماء ----------------------
 model DiwanCategory {
-  id      String       @id @default(cuid())
-  key     String       @unique
+  id      String        @id @default(cuid())
+  key     String        @unique
   labelAr String
   labelEn String
-  order   Int          @default(0)
+  order   Int           @default(0)
   threads DiwanThread[]
 
   @@map("diwan_categories")
@@ -221,22 +256,22 @@ model DiwanThread {
 
 // ---------------------- الإصدارات والمجلة ----------------------
 model JournalIssue {
-  id      String  @id @default(cuid())
-  nameAr  String
-  nameEn  String
-  subAr   String?
-  subEn   String?
-  noAr    String?
-  noEn    String?
-  dateAr  String?
-  dateEn  String?
-  tagAr   String?
-  tagEn   String?
+  id       String  @id @default(cuid())
+  nameAr   String
+  nameEn   String
+  subAr    String?
+  subEn    String?
+  noAr     String?
+  noEn     String?
+  dateAr   String?
+  dateEn   String?
+  tagAr    String?
+  tagEn    String?
   coverUrl String?
-  href    String?
-  isNew   Boolean @default(false)
-  order   Int     @default(0)
-  visible Boolean @default(true)
+  href     String?
+  isNew    Boolean @default(false)
+  order    Int     @default(0)
+  visible  Boolean @default(true)
 
   @@map("journal_issues")
 }
@@ -435,6 +470,18 @@ model AdmissionApplication {
   note       String?
   createdAt  DateTime         @default(now())
 
+  // --- المقابلة العلمية (الخطوة الثالثة من القبول) — تُحجز عبر Calendly ---
+  // تُملأ تلقائيًّا من ويب هوك Calendly عند حجز الطالب موعده.
+  interviewAt      DateTime?
+  /// رابط لقاء المقابلة (Zoom/Meet) كما يرسله Calendly.
+  interviewUrl     String?
+  /// حالة الموعد: scheduled | canceled
+  interviewStatus  String?
+  /// معرّف الحدث لدى Calendly — يمنع تكرار المعالجة عند إعادة الإرسال.
+  /// فهرس عادي لا قيد تفرّد: عدم التكرار يُفرض في كود الويب هوك (بحث قبل الكتابة).
+  calendlyEventUri String?
+
+  @@index([calendlyEventUri])
   @@index([status, createdAt])
   @@map("admission_applications")
 }
@@ -479,13 +526,13 @@ model Media {
 
 // ---------------------- شرائح الهيرو (الصفحة الرئيسية) ----------------------
 model HeroSlide {
-  id       String  @id @default(cuid())
-  imageAr  String // مسار الصورة العربية
-  imageEn  String // مسار الصورة الإنجليزية
-  altAr    String?
-  altEn    String?
-  order    Int     @default(0)
-  visible  Boolean @default(true)
+  id      String  @id @default(cuid())
+  imageAr String // مسار الصورة العربية
+  imageEn String // مسار الصورة الإنجليزية
+  altAr   String?
+  altEn   String?
+  order   Int     @default(0)
+  visible Boolean @default(true)
 
   @@map("hero_slides")
 }
@@ -502,4 +549,501 @@ model SocialLink {
   visible Boolean @default(true)
 
   @@map("social_links")
+}
+
+// ==========================================================================
+// نظام التعلّم (LMS) — المقرّرات والمجالس والتقييم والشهادات
+// ==========================================================================
+
+// =====================================================
+// (٢) بنية المحتوى التعليمي — مقرّر ← وحدة ← درس ← مرفق
+// ==========================================================================
+
+enum LessonKind {
+  VIDEO // درس مرئي (رابط خارجي أو مستضاف)
+  PDF // ملفّ للقراءة
+  TEXT // متن مكتوب داخل المنصّة
+  LIVE // موعد مجلس مباشر مرتبط بـLiveSession
+  QUIZ // اختبار مرتبط بـQuiz
+}
+
+/// وحدة دراسيّة داخل المقرّر (يقابلها «المحور» في الخطّة الدراسيّة).
+model Module {
+  id       String  @id @default(cuid())
+  courseId String
+  course   Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  titleAr  String
+  titleEn  String
+  descAr   String?
+  descEn   String?
+  order    Int     @default(0)
+  visible  Boolean @default(true)
+
+  lessons Lesson[]
+
+  @@index([courseId, order])
+  @@map("modules")
+}
+
+/// درس مفرد داخل وحدة.
+model Lesson {
+  id          String     @id @default(cuid())
+  moduleId    String
+  module      Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  titleAr     String
+  titleEn     String
+  kind        LessonKind @default(VIDEO)
+  // VIDEO: رابط يوتيوب/فيميو غير مُدرَج، أو رابط استضافة لاحقًا
+  videoUrl    String?
+  // TEXT: متن الدرس (HTML)
+  bodyAr      String?
+  bodyEn      String?
+  // LIVE/QUIZ: ارتباط اختياري بالكيان المقابل
+  sessionId   String?
+  quizId      String?
+  durationMin Int?
+  // معاينة مجّانيّة تُفتح لغير المسجَّلين (تسويق المقرّر)
+  freePreview Boolean    @default(false)
+  order       Int        @default(0)
+  visible     Boolean    @default(true)
+
+  attachments LessonAttachment[]
+  progress    LessonProgress[]
+
+  @@index([moduleId, order])
+  @@map("lessons")
+}
+
+/// ملفّات مرفقة بالدرس (نصّ محقَّق، جدول تخريج، ورقة تطبيق…).
+model LessonAttachment {
+  id       String  @id @default(cuid())
+  lessonId String
+  lesson   Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  titleAr  String
+  titleEn  String
+  url      String
+  filename String?
+  sizeKb   Int?
+  order    Int     @default(0)
+
+  @@index([lessonId, order])
+  @@map("lesson_attachments")
+}
+
+// ==========================================================================
+// (٣) التسجيل والتقدّم
+// ==========================================================================
+
+enum EnrollmentStatus {
+  PENDING // بانتظار الاعتماد أو سداد الرسوم
+  ACTIVE // مُفعَّل
+  COMPLETED // مُنجَز
+  CANCELLED // ملغى أو منسحب
+}
+
+/// قيد الطالب في مرحلة أكاديميّة (التأسيس/التخصّص/البحث).
+model StageEnrollment {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stageId     String
+  stage       ProgramStage     @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  status      EnrollmentStatus @default(PENDING)
+  startedAt   DateTime         @default(now())
+  completedAt DateTime?
+
+  @@unique([userId, stageId])
+  @@map("stage_enrollments")
+}
+
+/// تسجيل الطالب في مقرّر/دورة بعينها.
+model Enrollment {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId    String
+  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  status      EnrollmentStatus @default(PENDING)
+  // نظام الرسوم المرن المعلَن في الموقع: full | reduced | free
+  feeOption   String?          @default("free")
+  progressPct Int              @default(0) // 0..100 — يُحدَّث من LessonProgress
+  enrolledAt  DateTime         @default(now())
+  completedAt DateTime?
+
+  payments Payment[]
+
+  @@unique([userId, courseId])
+  @@index([courseId, status])
+  @@map("enrollments")
+}
+
+/// تقدّم الطالب في درس مفرد.
+model LessonProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completed Boolean  @default(false)
+  seconds   Int      @default(0) // آخر موضع مشاهدة
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, lessonId])
+  @@map("lesson_progress")
+}
+
+// ==========================================================================
+// (٤) المجالس المباشرة والتقويم
+// ==========================================================================
+// قرار المشروع: **Zoom بحساب مدفوع**. الحساب الموثَّق يُضاف في آخر المشروع،
+// والتكامل مبنيّ ليعمل قبله وبعده بلا تغيير كود (`src/lib/zoom.ts`):
+//   • بلا مفاتيح بيئة → وضع يدوي: المحرّر يلصق رابط الانضمام في joinUrl.
+//   • بالمفاتيح → يُنشأ المجلس على Zoom تلقائيًّا، ويعود joinUrl/startUrl،
+//     ويُملأ recordingUrl من التسجيل السحابي عبر الويب هوك، ويُملأ جدول
+//     Attendance من تقرير المشاركين. (كلاهما ميزة باقة مدفوعة.)
+// وهذا يُبطل الحاجة للرفع اليدوي، ويُوفي وعد الموقع بأن «المجالس المباشرة
+// مسجَّلة وتُتاح لاحقًا» تلقائيًّا.
+
+/// مجلس مباشر: محاضرة أو مجلس سماع مسنَد أو مجلس مذاكرة.
+model LiveSession {
+  id      String  @id @default(cuid())
+  titleAr String
+  titleEn String
+  descAr  String?
+  descEn  String?
+
+  // الارتباط: بمقرّر، أو بمرحلة، أو عامّ للكلّية كلّها (كلاهما فارغ)
+  courseId String?
+  course   Course?       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  stageId  String?
+  stage    ProgramStage? @relation(fields: [stageId], references: [id], onDelete: SetNull)
+
+  instructorId String?
+  instructor   Scholar? @relation(fields: [instructorId], references: [id], onDelete: SetNull)
+
+  startsAt    DateTime
+  endsAt      DateTime?
+  durationMin Int       @default(90)
+
+  // zoom | meet | youtube | other
+  provider String  @default("zoom")
+  /// رابط انضمام الطلاب — يُنشئه Zoom، أو يُلصق يدويًّا في الوضع غير المُفعَّل.
+  joinUrl  String?
+  /// رمز دخول المجلس إن وُجد.
+  passcode String?
+
+  // --- حقول Zoom (تبقى فارغة في الوضع اليدوي) ---
+  zoomMeetingId String? @unique
+  /// رابط المضيف — **سرّي**: لا يُعرض إلا للمحاضر والمدير، ولا يُرسل للطلاب أبدًا.
+  zoomStartUrl  String?
+
+  /// يُملأ تلقائيًّا من ويب هوك recording.completed، أو يدويًّا عند غياب المفاتيح.
+  recordingUrl       String?
+  /// Zoom يحمي التسجيلات بكلمة مرور — بدونها يتعذّر تشغيل الرابط.
+  recordingPasscode  String?
+  recordingReadyAt   DateTime?
+  /// آخر مزامنة لتقرير حضور Zoom إلى جدول Attendance.
+  attendanceSyncedAt DateTime?
+
+  // --- تنبيهات الطلاب بالبريد ---
+  // تُختم عند إرسال كل تذكير، فلا يُرسل مرّتين مهما تكرّر تشغيل المهمّة.
+  reminder24SentAt DateTime?
+  reminder1SentAt  DateTime?
+
+  // مجلس مفتوح للعامّة (يظهر في تقويم الموقع بلا تسجيل دخول)
+  isPublic Boolean @default(false)
+  visible  Boolean @default(true)
+
+  attendance Attendance[]
+
+  @@index([startsAt])
+  @@index([courseId, startsAt])
+  @@map("live_sessions")
+}
+
+/// حضور الطالب مجلسًا مباشرًا.
+model Attendance {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId String
+  session   LiveSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  joinedAt  DateTime    @default(now())
+  leftAt    DateTime?
+  /// دقائق الحضور الفعليّة — من تقرير مشاركي Zoom.
+  minutes   Int         @default(0)
+  present   Boolean     @default(true)
+  /// zoom | manual — مصدر السجلّ، لئلّا تدهس المزامنة تعديلًا يدويًّا.
+  source    String      @default("manual")
+  note      String?
+
+  @@unique([userId, sessionId])
+  @@map("attendance")
+}
+
+// ==========================================================================
+// (٥) الواجبات والاختبارات
+// ==========================================================================
+
+enum AssignmentState {
+  DRAFT // مسوّدة عند الطالب
+  SUBMITTED // مُسلَّم
+  RETURNED // أُعيد للتعديل
+  GRADED // مُصحَّح
+}
+
+model Assignment {
+  id       String    @id @default(cuid())
+  courseId String
+  course   Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  titleAr  String
+  titleEn  String
+  descAr   String?
+  descEn   String?
+  dueAt    DateTime?
+  maxScore Int       @default(100)
+  order    Int       @default(0)
+  visible  Boolean   @default(true)
+
+  submissions AssignmentSubmission[]
+
+  @@index([courseId, order])
+  @@map("assignments")
+}
+
+model AssignmentSubmission {
+  id           String          @id @default(cuid())
+  assignmentId String
+  assignment   Assignment      @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User            @relation("StudentWork", fields: [userId], references: [id], onDelete: Cascade)
+  text         String?
+  fileUrl      String?
+  fileName     String?
+  state        AssignmentState @default(DRAFT)
+  submittedAt  DateTime?
+  score        Int?
+  feedback     String?
+  gradedById   String?
+  gradedBy     User?           @relation("GradedBy", fields: [gradedById], references: [id], onDelete: SetNull)
+  gradedAt     DateTime?
+
+  @@unique([assignmentId, userId])
+  @@index([state])
+  @@map("assignment_submissions")
+}
+
+enum QuestionKind {
+  SINGLE // اختيار واحد
+  MULTI // اختيار متعدّد
+  TRUEFALSE // صواب/خطأ
+  SHORT // إجابة قصيرة (تصحيح يدوي)
+}
+
+/// اختبار أو مراجعة تفاعليّة.
+model Quiz {
+  id              String  @id @default(cuid())
+  courseId        String?
+  course          Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  titleAr         String
+  titleEn         String
+  descAr          String?
+  descEn          String?
+  timeLimitMin    Int? // بلا قيمة = بلا توقيت
+  passScore       Int     @default(60) // نسبة النجاح %
+  attemptsAllowed Int     @default(0) // 0 = بلا حدّ
+  shuffle         Boolean @default(true)
+  visible         Boolean @default(true)
+
+  questions Question[]
+  attempts  QuizAttempt[]
+
+  @@map("quizzes")
+}
+
+model Question {
+  id        String       @id @default(cuid())
+  quizId    String
+  quiz      Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  kind      QuestionKind @default(SINGLE)
+  textAr    String
+  textEn    String
+  explainAr String? // شرح الإجابة بعد التسليم
+  explainEn String?
+  points    Int          @default(1)
+  order     Int          @default(0)
+
+  choices Choice[]
+
+  @@index([quizId, order])
+  @@map("questions")
+}
+
+model Choice {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  textAr     String
+  textEn     String
+  correct    Boolean  @default(false)
+  order      Int      @default(0)
+
+  @@index([questionId, order])
+  @@map("choices")
+}
+
+model QuizAttempt {
+  id          String    @id @default(cuid())
+  quizId      String
+  quiz        Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+  // { questionId: [choiceId…] | "نصّ" }
+  answers     Json?
+  score       Int?
+  passed      Boolean?
+
+  @@index([userId, quizId])
+  @@map("quiz_attempts")
+}
+
+// ==========================================================================
+// (٦) الشهادات والإجازات
+// ==========================================================================
+// الموقع يَعِد بـ«إجازاتُك المسنَدة برقم توثيقٍ ورمز تحقُّقٍ قابلٍ للمشاركة»،
+// وصفحة certificates.html العامّة هي واجهة التحقّق.
+
+enum CertificateKind {
+  CERTIFICATE // شهادة إتمام مقرّر/مرحلة
+  IJAZA // إجازة مسنَدة
+}
+
+model Certificate {
+  id     String          @id @default(cuid())
+  kind   CertificateKind @default(CERTIFICATE)
+  userId String
+  user   User            @relation("CertificateHolder", fields: [userId], references: [id], onDelete: Cascade)
+
+  courseId String?
+  course   Course?       @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  stageId  String?
+  stage    ProgramStage? @relation(fields: [stageId], references: [id], onDelete: SetNull)
+
+  titleAr     String
+  titleEn     String
+  serial      String  @unique // رقم التوثيق المطبوع على الوثيقة
+  verifyCode  String  @unique // رمز التحقّق العلني القصير
+  // للإجازات: نصّ السند والمُجيز
+  isnadAr     String?
+  isnadEn     String?
+  grantedByAr String?
+  grantedByEn String?
+
+  issuedAt   DateTime @default(now())
+  issuedById String?
+  issuedBy   User?    @relation("CertificateIssuer", fields: [issuedById], references: [id], onDelete: SetNull)
+  pdfUrl     String?
+  revoked    Boolean  @default(false)
+  revokeNote String?
+
+  @@index([userId, issuedAt])
+  @@map("certificates")
+}
+
+// ==========================================================================
+// (٧) الرسوم والمدفوعات
+// ==========================================================================
+// بوابة الدفع وحسابها على العميل (البند التاسع من العقد). النموذج محايد
+// تجاه المزوّد: providerRef يحفظ معرّف العمليّة أيًّا كانت البوابة.
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  WAIVED // إعفاء (المسار المجّاني أو المخفَّض)
+}
+
+model Payment {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enrollmentId String?
+  enrollment   Enrollment?   @relation(fields: [enrollmentId], references: [id], onDelete: SetNull)
+  amount       Decimal       @db.Decimal(10, 2)
+  currency     String        @default("QAR")
+  status       PaymentStatus @default(PENDING)
+  provider     String? // اسم البوابة
+  providerRef  String? // معرّف العمليّة لدى البوابة
+  method       String? // card | transfer | cash
+  paidAt       DateTime?
+  note         String?
+  createdAt    DateTime      @default(now())
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@map("payments")
+}
+
+// ==========================================================================
+// (٨) الإشعارات
+// ==========================================================================
+// إشعارات داخل المنصّة الآن، وهي نفسها مصدر إشعارات Push في التطبيق لاحقًا.
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // session | assignment | grade | certificate | payment | announcement
+  kind      String    @default("announcement")
+  titleAr   String
+  titleEn   String
+  bodyAr    String?
+  bodyEn    String?
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+// ==========================================================================
+// (٩) منتدى الطلاب — ⚠️ خارج بنود العقد
+// ==========================================================================
+// العقد لا يذكر منتدًى، لكنّ الموقع يَعِد به في موضعين ظاهرين: بطاقة
+// «منتدى الطلاب» المميَّزة في منطقة الطالب، والخطوة الرابعة من القبول.
+// أُدرِج هنا للاكتمال — يُحذف إن قُرِّر إخراجه من النطاق، أو يُسعَّر ملحقًا
+// وفق البند العاشر.
+
+model ForumTopic {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  courseId  String?
+  pinned    Boolean  @default(false)
+  locked    Boolean  @default(false)
+  lang      String   @default("ar")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  replies ForumReply[]
+
+  @@index([createdAt])
+  @@map("forum_topics")
+}
+
+model ForumReply {
+  id        String     @id @default(cuid())
+  topicId   String
+  topic     ForumTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  userId    String
+  body      String
+  createdAt DateTime   @default(now())
+
+  @@index([topicId, createdAt])
+  @@map("forum_replies")
 }
