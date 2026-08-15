@@ -432,33 +432,51 @@ const bindProfileGrid: Binder = async ($, lang) => {
 /* -------------------------------- الإصدارات -------------------------------- */
 
 /** بطاقات أحدث الإصدارات في صفحة الإصدارات ← جدول JournalIssue. */
+/** غلاف عدد المجلّة — نفس ترميز `.issue` المستعمل في الرئيسية. */
+function issueCover(
+  r: {
+    nameAr: string; nameEn: string;
+    subAr: string | null; subEn: string | null;
+    noAr: string | null; noEn: string | null;
+    dateAr: string | null; dateEn: string | null;
+    tagAr: string | null; tagEn: string | null;
+    isNew: boolean;
+  },
+  lang: Lang,
+  i: number
+): string {
+  const name = lang === "ar" ? r.nameAr : r.nameEn;
+  const sub = lang === "ar" ? r.subAr : r.subEn;
+  const no = lang === "ar" ? r.noAr : r.noEn;
+  const date = lang === "ar" ? r.dateAr : r.dateEn;
+  const tag = lang === "ar" ? r.tagAr : r.tagEn;
+  // الغلاف الثاني بتدرّج مختلف كما في الرئيسية، والاسم بخطّ الثلث في العربية فقط.
+  const cover = i % 2 === 1 ? "issue-cover cover-2" : "issue-cover";
+  const nameCls = lang === "ar" ? "issue-name thuluth" : "issue-name";
+  return (
+    `<article class="issue${r.isNew ? " issue-new" : ""} reveal">` +
+    `<div class="${cover}">` +
+    `<span class="issue-orn" aria-hidden="true"></span>` +
+    `<span class="${nameCls}">${esc(name)}</span>` +
+    (sub ? `<span class="issue-sub">${esc(sub)}</span>` : "") +
+    (no ? `<span class="issue-no">${esc(no)}</span>` : "") +
+    (date ? `<span class="issue-date">${esc(date)}</span>` : "") +
+    `</div>` +
+    (tag ? `<span class="issue-tag${r.isNew ? "" : " muted"}">${esc(tag)}</span>` : "") +
+    `</article>`
+  );
+}
+
 const bindIssues: Binder = async ($, lang) => {
   const grid = $(".card-grid").first();
   if (grid.length === 0) return;
   const rows = await prisma.journalIssue.findMany(visibleOrder);
   if (rows.length === 0) return;
 
-  const t = L[lang];
-  grid.html(
-    rows
-      .map((r, i) => {
-        const name = lang === "ar" ? r.nameAr : r.nameEn;
-        const no = (lang === "ar" ? r.noAr : r.noEn) ?? "";
-        return imageCard(
-          {
-            href: link(lang, r.href, "published-research.html"),
-            image: mediaUrl(r.coverUrl, fallbackImage(i)),
-            title: no ? `${name} — ${no}` : name,
-            desc: lang === "ar" ? r.subAr : r.subEn,
-            tag: lang === "ar" ? r.tagAr : r.tagEn,
-            foot: (lang === "ar" ? r.dateAr : r.dateEn) || t.issue,
-            external: isExternal(r.href),
-          },
-          lang
-        );
-      })
-      .join("")
-  );
+  // الحاوية كانت شبكة بطاقات عامّة؛ نحوّلها إلى شبكة الأغلفة نفسها المستعملة
+  // في الرئيسية حتى ينطبق تنسيق الغلاف (.issues / .issue-cover).
+  grid.removeClass("card-grid two three four").addClass("issues");
+  grid.html(rows.map((r, i) => issueCover(r, lang, i)).join(""));
 };
 
 /** فهرس الأبحاث المحكّمة ← جدول Paper. */
