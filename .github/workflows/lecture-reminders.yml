@@ -1,0 +1,62 @@
+# تذكير الطلاب بمواعيد المجالس — تشغيل ساعيّ.
+#
+# لماذا هنا لا في vercel.json؟
+#   باقة Vercel المجّانيّة (Hobby) تسمح بمهمّة cron **يوميّة واحدة** فقط، بل إنّ
+#   جدولةً أكثر تواترًا (`0 * * * *`) تُفشل النشر نفسه. وتذكير «قبل ساعة» يحتاج
+#   تشغيلًا كل ساعة. فGitHub Actions — وهو مجّانيّ ومتاح على هذا المستودع —
+#   ينادي المسار نفسه كل ساعة، فنحصل على التذكيرين بلا ترقية باقة.
+#   مهمّة `vercel.json` اليوميّة تبقى شبكةَ أمان: لو تعطّل هذا الملفّ يومًا
+#   ظلّ تذكير الـ٢٤ ساعة يعمل.
+#
+# ما يلزم ضبطه مرّةً واحدة في:
+#   GitHub → Settings → Secrets and variables → Actions
+#     Secret   CRON_SECRET  = نفس قيمته في متغيّرات بيئة Vercel (بالحرف)
+#     Variable SITE_URL     = https://<نطاق-الموقع>   (بلا شرطة في آخره)
+#
+# قبل ضبطهما لا يفشل شيء: المهمّة تتخطّى نفسها وتُنهي بنجاح، فلا تصلك رسائل
+# فشل كل ساعة.
+
+name: تذكير المجالس
+
+on:
+  schedule:
+    # كل ساعة عند الدقيقة ٠. GitHub قد يؤخّر التشغيل بضع دقائق عند الازدحام،
+    # ونافذة تذكير الساعة (٤٥–٩٠ دقيقة) واسعة بما يحتمل ذلك.
+    - cron: "0 * * * *"
+  # زرّ تشغيل يدويّ من تبويب Actions — للاختبار بلا انتظار الجدول.
+  workflow_dispatch:
+
+# تشغيلٌ واحد في كل لحظة: لو تأخّر تشغيلٌ سابق لا يتراكب مع التالي فتُرسل
+# التذكيرات مرّتين قبل أن يُختم أثرها في قاعدة البيانات.
+concurrency:
+  group: lecture-reminders
+  cancel-in-progress: false
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: استدعاء مهمّة التذكير
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          if [ -z "$CRON_SECRET" ] || [ -z "$SITE_URL" ]; then
+            echo "::notice::CRON_SECRET أو SITE_URL غير مضبوط — تُخطّيت المهمّة."
+            exit 0
+          fi
+
+          # ملفّان منفصلان: الجسم للعرض، والرمز للفحص — حتى لا يختلطا.
+          code=$(curl -sS -o body.txt -w '%{http_code}' --max-time 120 \
+                 -H "Authorization: Bearer $CRON_SECRET" \
+                 "$SITE_URL/api/cron/lecture-reminders")
+
+          echo "HTTP $code"
+          cat body.txt
+          echo
+
+          if [ "$code" != "200" ]; then
+            echo "::error::فشل استدعاء مهمّة التذكير (HTTP $code)."
+            exit 1
+          fi
