@@ -235,26 +235,51 @@
      6) الظهور التدريجي المتدرّج
      --------------------------------------------------------------- */
   (function revealer() {
-    var items = [].slice.call(document.querySelectorAll('.reveal'));
-    if (!items.length) return;
+    // هذا السكربت يُنفَّذ مرّة واحدة لكل تحميل كامل، بينما ينتقل Next بين
+    // الصفحات باستبدال محتوى <main> بلا إعادة تنفيذ. لذا نرصد العناصر
+    // الجديدة عند كل استبدال، وإلا بقيت شفّافة وظهرت الصفحة فارغة.
+    var noIO = !('IntersectionObserver' in window) || reduce;
 
-    // تدرّج زمني داخل كل مجموعة
-    document.querySelectorAll('.stagger').forEach(function (group) {
-      [].slice.call(group.children).forEach(function (child, i) {
-        if (child.classList.contains('reveal')) child.style.setProperty('--d', (i % 6) * 90 + 'ms');
-      });
-    });
-
-    if (!('IntersectionObserver' in window) || reduce) {
-      items.forEach(function (el) { el.classList.add('in'); });
-      return;
-    }
-    var io = new IntersectionObserver(function (entries) {
+    var io = noIO ? null : new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
         if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
       });
     }, { threshold: 0.1, rootMargin: '0px 0px -50px' });
-    items.forEach(function (el) { io.observe(el); });
+
+    function scan() {
+      // تدرّج زمني داخل كل مجموعة
+      document.querySelectorAll('.stagger').forEach(function (group) {
+        [].slice.call(group.children).forEach(function (child, i) {
+          if (child.classList.contains('reveal') && !child.style.getPropertyValue('--d')) {
+            child.style.setProperty('--d', (i % 6) * 90 + 'ms');
+          }
+        });
+      });
+
+      [].slice.call(document.querySelectorAll('.reveal')).forEach(function (el) {
+        if (el.__revealed) return;
+        el.__revealed = true;
+        if (noIO) { el.classList.add('in'); return; }
+        io.observe(el);
+      });
+    }
+
+    scan();
+
+    // إعادة الرصد عند استبدال محتوى الصفحة (تنقّل داخلي بلا تحميل كامل)
+    if ('MutationObserver' in window) {
+      var pending = false;
+      new MutationObserver(function (muts) {
+        if (pending) return;
+        for (var i = 0; i < muts.length; i++) {
+          if (muts[i].addedNodes.length) {
+            pending = true;
+            requestAnimationFrame(function () { pending = false; scan(); });
+            break;
+          }
+        }
+      }).observe(document.body, { childList: true, subtree: true });
+    }
   })();
 
   /* ---------------------------------------------------------------
