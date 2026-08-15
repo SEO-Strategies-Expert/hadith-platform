@@ -8,6 +8,8 @@ export type FieldType =
   | "bool"
   | "select"
   | "date"
+  // موعد بتاريخ وساعة — يُعرض ويُقرأ بتوقيت الكلّية لا بتوقيت الخادم
+  | "datetime"
   | "image";
 
 export interface FieldDef {
@@ -20,6 +22,11 @@ export interface FieldDef {
   relation?: { model: string; labelField: string; emptyLabel?: string };
   hint?: string;
   half?: boolean; // نصف عرض في الشبكة
+  /**
+   * الحقل اختياريّ في المخطّط: فراغه يعني «غير محدَّد» (null) لا صفرًا ولا
+   * «اتركه كما هو». بدونها يُحفظ الرقم الفارغ صفرًا، ويتعذّر مسح تاريخ بعد ضبطه.
+   */
+  nullable?: boolean;
 }
 
 export interface ColumnDef {
@@ -222,12 +229,25 @@ export const resources: Record<string, ResourceConfig> = {
         half: true,
         relation: { model: "programStage", labelField: "titleAr", emptyLabel: "— بلا مرحلة —" },
       },
+      {
+        name: "instructorId",
+        label: "المحاضر",
+        type: "select",
+        half: true,
+        relation: { model: "scholar", labelField: "nameAr", emptyLabel: "— بلا محاضر —" },
+      },
       { name: "category", label: "التصنيف (مفتاح تصفية)", type: "text", half: true, hint: "تخريج / مخطوطات / بحث" },
+      { name: "hours", label: "عدد الساعات", type: "number", half: true, nullable: true },
+      { name: "summaryAr", label: "نبذة مختصرة (عربي)", type: "textarea", hint: "سطران يظهران في بطاقة المقرّر وبوابة الطالب." },
+      { name: "summaryEn", label: "نبذة مختصرة (إنجليزي)", type: "textarea-ltr" },
       { name: "descAr", label: "الوصف (عربي)", type: "textarea" },
       { name: "descEn", label: "الوصف (إنجليزي)", type: "textarea-ltr" },
       ...bilingual("meta", "بيان مختصر (عدد اللقاءات…)"),
+      { name: "startsOn", label: "تاريخ البدء", type: "date", half: true, nullable: true },
       { name: "href", label: "رابط الدورة (اختياري)", type: "ltr", half: true },
-      { name: "imageUrl", label: "صورة الدورة", type: "image", half: true },
+      { name: "imageUrl", label: "صورة الدورة", type: "image" },
+      // «منشور» يخصّ نظام التعلّم، و«ظاهر» يخصّ بطاقة المقرّر في الموقع — حقلان مختلفان عمدًا.
+      { name: "published", label: "منشور (مفتوح للتسجيل والدراسة)", type: "bool" },
       ...commonTail,
     ],
   },

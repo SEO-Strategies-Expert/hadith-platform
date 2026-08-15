@@ -15,9 +15,15 @@ function coerce(fields: FieldDef[], formData: FormData) {
     if (f.type === "bool") {
       data[f.name] = raw === "on";
     } else if (f.type === "number") {
-      data[f.name] = raw != null && raw !== "" ? Number(raw) : 0;
-    } else if (f.type === "date") {
-      data[f.name] = raw ? new Date(String(raw)) : undefined;
+      // الفراغ يصير صفرًا افتراضًا لأنّ حقول مثل `order` غير قابلة للإفراغ في
+      // المخطّط (Int @default(0))؛ أمّا الحقول الاختياريّة (مثل عدد الساعات)
+      // فتُعلَّم `nullable` ليعني فراغها «غير محدَّد» لا «صفر ساعة».
+      data[f.name] =
+        raw != null && raw !== "" ? Number(raw) : f.nullable ? null : 0;
+    } else if (f.type === "date" || f.type === "datetime") {
+      // `undefined` يجعل Prisma يتجاهل الحقل — وهو الصحيح عند الإنشاء، لكنّه
+      // كان يمنع **مسح** تاريخ بعد ضبطه. الحقل القابل للإفراغ يُرسل null صراحةً.
+      data[f.name] = raw ? new Date(String(raw)) : f.nullable ? null : undefined;
     } else {
       const v = raw == null ? "" : String(raw).trim();
       data[f.name] = v === "" ? null : v;

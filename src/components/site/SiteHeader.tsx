@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Lang } from "@/lib/site-data";
 import { getHeaderNav, getSocialLinks, getSettingsMap } from "@/lib/site-data";
-import { siteHref, counterpartHref } from "@/lib/site-links";
+import { siteHref, counterpartPath } from "@/lib/site-links";
 
 const T = {
   ar: {
@@ -34,7 +34,15 @@ const T = {
   },
 } as const;
 
-export async function SiteHeader({ lang, currentSlug }: { lang: Lang; currentSlug: string }) {
+export async function SiteHeader({
+  lang,
+  currentSlug,
+  pathname,
+}: {
+  lang: Lang;
+  currentSlug: string;
+  pathname: string;
+}) {
   const [nav, social, settings] = await Promise.all([
     getHeaderNav(),
     getSocialLinks(),
@@ -42,7 +50,12 @@ export async function SiteHeader({ lang, currentSlug }: { lang: Lang; currentSlu
   ]);
   const t = T[lang];
   const brandName = lang === "ar" ? settings.get("site.shortAr") : settings.get("site.shortEn");
-  const brandFull = lang === "ar" ? settings.get("site.nameAr") : settings.get("site.nameEn");
+  // السقوط إلى الاسم المختصر ثم إلى نصّ ثابت: الاسم يدخل في قالب نصّي لـaria-label،
+  // وقيمة غائبة كانت تُطبع حرفيًّا «undefined» فيقرأها قارئ الشاشة.
+  const brandFull =
+    (lang === "ar" ? settings.get("site.nameAr") : settings.get("site.nameEn")) ||
+    brandName ||
+    (lang === "ar" ? "الكلّية العليا للحديث النبوي" : "The Higher College of Prophetic Hadith");
   const liveUrl = settings.get("header.liveUrl") || "#";
   const uniSocialUrl = settings.get("header.universitySocialUrl") || "#";
 
@@ -72,7 +85,7 @@ export async function SiteHeader({ lang, currentSlug }: { lang: Lang; currentSlu
           <nav className="navbar-links" aria-label={t.quickLinks}>
             <Link
               className="lang-switch"
-              href={counterpartHref(lang, currentSlug)}
+              href={counterpartPath(lang, pathname)}
               hrefLang={lang === "ar" ? "en" : "ar"}
               lang={lang === "ar" ? "en" : "ar"}
             >

@@ -1,6 +1,7 @@
 import type { FieldDef } from "@/lib/resources";
 import { Field, TextArea, Select, Checkbox } from "@/components/admin/ui";
 import { ImagePickerField } from "@/components/admin/ImagePickerField";
+import { toLocalInput } from "@/components/admin/datetime";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -38,6 +39,18 @@ function renderField(f: FieldDef, record?: any) {
       return <Field label={f.label} name={f.name} type="number" defaultValue={val ?? 0} required={f.required} hint={f.hint} />;
     case "date":
       return <Field label={f.label} name={f.name} type="date" defaultValue={toDateInput(val)} required={f.required} hint={f.hint} dir="ltr" />;
+    case "datetime":
+      return (
+        <Field
+          label={f.label}
+          name={f.name}
+          type="datetime-local"
+          defaultValue={toLocalInput(val)}
+          required={f.required}
+          hint={f.hint}
+          dir="ltr"
+        />
+      );
     default:
       return <Field label={f.label} name={f.name} defaultValue={val ?? undefined} dir="rtl" required={f.required} hint={f.hint} />;
   }

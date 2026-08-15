@@ -23,7 +23,15 @@ export default auth((req) => {
     }
   }
 
-  const isStudentArea = pathname === "/student" || pathname === "/en/student";
+  // بادئة لا تطابقًا تامًّا: `/student/course/…` و`/student/lesson/…` كانت خارج
+  // الحماية. الشرطة في `/student/` مقصودة — `/student-login.html` يبدأ بالبادئة
+  // نفسها، ولو شملناه لدارت إعادة التوجيه على نفسها بلا نهاية.
+  // هذا حارس أوّل لا وحيد: كل صفحة وserver action تُعيد التحقّق بنفسها.
+  const isStudentArea =
+    pathname === "/student" ||
+    pathname.startsWith("/student/") ||
+    pathname === "/en/student" ||
+    pathname.startsWith("/en/student/");
   if (isStudentArea && !req.auth) {
     return NextResponse.redirect(
       new URL(isEnglish ? "/en/student-login.html" : "/student-login.html", req.url)

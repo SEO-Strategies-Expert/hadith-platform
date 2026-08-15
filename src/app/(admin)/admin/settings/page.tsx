@@ -1,7 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Field, TextArea } from "@/components/admin/ui";
 import { ActionForm } from "@/components/admin/ActionForm";
+import { CALENDLY_URL_SETTING_KEY } from "@/lib/calendly";
 import { saveSettings } from "./actions";
+
+/**
+ * مفاتيح تعرفها اللوحة وقد لا يكون لها صفٌّ في القاعدة بعد.
+ * الصفحة تُبنى من صفوف جدول settings، فمفتاحٌ جديدٌ لا يظهر حتى يُحفظ أوّل مرّة —
+ * وهي حلقةٌ مفرغة تمنع المدير من ضبطه أصلًا. فنعرضه هنا فارغًا، وsaveSettings
+ * يُنشئ الصفّ بالـupsert عند أوّل حفظ بلا حاجة إلى هجرةٍ أو بذرةٍ في القاعدة.
+ */
+const EXTRA_KEYS: { key: string; group: string }[] = [
+  { key: CALENDLY_URL_SETTING_KEY, group: "admissions" },
+];
 
 const LABELS: Record<string, string> = {
   "site.nameAr": "اسم الكلّية (عربي)",
@@ -19,6 +30,12 @@ const LABELS: Record<string, string> = {
   "header.liveUrl": "رابط البث المباشر",
   "header.universityUrl": "رابط منصّة الجامعة",
   "header.universitySocialUrl": "رابط صفحات الجامعة على التواصل",
+  [CALENDLY_URL_SETTING_KEY]: "رابط حجز المقابلة العلميّة (Calendly)",
+};
+
+const HINTS: Record<string, string> = {
+  [CALENDLY_URL_SETTING_KEY]:
+    "الصق رابط نوع الحدث من Calendly، مثل https://calendly.com/hadith-college/interview — واتركه فارغًا لإخفاء أداة الحجز من صفحة المقابلة.",
 };
 
 const GROUP_TITLES: Record<string, string> = {
@@ -28,6 +45,7 @@ const GROUP_TITLES: Record<string, string> = {
   site: "الموقع",
   university: "الجامعة",
   header: "روابط الهيدر (البث والجامعة)",
+  admissions: "القبول والمقابلات",
 };
 
 function isLtr(key: string) {
@@ -45,8 +63,21 @@ export default async function SettingsPage({
   const { saved } = await searchParams;
   const settings = await prisma.setting.findMany({ orderBy: [{ group: "asc" }, { key: "asc" }] });
 
-  const groups = new Map<string, typeof settings>();
-  for (const s of settings) {
+  type Row = { key: string; group: string; labelAr: string | null; value: string };
+  const rows: Row[] = settings.map((s) => ({
+    key: s.key,
+    group: s.group,
+    labelAr: s.labelAr,
+    value: s.value == null ? "" : String(s.value),
+  }));
+  for (const extra of EXTRA_KEYS) {
+    if (!rows.some((r) => r.key === extra.key)) {
+      rows.push({ key: extra.key, group: extra.group, labelAr: null, value: "" });
+    }
+  }
+
+  const groups = new Map<string, Row[]>();
+  for (const s of rows) {
     const g = groups.get(s.group) ?? [];
     g.push(s);
     groups.set(s.group, g);
@@ -76,13 +107,19 @@ export default async function SettingsPage({
                 <div className="grid gap-5 sm:grid-cols-2">
                   {items.map((s) => {
                     const label = LABELS[s.key] ?? s.labelAr ?? s.key;
-                    const value = s.value == null ? "" : String(s.value);
+                    const value = s.value;
                     return (
                       <div key={s.key} className={isLong(s.key) ? "sm:col-span-2" : ""}>
                         {isLong(s.key) ? (
                           <TextArea label={label} name={s.key} defaultValue={value} dir={isLtr(s.key) ? "ltr" : "rtl"} />
                         ) : (
-                          <Field label={label} name={s.key} defaultValue={value} dir={isLtr(s.key) ? "ltr" : "rtl"} />
+                          <Field
+                            label={label}
+                            name={s.key}
+                            defaultValue={value}
+                            dir={isLtr(s.key) ? "ltr" : "rtl"}
+                            hint={HINTS[s.key]}
+                          />
                         )}
                       </div>
                     );

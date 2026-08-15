@@ -18,6 +18,9 @@ import {
   HelpCircle,
   ListOrdered,
   Table,
+  Layers,
+  Radio,
+  UserCheck,
 } from "lucide-react";
 
 export type NavItem = {
@@ -55,6 +58,15 @@ export const adminNav: NavSection[] = [
       { label: "الإصدارات والمجلة", href: "/admin/publications", icon: BookMarked },
       { label: "المكتبة والمصادر", href: "/admin/library", icon: Library },
       { label: "الوسائط والصور", href: "/admin/media", icon: Images },
+    ],
+  },
+  {
+    // نظام التعلّم: ما يدخل به المدير المادّة العلميّة ويفتحها للطلاب.
+    title: "التعليم",
+    items: [
+      { label: "المقرّرات ومحتواها", href: "/admin/courses", icon: Layers },
+      { label: "المجالس المباشرة", href: "/admin/sessions", icon: Radio },
+      { label: "تسجيل الطلاب", href: "/admin/enrollments", icon: UserCheck },
     ],
   },
   {

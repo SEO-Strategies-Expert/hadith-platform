@@ -6,6 +6,7 @@ import type { Lang } from "@/lib/site-data";
 import { longDate, mediaUrl } from "@/lib/site-format";
 import { siteHref } from "@/lib/site-links";
 import { studentLogout } from "@/app/(site)/student-actions";
+import { StudentCourses, StudentSessions } from "@/components/site/StudentCourses";
 
 const T = {
   ar: {
@@ -22,15 +23,12 @@ const T = {
     application: "حالة طلب الالتحاق",
     noApplication: "لا يوجد طلب التحاق مرتبط ببريدك.",
     submitted: "أُرسل في",
-    courses: "المقرّرات المتاحة",
-    noCourses: "لم تُضَف مقرّرات بعد.",
-    events: "الفعاليات القادمة",
-    noEvents: "لا فعاليات مجدولة حاليًّا.",
     news: "آخر الأخبار",
     library: "المكتبة الرقمية",
     diwan: "ديوان العلماء",
     contact: "تواصل مع الكلّية",
-    quick: "روابط سريعة",
+    goCourses: "مقرّراتي",
+    goSessions: "مجالسي",
     statuses: {
       NEW: "قيد الاستلام",
       IN_PROGRESS: "قيد المراجعة",
@@ -52,15 +50,12 @@ const T = {
     application: "Application status",
     noApplication: "No application is linked to your email.",
     submitted: "Submitted on",
-    courses: "Available courses",
-    noCourses: "No courses added yet.",
-    events: "Upcoming events",
-    noEvents: "No scheduled events at the moment.",
     news: "Latest news",
     library: "Digital library",
     diwan: "Scholars' forum",
     contact: "Contact the college",
-    quick: "Quick links",
+    goCourses: "My courses",
+    goSessions: "My sessions",
     statuses: {
       NEW: "Received",
       IN_PROGRESS: "Under review",
@@ -72,26 +67,34 @@ const T = {
 
 export async function StudentDashboard({ lang }: { lang: Lang }) {
   const user = await currentUser();
-  if (!user) redirect(lang === "en" ? "/en/student-login.html" : "/student-login.html");
+  if (!user?.id) redirect(lang === "en" ? "/en/student-login.html" : "/student-login.html");
 
   const t = T[lang];
-  const [profile, application, courses, events, news] = await Promise.all([
-    prisma.user.findUnique({ where: { id: user.id as string } }),
+  const [profile, application, news] = await Promise.all([
+    prisma.user.findUnique({ where: { id: user.id } }),
     user.email
       ? prisma.admissionApplication.findFirst({
           where: { email: user.email },
           orderBy: { createdAt: "desc" },
         })
       : null,
-    prisma.course.findMany({ where: { visible: true }, orderBy: { order: "asc" }, take: 12 }),
-    prisma.event.findMany({ where: { visible: true }, orderBy: { date: "asc" }, take: 4 }),
     prisma.newsItem.findMany({ where: { visible: true }, orderBy: { date: "desc" }, take: 3 }),
   ]);
 
+  // `page-meta` مصمَّم لخلفيّة كحليّة، فبيانات الطالب على خلفيّة بيضاء
+  // تُصاغ بتنسيقٍ مضمَّن ليبقى النصّ مقروءًا.
   const row = (label: string, value: string | null | undefined) => (
-    <div className="page-meta" style={{ margin: 0 }}>
-      <span style={{ fontWeight: 800 }}>{label}</span>
-      <span>{value || t.none}</span>
+    <div
+      style={{
+        display: "flex",
+        gap: 12,
+        flexWrap: "wrap",
+        padding: "10px 0",
+        borderBottom: "1px solid rgba(18,49,89,.10)",
+      }}
+    >
+      <span style={{ fontWeight: 800, color: "#123159", minWidth: 150 }}>{label}</span>
+      <span style={{ color: "#3d4a5c" }}>{value || t.none}</span>
     </div>
   );
 
@@ -105,6 +108,12 @@ export async function StudentDashboard({ lang }: { lang: Lang }) {
               {t.welcome} {profile?.name ?? ""}
             </h1>
             <div className="page-actions">
+              <Link className="btn btn-gold" href="#my-courses">
+                {t.goCourses}
+              </Link>
+              <Link className="btn btn-outline-ink" href="#my-sessions">
+                {t.goSessions}
+              </Link>
               <form action={studentLogout.bind(null, lang)}>
                 <button className="btn btn-outline" type="submit">
                   {t.logout}
@@ -120,7 +129,7 @@ export async function StudentDashboard({ lang }: { lang: Lang }) {
           <div className="content-split">
             <div className="split-copy reveal">
               <h2 className="thuluth">{t.profile}</h2>
-              <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
+              <div style={{ display: "grid", gap: 2, marginTop: 16 }}>
                 {row(t.email, profile?.email)}
                 {row(t.studentNo, profile?.studentNo)}
                 {row(t.program, profile?.program)}
@@ -138,7 +147,7 @@ export async function StudentDashboard({ lang }: { lang: Lang }) {
                   </p>
                   <p>
                     {application.program ?? ""} — {t.submitted}{" "}
-                    {longDate(application.createdAt, lang)}
+                    {longDate(application.createdAt, lang, { arabicDigits: lang === "ar" })}
                   </p>
                 </>
               ) : (
@@ -149,59 +158,16 @@ export async function StudentDashboard({ lang }: { lang: Lang }) {
         </div>
       </section>
 
-      <section className="inner-section cream orn-cream">
-        <div className="container">
-          <header className="section-cap reveal">
-            <h2 className="thuluth">{t.courses}</h2>
-          </header>
-          {courses.length === 0 ? (
-            <p>{t.noCourses}</p>
-          ) : (
-            <div className="card-grid ">
-              {courses.map((c) => (
-                <article className="info-card reveal" key={c.id}>
-                  <h3>{lang === "ar" ? c.titleAr : c.titleEn}</h3>
-                  {(lang === "ar" ? c.descAr : c.descEn) && (
-                    <p>{lang === "ar" ? c.descAr : c.descEn}</p>
-                  )}
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="inner-section white orn-cream">
-        <div className="container">
-          <header className="section-cap reveal">
-            <h2 className="thuluth">{t.events}</h2>
-          </header>
-          {events.length === 0 ? (
-            <p>{t.noEvents}</p>
-          ) : (
-            <ul className="agenda-list">
-              {events.map((e) => (
-                <li key={e.id}>
-                  <div>
-                    <b>{lang === "ar" ? e.titleAr : e.titleEn}</b>
-                    <span>{longDate(e.date, lang)}</span>
-                    {(lang === "ar" ? e.whenAr : e.whenEn) && (
-                      <span className="when">{lang === "ar" ? e.whenAr : e.whenEn}</span>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
+      {/* المقرّرات والمجالس من `lib/lms.ts` — مرتبطة بالطالب لا قوائم عامّة */}
+      <StudentCourses lang={lang} userId={user.id} />
+      <StudentSessions lang={lang} userId={user.id} />
 
       <section className="inner-section cream orn-cream">
         <div className="container">
           <header className="section-cap reveal">
             <h2 className="thuluth">{t.news}</h2>
           </header>
-          <div className="card-grid ">
+          <div className="card-grid">
             {news.map((n) => (
               <article className="image-card reveal" key={n.id}>
                 <Link href={`${siteHref(lang, "news-detail.html")}?item=${n.slug ?? n.id}`}>
@@ -217,7 +183,7 @@ export async function StudentDashboard({ lang }: { lang: Lang }) {
                   <div className="body">
                     <h3>{lang === "ar" ? n.titleAr : n.titleEn}</h3>
                     <div className="card-foot">
-                      <span>{longDate(n.date, lang)}</span>
+                      <span>{longDate(n.date, lang, { arabicDigits: lang === "ar" })}</span>
                       <strong>{lang === "ar" ? "←" : "→"}</strong>
                     </div>
                   </div>

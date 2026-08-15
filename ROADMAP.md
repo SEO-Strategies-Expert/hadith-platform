@@ -82,16 +82,31 @@ ZOOM_TIMEZONE="Asia/Qatar"    # اختياري
 |---|---|---|---|---|
 | ١ | الهوية وبوابة الطالب | — | `auth*`, `lib/guard.ts`, `proxy.ts`, `(site)/student*`, `components/site/StudentLogin*` | 🔴 جارٍ |
 | ٠ | **مخطّط LMS دفعةً واحدة** | — | `prisma/schema.prisma` | ✅ مدموج (44 جدولًا) |
-| ٢ | نواة المقرّرات (وحدات/دروس/تسجيل/تقدّم) | ٠ | `admin/courses/**`, `lib/lms.ts`, `(site)/courses*` | ⬜ |
-| ٣ | المجالس المباشرة والتقويم | ٠ | `admin/sessions/**`, `lib/schedule.ts`, صفحة التقويم، شارة «مباشر الآن» | ⬜ |
-| ٤ | لوحة الأكاديميين | ١ + ٢ | `(instructor)/**` | ⬜ |
-| ٥ | الواجبات والاختبارات | ٢ | `admin/quizzes/**`, `lib/quiz.ts` | ⬜ |
-| ٦ | الشهادات والإجازات + التحقّق العلني | ٢ | `lib/certificates.ts`, صفحة `certificates` | ⬜ |
-| ٧ | القبول والرسوم والمدفوعات | ١ | `lib/admissions.ts`, `admin/payments/**` | ⬜ |
-| ٨ | البريد والإشعارات | — | `lib/mailer.ts` + قوالب | ⬜ |
+| ٢أ | نواة المقرّرات — طبقة الاستعلام | ٠ | `lib/lms.ts` | ✅ |
+| ٢ب | بوابة الطالب: مقرّراتي/الدرس/التقدّم | ٢أ | `(site)/student/**`, `components/site/Student*` | ✅ (لم يُختبَر في متصفّح بعد) |
+| ٢ج | اللوحة: بنية المقرّر + المجالس + التسجيل | ٢أ | `admin/courses|sessions|enrollments/**`, `resources.ts`, `admin-nav.ts` | 🔴 جارٍ |
+| ٣ | تنبيهات المجالس بالبريد | ٠ | `lib/mailer.ts`, `email-templates.ts`, `reminders.ts`, `api/cron/**`, `vercel.json` | 🔴 جارٍ |
+| ٤ | Calendly للمقابلة العلميّة | ٠ | `lib/calendly.ts`, `api/webhooks/calendly/**`, `interview.html`, `admin/settings/**` | 🔴 جارٍ |
+| ٥ | لوحة الأكاديميين | ٢ب + ٢ج | `(instructor)/**` | ⬜ |
+| ٦ | الواجبات والاختبارات | ٢ج | `admin/quizzes/**`, `lib/quiz.ts` | ⬜ |
+| ٧ | الشهادات والإجازات + التحقّق العلني | ٢ج | `lib/certificates.ts`, صفحة `certificates` | ⬜ |
+| ٨ | الرسوم والمدفوعات | ٢ج | `admin/payments/**` | ⬜ |
 
 المسار ٨ حرّ تمامًا (ملفّات جديدة، صفر تعارض).
 المسار ٧ يبدأ من رأس مال جاهز: `AdmissionApplication` مبنيّ ويعمل.
+
+---
+
+## ⚠️ ثغرة صلاحيّات أُصلحت (2026-08-15)
+
+`src/proxy.ts` كان يحمي بوابة الطالب **بمطابقة تامّة** (`pathname === "/student"`)،
+فالمسارات الفرعيّة `/student/course/*` و`/student/lesson/*` كانت خارج الحارس.
+صار المطابقة بالبادئة — مع استثناء مقصود لـ`/student-login.html` لأنّه يبدأ
+بالبادئة نفسها، ولو شُمل لدارت إعادة التوجيه بلا نهاية (فُحصت ١٠ حالات).
+
+الحارس الأوسط **ليس حدّ الأمان الوحيد**: كل صفحة طالب وكل server action تُعيد
+التحقّق بنفسها (`isEnrolled` + فحص `freePreview`/`visible`) — لأنّ server action
+نقطة دخول شبكيّة مستقلّة لا يمرّ عبرها الحارس.
 
 ---
 

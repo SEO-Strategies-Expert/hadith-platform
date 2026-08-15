@@ -23,10 +23,19 @@ export function siteHref(lang: Lang, href: string): string {
   return hash ? `${base}#${hash}` : base;
 }
 
-// المسار المقابل لنفس الصفحة باللغة الأخرى — لزر تبديل اللغة.
-export function counterpartHref(lang: Lang, currentSlug: string): string {
-  const target = lang === "ar" ? "en" : "ar";
-  const isHome = currentSlug === "index" || currentSlug === "";
-  if (target === "en") return isHome ? "/en" : `/en/${currentSlug}.html`;
-  return isHome ? "/" : `/${currentSlug}.html`;
+/**
+ * المسار المقابل لنفس الصفحة باللغة الأخرى — لزر تبديل اللغة.
+ *
+ * يُشتقّ من **المسار الفعلي** لا من المعرّف: النسخة القديمة كانت تُلحق `.html`
+ * دائمًا، وهو صحيح لصفحات الموقع المُرحَّلة (`about.html`) لكنّه يكسر مسارات
+ * بوابة الطالب النظيفة — `/student/lesson/<id>` كان يصير
+ * `/en/student/lesson/<id>.html` وهو مسار غير موجود.
+ * تبديل البادئة يعالج الشكلين معًا بلا استثناءات مكتوبة بأسماء المسارات.
+ */
+export function counterpartPath(lang: Lang, pathname: string): string {
+  if (lang === "en") {
+    const rest = pathname.replace(/^\/en(?=\/|$)/, "");
+    return rest === "" || rest === "/" ? "/" : rest;
+  }
+  return pathname === "/" ? "/en" : `/en${pathname}`;
 }

@@ -38,7 +38,7 @@ export default async function SiteLayout({
           {skipLabel}
         </a>
         <IconLibrary />
-        {!isPortal && <SiteHeader lang={lang} currentSlug={currentSlug} />}
+        {!isPortal && <SiteHeader lang={lang} currentSlug={currentSlug} pathname={pathname} />}
         {!isPortal && <Ticker lang={lang} />}
         {children}
         {!isPortal && <SiteFooter lang={lang} />}
