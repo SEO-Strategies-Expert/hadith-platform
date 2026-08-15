@@ -1,0 +1,43 @@
+# اعتماديّات
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# بناء أصيل — تُولَّد بـ prebuild ولا تُلتزم
+/ios
+/android
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+.kotlin/
+
+# EAS
+.easignore
+credentials.json
+
+# Metro
+.metro-health-check*
+
+# سجلّات
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# نظام التشغيل
+.DS_Store
+*.pem
+
+# متغيّرات البيئة — تحوي عنوان الخادم ومفاتيح البناء
+.env
+.env.*
+!.env.example
+
+# TypeScript
+*.tsbuildinfo

@@ -40,6 +40,8 @@ model User {
   issuedCerts      Certificate[]          @relation("CertificateIssuer")
   payments         Payment[]
   notifications    Notification[]
+  refreshTokens    RefreshToken[]
+  devices          DeviceToken[]
 
   id           String     @id @default(cuid())
   name         String
@@ -1055,4 +1057,46 @@ model ForumReply {
 
   @@index([topicId, createdAt])
   @@map("forum_replies")
+}
+
+// ==========================================================================
+// تطبيق الجوال — المصادقة والإشعارات
+// ==========================================================================
+// التطبيق لا يستطيع استعمال كعكة الجلسة (NextAuth) لأنّها مربوطة بالمتصفّح،
+// فله مسار مستقلّ: رمز وصول قصير العمر (JWT) + رمز تجديد طويل العمر يُخزَّن
+// **مجزَّأً** هنا. تخزين الرمز خامًّا يعني أنّ تسريب القاعدة يمنح دخولًا دائمًا.
+
+model RefreshToken {
+  id         String    @id @default(cuid())
+  /// تجزئة SHA-256 للرمز — الرمز نفسه لا يُحفظ قطّ.
+  tokenHash  String    @unique
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// معرّف الجهاز: يتيح للمستخدم إنهاء جلسة جهازٍ بعينه.
+  deviceId   String?
+  deviceName String?
+  expiresAt  DateTime
+  /// يُختم عند التدوير أو الخروج — لا يُحذف السجلّ ليبقى أثرٌ للتدقيق.
+  revokedAt  DateTime?
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, revokedAt])
+  @@map("refresh_tokens")
+}
+
+/// رمز إشعارات Expo لكل جهاز. الرمز يتبدّل من تلقائه أحيانًا، فيُحدَّث بالـupsert.
+model DeviceToken {
+  id         String   @id @default(cuid())
+  token      String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform   String // ios | android
+  deviceId   String?
+  appVersion String?
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@map("device_tokens")
 }
