@@ -98,6 +98,25 @@ const config: ExpoConfig = {
     ],
   ],
 
+  /**
+   * التحديث عن بُعد (OTA).
+   *
+   * التطبيق يفحص وجود تحديثٍ عند كل إقلاع وينزّله في الخلفيّة، فيصل تعديل
+   * الشاشات والألوان بلا بناءٍ جديد ولا إعادة تثبيت عند العميل.
+   *
+   * ⚠️ `runtimeVersion` بسياسة `appVersion` مقصودة: التحديث لا يُطبَّق إلّا على
+   * نسخةٍ تحمل إصدار التطبيق نفسه. فلو أضفنا لاحقًا وحدةً أصيلة (مكتبة تحتاج
+   * كودًا أصليًّا) نرفع `version`، فلا يُرسَل إليها تحديثُ جافاسكربت يفترض
+   * وجود تلك الوحدة — وهذا ما يمنع تعطُّل التطبيق في يد العميل.
+   * أي: OTA لتعديلات الواجهة والمنطق، والبناء الجديد للوحدات الأصيلة وحدها.
+   */
+  updates: {
+    url: easProjectId ? `https://u.expo.dev/${easProjectId}` : undefined,
+    fallbackToCacheTimeout: 0,
+    checkAutomatically: 'ON_LOAD',
+  },
+  runtimeVersion: { policy: 'appVersion' },
+
   experiments: {
     typedRoutes: true,
   },
