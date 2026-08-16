@@ -220,7 +220,11 @@ export function Screen({
   children,
   scroll = true,
   padded = true,
-  edges = ['top'],
+  /**
+   * لا حافّة علويّة افتراضًا: `BrandHeader` يعلو كلّ شاشة وهو من يبتلع
+   * `insets.top`. لو أُضيفت هنا أيضًا لتضاعف هامش شريط الحالة.
+   */
+  edges = [],
   refreshControl,
   contentStyle,
 }: {

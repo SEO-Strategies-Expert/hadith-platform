@@ -3,6 +3,8 @@ import { I18nManager, Platform } from 'react-native';
 import { getPref, setPref } from '../auth/storage';
 import { strings, type Lang, type StringKey } from './strings';
 
+export { primeRTL, useRTLBootstrap, type RtlStatus } from './rtl';
+
 /** ضمانة وقت الترجمة: القاموس الإنجليزي يغطّي كل مفاتيح العربي. */
 const _completeness: Record<StringKey, string> = strings.en;
 void _completeness;
@@ -121,7 +123,9 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
     return {
       lang,
-      isRTL: true,
+      // الواجهة عربيّةٌ دائمًا، لكنّ **تحقّق** الاتّجاه على المنصّة
+      // الأصليّة ليس مضمونًا (انظر `rtl.ts`) — فلا يُدّعى ما لم يقع.
+      isRTL: Platform.OS === 'web' ? true : I18nManager.isRTL,
       ready,
       setLang,
       t: (key: StringKey) => dict[key] ?? strings.ar[key],
@@ -140,15 +144,6 @@ export function useI18n(): I18nValue {
   const ctx = useContext(I18nContext);
   if (!ctx) throw new Error('useI18n must be used inside <I18nProvider>');
   return ctx;
-}
-
-/** يُستدعى مرّةً عند الإقلاع — التثبيت النهائي للاتّجاه من إضافة expo-localization. */
-export function ensureRTL(): void {
-  try {
-    I18nManager.allowRTL(true);
-  } catch {
-    /* لا يُعتدّ بفشله. */
-  }
 }
 
 export type { Lang };

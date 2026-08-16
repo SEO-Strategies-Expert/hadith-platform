@@ -6,7 +6,7 @@ import { messageOf } from '../../src/api/client';
 import { getAssignment, saveAssignment } from '../../src/api/endpoints';
 import type { AssignmentDetail, SubmissionState } from '../../src/api/types';
 import type { StringKey } from '../../src/i18n/strings';
-import { colors, spacing } from '../../src/theme';
+import { colors, latinInput, spacing } from '../../src/theme';
 import { Button } from '../../src/ui/Button';
 import { Field } from '../../src/ui/Field';
 import { Badge, Card, Divider, InfoRow, Row, Screen, Txt } from '../../src/ui/kit';
@@ -168,7 +168,7 @@ function AssignmentForm({
             autoCapitalize="none"
             keyboardType="url"
             editable={busy === null}
-            style={{ textAlign: 'left', writingDirection: 'ltr' }}
+            style={latinInput}
             hint={t('assignmentUploadNote')}
           />
           {fileUrl.trim() ? (

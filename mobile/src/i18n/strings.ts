@@ -284,6 +284,24 @@ export const strings = {
     // ضيف
     guestNotice: 'سجّل الدخول للوصول إلى هذا القسم.',
     goToLogin: 'الانتقال إلى الدخول',
+
+    // القائمة (زرّ الثلاث شُرَط)
+    menu: 'القائمة',
+    menuStudentPortal: 'بوابة الطالب',
+    menuAdminConsole: 'لوحة تحكّم الموقع',
+    menuOpensInBrowser: 'تُفتح في المتصفّح',
+    menuPages: 'صفحات الكلّية',
+    menuLive: 'البثّ المباشر',
+    menuSocialEmpty: 'لم تُضبط روابط منصّات الكلّية بعد، وتظهر هنا فور إضافتها من لوحة التحكّم.',
+    menuSwitchLang: 'تبديل اللغة',
+    menuExpand: 'عرض الصفحات الفرعيّة',
+    menuCollapse: 'طيّ الصفحات الفرعيّة',
+
+    // صفحات الموقع داخل التطبيق
+    sitePage: 'صفحة من الموقع',
+    pageError: 'تعذّر تحميل هذه الصفحة من موقع الكلّية.',
+    pageOpenInBrowser: 'فتح الصفحة في المتصفّح',
+    pageWebNotice: 'صفحات الموقع تُعرض داخل التطبيق على الهاتف؛ وفي المتصفّح تُفتح في تبويب مستقلّ.',
   },
 
   en: {
@@ -545,6 +563,24 @@ export const strings = {
 
     guestNotice: 'Sign in to reach this section.',
     goToLogin: 'Go to sign in',
+
+    menu: 'Menu',
+    menuStudentPortal: 'Student portal',
+    menuAdminConsole: 'Site control panel',
+    menuOpensInBrowser: 'Opens in your browser',
+    menuPages: 'College pages',
+    menuLive: 'Live broadcast',
+    menuSocialEmpty:
+      'The college’s social links have not been set yet; they appear here as soon as they are added from the control panel.',
+    menuSwitchLang: 'Switch language',
+    menuExpand: 'Show sub-pages',
+    menuCollapse: 'Hide sub-pages',
+
+    sitePage: 'Website page',
+    pageError: 'Could not load this page from the college website.',
+    pageOpenInBrowser: 'Open the page in your browser',
+    pageWebNotice:
+      'Website pages are shown inside the app on a phone; in a browser they open in a separate tab.',
   },
 } as const;
 

@@ -13,6 +13,7 @@ import type {
   LessonDetail,
   Me,
   MyCourse,
+  NavPayload,
   NewsDetail,
   NewsItem,
   NotificationsPage,
@@ -66,6 +67,12 @@ export const getFaculty = (args?: PageArgs & { council?: boolean }) =>
 /** لا تقبل `cursor`، و`nextCursor` فيها `null` دائمًا. */
 export const getPublicSessions = (limit = 20) =>
   apiRequest<Paged<SessionPublic>>('/sessions/public', { query: { limit } });
+
+/**
+ * قائمة التنقّل الشاملة — شجرة هيدر الموقع، والمنصّات المضبوطة، ورابط البثّ.
+ * تُقرأ من القاعدة حيًّا: ما يعدّله المدير في اللوحة يظهر هنا بلا إصدارٍ جديد.
+ */
+export const getNav = () => apiRequest<NavPayload>('/nav');
 
 /* ————— الطالب ————— */
 

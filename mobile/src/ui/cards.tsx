@@ -93,14 +93,14 @@ export function CourseTile({
             {summary}
           </Txt>
         ) : altTitle && altTitle !== title ? (
-          // النقحرة اللاتينيّة نصٌّ من اليسار داخل صفحةٍ من اليمين، فتُترك
-          // بلا محاذاةٍ صريحة تهرب إلى الحافّة المقابلة للعنوان.
-          <Txt
-            variant="small"
-            color={colors.textMuted}
-            align={lang === 'en' ? 'left' : 'right'}
-            numberOfLines={2}
-          >
+          /*
+            النقحرة اللاتينيّة نصٌّ من اليسار داخل صفحةٍ من اليمين. تُترك
+            **بلا محاذاةٍ صريحة**: المحاذاة الافتراضيّة تتبع اتّجاه الفقرة
+            فتجلس على حافّة العنوان نفسها. أمّا `align="right"` فينقلب
+            يسارًا متى سرى RTL — يعكس React Native `left`/`right` من
+            تلقائه (انظر `latinInput` في `theme.ts`).
+          */
+          <Txt variant="small" color={colors.textMuted} numberOfLines={2}>
             {altTitle}
           </Txt>
         ) : null}
@@ -323,8 +323,24 @@ export function NewsLeadTile({ item }: { item: NewsItem }) {
 
 /* ————— بطاقة عضو الهيئة ————— */
 
+/**
+ * بطاقة عضو الهيئة العلميّة — **بلا اسم**.
+ *
+ * طلبُ العميل صريح: تُعرَّف الهيئة بصفتها العلميّة لا بأشخاصها. فتبقى
+ * الصورة والرتبة والتخصّص والدولة، ويسقط الاسم. والرتبة تخلُف الاسمَ في
+ * موضع العنوان لئلّا تفتتح البطاقة على بياض؛ فإن غابت الرتبةُ أيضًا
+ * تقدّم التخصّص.
+ */
 export function FacultyTile({ member, width }: { member: FacultyMember; width?: number }) {
   const { pick, t } = useI18n();
+
+  const rank = member.rankAr || member.rankEn ? pick(member.rankAr, member.rankEn) : null;
+  const spec = member.specAr || member.specEn ? pick(member.specAr, member.specEn) : null;
+  const country = member.countryAr || member.countryEn ? pick(member.countryAr, member.countryEn) : null;
+
+  const headline = rank ?? spec;
+  const support = rank ? spec : null;
+
   return (
     <Card style={[styles.facultyCard, width ? { width } : { flex: 1 }]} padded={false}>
       <RemoteImage uri={assetUrl(member.photoUrl)} height={168} rounded={0}>
@@ -341,19 +357,17 @@ export function FacultyTile({ member, width }: { member: FacultyMember; width?: 
       </RemoteImage>
 
       <View style={styles.facultyBody}>
-        <Txt variant="heading" color={colors.navy} numberOfLines={2}>
-          {pick(member.nameAr, member.nameEn)}
-        </Txt>
-        {member.rankAr || member.rankEn ? (
-          <Txt variant="tinyStrong" color={colors.goldDark} numberOfLines={1}>
-            {pick(member.rankAr, member.rankEn)}
+        {headline ? (
+          <Txt variant="heading" color={colors.navy} numberOfLines={2}>
+            {headline}
           </Txt>
         ) : null}
-        {member.specAr || member.specEn ? (
+        {support ? (
           <Txt variant="tiny" color={colors.textMuted} numberOfLines={2}>
-            {pick(member.specAr, member.specEn)}
+            {support}
           </Txt>
         ) : null}
+        {country ? <MetaChip icon="earth-outline" text={country} /> : null}
       </View>
     </Card>
   );

@@ -41,7 +41,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-    textAlign: 'right',
+    // بلا `textAlign` صريح: الافتراضيّ يتبع اتّجاه الواجهة، فيُحاذى
+    // النصّ إلى بدايتها. وكتابة `'right'` هنا تنقلب إلى يسارٍ متى سرى
+    // RTL فعلًا، لأنّ React Native يعكس `left`/`right` بنفسه (انظر
+    // `latinInput` في `theme.ts`).
     writingDirection: 'rtl',
   },
   multiline: { minHeight: 140, textAlignVertical: 'top' },

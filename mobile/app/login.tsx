@@ -6,7 +6,7 @@ import { useAuth } from '../src/auth/AuthContext';
 import { useI18n } from '../src/i18n';
 import { messageOf } from '../src/api/client';
 import { APPLY_URL } from '../src/config';
-import { colors, goldHairline, navyScrim, radius, spacing } from '../src/theme';
+import { colors, goldHairline, latinInput, navyScrim, radius, spacing } from '../src/theme';
 import { Button } from '../src/ui/Button';
 import { Field } from '../src/ui/Field';
 import { Card, Txt } from '../src/ui/kit';
@@ -97,7 +97,7 @@ export default function LoginScreen() {
               textContentType="emailAddress"
               autoComplete="email"
               editable={!busy}
-              style={{ textAlign: 'left', writingDirection: 'ltr' }}
+              style={latinInput}
               onSubmitEditing={() => void submit()}
             />
             <Field
@@ -110,7 +110,7 @@ export default function LoginScreen() {
               textContentType="password"
               autoComplete="current-password"
               editable={!busy}
-              style={{ textAlign: 'left', writingDirection: 'ltr' }}
+              style={latinInput}
               onSubmitEditing={() => void submit()}
             />
             <Button

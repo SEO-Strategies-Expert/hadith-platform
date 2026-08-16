@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { I18nManager, Platform, type TextStyle } from 'react-native';
 
 /**
  * نظام التصميم — منقول عن هويّة موقع الكلّية حرفًا بحرف
@@ -111,16 +111,33 @@ export const radius = {
 /**
  * أسماء العائلات كما تُسجَّل في `useFonts` بـ`app/_layout.tsx`.
  * الويب يحتاج سقوطًا صريحًا لأنّ `expo-font` يحقن `@font-face` بهذه الأسماء.
+ *
+ * التسمية تتبع الموقع حرفًا بحرف:
+ *  - `Thuluth`   = `thuluth-dt` — «DecoType Thuluth 2»، خطّ الثلث الحقيقيّ.
+ *  - `ThuluthAlt`= `thuluth-400/700` — `Scheherazade New`، نسخيٌّ يُستعمل
+ *    احتياطًا للعناوين وخطًّا للأرقام الاحتفاليّة، لا خطًّا للثلث.
  */
 export const fonts = {
   thuluth: 'Thuluth',
-  thuluthBold: 'ThuluthBold',
+  thuluthAlt: 'ThuluthAlt',
+  thuluthAltBold: 'ThuluthAltBold',
   naskh: 'Naskh',
   naskhBold: 'NaskhBold',
   body: 'Plex',
   bodyMedium: 'PlexMedium',
   bodyBold: 'PlexBold',
 } as const;
+
+/**
+ * سلسلة سقوط الثلث. على الويب يقبل `react-native-web` قائمةً بفواصل
+ * فتُنقل سلسلة `.thuluth` من الموقع كما هي؛ وعلى المنصّات الأصليّة
+ * لا يقبل `fontFamily` إلّا عائلةً واحدة — فإن أخفق تحميل الملفّ سقط
+ * النظام إلى خطّه العربيّ الافتراضيّ، ولا سبيل إلى ترتيبٍ أدقّ.
+ */
+const thuluthStack =
+  Platform.OS === 'web'
+    ? `${fonts.thuluth}, ${fonts.thuluthAlt}, ${fonts.naskhBold}, serif`
+    : fonts.thuluth;
 
 /** المتن — يُستعمل حيثما لم يُطلب خطٌّ احتفاليّ. */
 export const fontFamily = fonts.body;
@@ -139,7 +156,7 @@ export const NASKH_LINE = 1.9;
  * فوق العريض فيبهت الرسم — فالوزن يأتي من اسم العائلة وحده.
  */
 const thuluthSize = (fontSize: number) => ({
-  fontFamily: fonts.thuluth,
+  fontFamily: thuluthStack,
   fontSize,
   // التشكيل يخرج عن صندوق النصّ رأسيًّا؛ هذا الاتّساع يمنع اقتصاصه.
   lineHeight: Math.round(fontSize * THULUTH_LINE),
@@ -156,9 +173,9 @@ export const typography = {
   hero: thuluthSize(30),
   /** عنوان احتفاليّ داخل الشاشة. */
   ceremonial: thuluthSize(21),
-  /** رقم إحصائيّ — ثلثٌ عريض. */
+  /** رقم إحصائيّ — `ThuluthAlt` العريض، وهو خطّ `.facts b` في الموقع. */
   numeral: {
-    fontFamily: fonts.thuluthBold,
+    fontFamily: fonts.thuluthAltBold,
     fontSize: 30,
     lineHeight: 46,
   },
@@ -175,6 +192,24 @@ export const typography = {
   tiny: { fontFamily: fonts.body, fontSize: 11.5, lineHeight: 20 },
   tinyStrong: { fontFamily: fonts.bodyMedium, fontSize: 11.5, lineHeight: 20 },
 } as const;
+
+/* ————————————— الاتّجاه ————————————— */
+
+/**
+ * حقل مضمونُه لاتينيّ (بريد، كلمة سرّ، رابط): يُقرأ من اليسار لليمين
+ * ويُحاذى إلى اليسار **بصريًّا** مهما كان اتّجاه الواجهة.
+ *
+ * لماذا لا يكفي `textAlign:'left'`؟ لأنّ React Native **يعكس** قيمتَي
+ * `left` و`right` من تلقائه حين يكون الاتّجاه RTL — على أندرويد في
+ * `TextAttributeProps.getTextAlignment` (`"left" -> if (isRTL) Gravity.RIGHT`)
+ * وعلى iOS في `RCTTextAttributes` بالمثل. فكتابة `left` صراحةً تُنتج
+ * يمينًا: انقلابٌ مزدوج. أمّا `react-native-web` فلا يعكس شيئًا ويترك
+ * الأمر لـ`dir` في CSS — ولذلك اختلف الحلّ بين المنصّتين.
+ */
+export const latinInput: TextStyle = {
+  writingDirection: 'ltr',
+  textAlign: Platform.OS === 'web' ? 'left' : I18nManager.isRTL ? 'right' : 'left',
+};
 
 /* ————————————— الظلال ————————————— */
 

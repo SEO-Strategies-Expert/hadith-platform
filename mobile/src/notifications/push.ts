@@ -1,5 +1,4 @@
 import { Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { EAS_PROJECT_ID } from '../config';
 import { getDeviceId, getPref, setPref } from '../auth/storage';
@@ -15,21 +14,51 @@ import { registerDevice, unregisterDevice } from '../api/endpoints';
 export type PushStatus = 'granted' | 'denied' | 'undetermined' | 'unsupported';
 
 const TOKEN_PREF = 'push_token';
-const isSupported = Platform.OS === 'ios' || Platform.OS === 'android';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+/**
+ * تطبيق Expo Go **أزال إشعارات Push منذ SDK 53**، ومجرّد استيراد
+ * `expo-notifications` عنده يرمي خطأً غير ملتقَط يُسقط التطبيق عند الإقلاع.
+ * ولأنّ هذا الملفّ يُستورَد من `AuthContext` فالسقوط يحدث قبل ظهور أيّ شاشة.
+ *
+ * فالوحدة تُحمَّل **كسولًا** لا في رأس الملفّ، وتُتخطّى كليًّا داخل Expo Go.
+ * الإشعارات تعمل في نسخة البناء (development/production build) وحدها — وهي
+ * ما يُثبَّت على أجهزة الطلاب فعلًا؛ أمّا Expo Go فأداة تجربة لا غير.
+ */
+const isExpoGo = Constants.executionEnvironment === 'storeClient';
+const isSupported = (Platform.OS === 'ios' || Platform.OS === 'android') && !isExpoGo;
+
+type NotificationsModule = typeof import('expo-notifications');
+let cached: NotificationsModule | null = null;
+let handlerSet = false;
+
+/** يحمّل الوحدة عند أوّل حاجة فعليّة إليها، ويعيد null إن تعذّر. */
+async function notifications(): Promise<NotificationsModule | null> {
+  if (!isSupported) return null;
+  if (cached) return cached;
+  try {
+    cached = await import('expo-notifications');
+    if (!handlerSet) {
+      cached.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldPlaySound: true,
+          shouldSetBadge: true,
+          shouldShowBanner: true,
+          shouldShowList: true,
+        }),
+      });
+      handlerSet = true;
+    }
+    return cached;
+  } catch {
+    return null;
+  }
+}
 
 export async function getPushStatus(): Promise<PushStatus> {
-  if (!isSupported) return 'unsupported';
+  const N = await notifications();
+  if (!N) return 'unsupported';
   try {
-    const { status } = await Notifications.getPermissionsAsync();
+    const { status } = await N.getPermissionsAsync();
     if (status === 'granted') return 'granted';
     if (status === 'denied') return 'denied';
     return 'undetermined';
@@ -38,12 +67,12 @@ export async function getPushStatus(): Promise<PushStatus> {
   }
 }
 
-async function ensureAndroidChannel(): Promise<void> {
+async function ensureAndroidChannel(N: NotificationsModule): Promise<void> {
   if (Platform.OS !== 'android') return;
   // على أندرويد ١٣+ تُنشأ القناة قبل طلب الرمز.
-  await Notifications.setNotificationChannelAsync('default', {
+  await N.setNotificationChannelAsync('default', {
     name: 'تنبيهات الكلّية',
-    importance: Notifications.AndroidImportance.DEFAULT,
+    importance: N.AndroidImportance.DEFAULT,
     lightColor: '#D8AB4A',
   });
 }
@@ -57,15 +86,16 @@ export type EnableResult =
  * يُستدعى بعد الدخول فقط — التسجيل يحتاج `Bearer` صالحًا.
  */
 export async function enablePush(): Promise<EnableResult> {
-  if (!isSupported) return { ok: false, reason: 'unsupported' };
+  const N = await notifications();
+  if (!N) return { ok: false, reason: 'unsupported' };
 
   try {
-    await ensureAndroidChannel();
+    await ensureAndroidChannel(N);
 
-    const current = await Notifications.getPermissionsAsync();
+    const current = await N.getPermissionsAsync();
     let granted = current.status === 'granted';
     if (!granted) {
-      const asked = await Notifications.requestPermissionsAsync({
+      const asked = await N.requestPermissionsAsync({
         ios: { allowAlert: true, allowBadge: true, allowSound: true },
       });
       granted = asked.status === 'granted';
@@ -77,7 +107,7 @@ export async function enablePush(): Promise<EnableResult> {
       return { ok: false, reason: 'no-project-id' };
     }
 
-    const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId: EAS_PROJECT_ID });
+    const { data: token } = await N.getExpoPushTokenAsync({ projectId: EAS_PROJECT_ID });
     if (!token) return { ok: false, reason: 'failed' };
 
     await registerDevice({

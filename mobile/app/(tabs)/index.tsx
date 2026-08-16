@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, useWindowDimensions, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/auth/AuthContext';
 import { useI18n } from '../../src/i18n';
 import { getCourses, getFaculty, getMySessions, getNews, getPublicSessions } from '../../src/api/endpoints';
@@ -93,7 +92,8 @@ export default function HomeScreen() {
   const newsItems = news.data?.items ?? [];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.cream }} edges={['top']}>
+    // بلا حافّةٍ علويّة: `BrandHeader` فوق الشاشة يبتلع هامش شريط الحالة.
+    <View style={{ flex: 1, backgroundColor: colors.cream }}>
       <ScrollView
         contentContainerStyle={{ paddingBottom: spacing.xxl, gap: spacing.xl }}
         refreshControl={
@@ -248,6 +248,6 @@ export default function HomeScreen() {
           ) : null}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

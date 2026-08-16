@@ -48,23 +48,38 @@ const config: ExpoConfig = {
     'expo-router',
     'expo-secure-store',
     'expo-video',
-    // خطوط الكلّية تُضمَّن في الحزمة الأصليّة، ويُحمّلها `useFonts` وقت الإقلاع.
+    /**
+     * خطوط الكلّية تُضمَّن في الحزمة الأصليّة وقت البناء. القائمة هنا
+     * يجب أن تطابق ما يُسجّله `useFonts` في `app/_layout.tsx` ملفًّا
+     * بملفّ — وأوّلها `thuluth-dt.ttf`، وهو خطّ الثلث الحقيقيّ
+     * («DecoType Thuluth 2») الذي يحمّله الموقع باسم `Thuluth`.
+     * ما ينقص هنا يُحمَّل على الويب بلا شكوى ثمّ يغيب في النسخة الأصيلة.
+     */
     [
       'expo-font',
       {
         fonts: [
+          './assets/fonts/thuluth-dt.ttf',
           './assets/fonts/thuluth-400.ttf',
           './assets/fonts/thuluth-700.ttf',
           './assets/fonts/naskh-400.ttf',
           './assets/fonts/naskh-700.ttf',
           './assets/fonts/plex-400.ttf',
-          './assets/fonts/plex-600.ttf',
+          './assets/fonts/plex-500.ttf',
           './assets/fonts/plex-700.ttf',
         ],
       },
     ],
-    // عربيّة أوّلًا: يُثبَّت اتّجاه RTL على مستوى النظام وقت البناء،
-    // فلا يحتاج التطبيق إلى إعادة تشغيل لضبط الاتّجاه.
+    /**
+     * عربيّة أوّلًا. هذه الإضافة تكتب `ExpoLocalization_forcesRTL=true`
+     * في `strings.xml` (وفي `Info.plist` على iOS)، فتقرؤها الوحدة
+     * الأصليّة وتستدعي `I18nManager.forceRTL` قبل أوّل تصيير — فلا
+     * يحتاج المستخدم النهائي إلى إعادة تشغيل.
+     *
+     * **حدُّها:** إضافات الإعداد تسري في نسخة البناء (EAS / prebuild)
+     * وحدها، ولا أثر لها في Expo Go — فهناك `strings.xml` هو ملفّ Expo
+     * Go وقيمته `unset`. مسارُ Expo Go يُعالَج في `src/i18n/rtl.ts`.
+     */
     ['expo-localization', { supportsRTL: true, forcesRTL: true }],
     [
       'expo-splash-screen',

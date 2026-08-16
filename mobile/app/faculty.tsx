@@ -31,14 +31,20 @@ export default function FacultyScreen() {
               ))}
             </Row>
 
-            {/* السِّيَر المكتوبة تُعرض تحت الشبكة كي لا تُشوّه ارتفاعها. */}
+            {/*
+              السِّيَر المكتوبة تُعرض تحت الشبكة كي لا تُشوّه ارتفاعها.
+              عنوان البطاقة هنا هو الرتبة لا الاسم — الأسماء مرفوعة من
+              هذه الشاشة بطلب العميل، فلا تعود من باب السيرة.
+            */}
             {items
               .filter((m) => m.bioAr || m.bioEn)
               .map((m) => (
                 <Card key={`${m.id}-bio`} style={{ gap: spacing.xs }}>
-                  <Txt variant="heading" color={colors.navy}>
-                    {pick(m.nameAr, m.nameEn)}
-                  </Txt>
+                  {m.rankAr || m.rankEn ? (
+                    <Txt variant="heading" color={colors.navy}>
+                      {pick(m.rankAr, m.rankEn)}
+                    </Txt>
+                  ) : null}
                   <Txt variant="small" color={colors.textMuted}>
                     {pick(m.bioAr, m.bioEn)}
                   </Txt>

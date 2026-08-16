@@ -438,3 +438,40 @@ export type DeviceRegistration = {
   lastSeenAt: string;
   createdAt: string;
 };
+
+/* ————— قائمة التنقّل (`/nav`) ————— */
+
+/**
+ * عنصرٌ في شجرة قائمة الهيدر كما يبنيها الموقع من `nav_links`.
+ * `href` يخرج كما هو مخزَّنًا (`about.html`، `about.html#vision`،
+ * `https://sunnah.one/`) و`external` يقول أيّهما — والتركيب على أصل
+ * الموقع يجري في التطبيق لأنّه وحده يعرف لغة العرض.
+ */
+export type NavNode = {
+  id: string;
+  labelAr: string;
+  labelEn: string;
+  href: string;
+  icon: string | null;
+  external: boolean;
+  children: NavNode[];
+};
+
+export type SocialLinkItem = {
+  id: string;
+  key: string;
+  labelAr: string;
+  labelEn: string;
+  /** مضبوطٌ حتمًا: الخادم يستبعد الفارغ و«#» قبل الإرسال. */
+  url: string;
+  icon: string;
+};
+
+export type NavPayload = {
+  site: { url: string; nameAr: string; nameEn: string; shortAr: string; shortEn: string };
+  header: NavNode[];
+  /** المضبوطة وحدها — قد تكون فارغة، وعندئذٍ لا يُعرض القسم. */
+  social: SocialLinkItem[];
+  /** `null` ما لم يُضبط `header.liveUrl` في لوحة التحكّم. */
+  live: string | null;
+};

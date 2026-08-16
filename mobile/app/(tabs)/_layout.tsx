@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useI18n } from '../../src/i18n';
 import { colors, fonts, goldHairline } from '../../src/theme';
+import { BrandHeader } from '../../src/ui/AppHeader';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -24,10 +25,13 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: colors.navyDeep },
-        headerTintColor: colors.goldLight,
-        headerTitleStyle: { fontFamily: fonts.naskhBold, fontSize: 16, color: colors.goldLight },
-        headerShadowVisible: false,
+        /**
+         * ترويسة الكلّية نفسها التي في `app/_layout.tsx`. هنا بلا عنوان
+         * شاشة: شريط التبويبات أسفل الشاشة يقول أين نحن، فتكرارُه في
+         * الرأس حشوٌ — والموقع نفسه لا يضع عنوان الصفحة في `.site-head`.
+         */
+        headerShown: true,
+        header: () => <BrandHeader />,
         // شريط التبويبات بألوان الكلّية: قاعدةٌ كحليّة وذهبٌ للمُحدَّد.
         tabBarActiveTintColor: colors.gold,
         tabBarInactiveTintColor: colors.textOnNavyMuted,
