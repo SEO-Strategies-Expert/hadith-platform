@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# سجلّ بيانات العرض — محلّي، يخصّ قاعدة بعينها
+prisma/demo-seed.record.json
