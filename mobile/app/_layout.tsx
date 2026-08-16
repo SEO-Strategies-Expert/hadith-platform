@@ -50,6 +50,9 @@ function Navigator() {
       <Stack.Screen name="payments" options={{ title: t('paymentsTitle') }} />
       <Stack.Screen name="faculty" options={{ title: t('facultyTitle') }} />
       <Stack.Screen name="contact" options={{ title: t('contactTitle') }} />
+      <Stack.Screen name="programs/index" options={{ title: t('programsTitle') }} />
+      {/* عنوانها اسمُ المرحلة، فتضبطه الشاشة عند التركيب. */}
+      <Stack.Screen name="programs/[stage]" options={{ title: t('programsStageCourses') }} />
       <Stack.Screen name="course/[id]" options={{ title: t('tabCourses') }} />
       <Stack.Screen name="lesson/[id]" options={{ title: t('lesson') }} />
       <Stack.Screen name="quiz/[id]" options={{ title: t('quizTitle') }} />

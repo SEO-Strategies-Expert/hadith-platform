@@ -12,7 +12,7 @@ import { Txt } from './kit';
  */
 type Kind = 'primary' | 'navy' | 'secondary' | 'ghost' | 'onNavy' | 'danger';
 
-const GOLD_FACE = ['#FFF8DE', '#F6E2A0', '#E2BC5E', '#C79A31', '#F6E2A0'] as const;
+const GOLD_FACE = ['#FAE7B3', '#F6E2A0', '#E2BC5E', '#B28426', '#F6E2A0'] as const;
 const GOLD_STOPS = [0, 0.26, 0.52, 0.78, 1] as const;
 
 const kinds: Record<Exclude<Kind, 'primary'>, { bg: string; fg: string; border: string }> = {

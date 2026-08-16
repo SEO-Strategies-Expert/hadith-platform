@@ -125,10 +125,10 @@ export function GoldRule({ height = 2, style }: { height?: number; style?: ViewS
 }
 
 /**
- * لون الزخارف: `#C79A31` هو ذهب `.ornament-rule` في الموقع بعينه —
+ * لون الزخارف: `#B28426` هو ذهب `.ornament-rule` في الموقع بعينه —
  * أغمق قليلًا من `--gold` كي يُقرأ الخطّ الرفيع على الكريميّ.
  */
-const ORNAMENT_GOLD = '#C79A31';
+const ORNAMENT_GOLD = '#B28426';
 const ornamentColor = (tone: 'gold' | 'navy') => (tone === 'gold' ? ORNAMENT_GOLD : colors.navy);
 
 /**

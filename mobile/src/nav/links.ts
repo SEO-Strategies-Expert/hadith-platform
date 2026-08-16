@@ -34,6 +34,12 @@ export type NavTarget =
  */
 const NATIVE_ROUTES: Record<string, Href> = {
   'index.html': '/',
+  /*
+    صفحة البرامج في الموقع نصٌّ محرَّرٌ ثابت لا يعرف الكتالوج، والكتالوج
+    في القاعدة. فالشاشة الأصيلة تُريه من مصدره: ثلاث درجاتٍ بمقرّراتها،
+    والدورات والدبلومات إلى جانبها.
+  */
+  'programs.html': '/programs',
   'courses.html': '/courses',
   'news.html': '/news',
   'faculty.html': '/faculty',

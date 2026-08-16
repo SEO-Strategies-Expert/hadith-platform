@@ -25,6 +25,102 @@ import { openExternal } from './openLink';
  * من صفحةٍ إلى `sunnah.one` إلى غيرها وهو يظنّ نفسه في التطبيق، ثمّ لا
  * يجد زرَّ رجوعٍ يُخرجه.
  */
+/* ————————————— تعرية الصفحة من إطار الموقع ————————————— */
+
+/**
+ * صفحة الموقع تُقدَّم للمتصفّح **كاملة**: رابط تخطٍّ، وهيدرٌ لاصق فيه
+ * شريطُ المنصّات ولوحُ البحث وشريطُ الأقسام، وشريطٌ إخباريّ متحرّك،
+ * وفوترٌ، وزرُّ عودةٍ عائم. وعرضُها كما هي داخل تطبيقٍ له ترويسته يُنتج
+ * **ترويستين وفوترًا ملزوقًا** — وهو ما رآه العميل ووصفه بالنسخ واللصق.
+ *
+ * المحدِّدات ليست تخمينًا؛ هذه مواضعها في الموقع:
+ *  · `.skip-link`  — `public/assets/css/style.css:74`، ومصدرها
+ *                    `src/app/(site)/layout.tsx` (`<a className="skip-link">`).
+ *  · `.site-head`  — `style.css:150`، وتحتها `.navbar` (١٥٣)
+ *                    و`.search-panel` (٢١٤) و`.menubar` (٢٢٣).
+ *  · `.ticker`     — `style.css:302`، وهو **شقيقٌ** للهيدر لا ابنٌ له
+ *                    (`<Ticker/>` بعد `<SiteHeader/>` في التخطيط).
+ *  · `.site-foot`  — `style.css:640` (`<footer className="site-foot orn-navy">`).
+ *  · `.to-top`     — `style.css:661`، زرٌّ `position:fixed` معرّفه `#toTop`.
+ * وقد تحقّقتُ من الشجرة حيًّا على `http://localhost:3000/programs.html`:
+ * أبناء `<body>` هم `a.skip-link` ثمّ `header.site-head` ثمّ `div.ticker`
+ * ثمّ `main#main` ثمّ `footer.site-foot` ثمّ `button#toTop`.
+ *
+ * وما عدا ذلك **يبقى**: `#main` بكلّ ما فيه من نصٍّ وصورٍ وجداول. الهدف
+ * نزع الإطار لا المضمون.
+ *
+ * أمّا الهوامش فتُقلَّص لا تُلغى: الهيدر `sticky` لا `fixed` فلا هامشَ
+ * يُعوَّض، لكنّ `.page-hero` مبنيٌّ على شاشة حاسوبٍ (`min-height:520px`
+ * و`padding-block:78px 66px` في `inner-pages.css`) وكان يفترض هيدرًا
+ * فوقه؛ فبعد رفعه يصير البياضُ فوق العنوان بلا معنى. و`.breadcrumbs`
+ * كانت `position:absolute` داخله فتُعاد إلى مجرى النصّ لئلّا تركب العنوان
+ * بعد أن قصُر الهيرو.
+ *
+ * النسخة الإنجليزيّة `/en/...` تستعمل الأصناف نفسها — `en.css` يبدّل
+ * الخطوط والاتّجاه لا أسماء الأصناف — فالتنظيفة واحدة للّغتين.
+ */
+const CHROME_CSS = `
+.skip-link,.site-head,.ticker,.site-foot,.to-top{display:none!important}
+html,body{background:#FCFBF8!important}
+body{margin-top:0!important;padding-top:0!important}
+#main>*:first-child{margin-top:0!important}
+.page-hero{min-height:0!important}
+.page-hero>.container{padding-block:34px 30px!important}
+.breadcrumbs{position:static!important;inset:auto!important;margin:0 0 12px!important}
+.inner-section{padding-block:46px!important}
+.inner-section.compact{padding-block:32px!important}
+.section{padding-block:48px!important}
+`;
+
+/**
+ * الحقن **قبل أوّل رسم** قدر ما تسمح المنصّة: هيدرٌ يومض ثمّ يختفي أسوأ
+ * من هيدرٍ باقٍ، لأنّ الوميض عطبٌ ظاهر لا خيارُ تصميم.
+ *
+ * ولذلك ثلاث احتياطات في نصٍّ واحد:
+ *  ١) يُعلَّق النمط على `document.head` إن وُجد، وإلّا على
+ *     `document.documentElement` — فعند بدء المستند قد لا يكون الرأس
+ *     أُنشئ بعد، ومحاولةُ `head.appendChild` وحدها تسقط صامتة.
+ *  ٢) فإن لم يوجد جذرٌ أصلًا، يُعاد المحاولة على فتراتٍ قصيرة بسقفٍ
+ *     ينتهي إليه، فلا مؤقّتٌ يدور إلى الأبد.
+ *  ٣) ويُعاد التعليق عند `DOMContentLoaded` و`load` وفي الحقن التالي
+ *     للتحميل — والعمليّة **متكافئة**: وجودُ العنصر بمعرّفه يمنع تكراره.
+ *
+ * و`true;` في آخر النصّ لازمة: `react-native-webview` تُحذّر على iOS من
+ * محقونٍ لا يُرجع قيمةً أخيرة.
+ */
+const CHROME_JS = `
+(function () {
+  var ID = '__app_chrome__';
+  var CSS = ${JSON.stringify(CHROME_CSS)};
+  function install() {
+    try {
+      if (typeof document === 'undefined') return false;
+      if (document.getElementById(ID)) return true;
+      var root = document.head || document.documentElement;
+      if (!root) return false;
+      var el = document.createElement('style');
+      el.id = ID;
+      el.appendChild(document.createTextNode(CSS));
+      root.appendChild(el);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  if (!install()) {
+    var tries = 0;
+    var timer = setInterval(function () {
+      if (install() || ++tries > 120) clearInterval(timer);
+    }, 8);
+  }
+  try {
+    document.addEventListener('DOMContentLoaded', install);
+    window.addEventListener('load', install);
+  } catch (e) {}
+})();
+true;
+`;
+
 export function SiteWebView({ url, origin }: { url: string; origin: string }) {
   const { t } = useI18n();
   const [loading, setLoading] = useState(true);
@@ -69,6 +165,14 @@ export function SiteWebView({ url, origin }: { url: string; origin: string }) {
         source={{ uri: url }}
         originWhitelist={['https://*', 'http://*']}
         onShouldStartLoadWithRequest={shouldStart}
+        /*
+          الاثنان معًا لا أحدهما: الأوّل يسبق محتوى الصفحة فيمنع الوميض،
+          والثاني يلحق التحميل فيُمسك الحالات التي يُستبدل فيها الرأس أو
+          يتأخّر فيها تنفيذ الأوّل (أندرويد يُنفّذه عند `onPageStarted`
+          لا عند بناء المستند). والنصّ متكافئٌ فتكراره بلا أثر.
+        */
+        injectedJavaScriptBeforeContentLoaded={CHROME_JS}
+        injectedJavaScript={CHROME_JS}
         onLoadStart={() => setLoading(true)}
         onLoadEnd={() => setLoading(false)}
         onError={() => {

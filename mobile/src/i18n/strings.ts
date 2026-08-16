@@ -91,6 +91,21 @@ export const strings = {
     applyAction: 'تقديم طلب التحاق',
     browseAsGuest: 'تصفّح المقرّرات دون دخول',
 
+    // البرامج
+    programsTitle: 'البرامج الأكاديميّة',
+    programsIntro:
+      'ثلاث درجاتٍ متدرّجة، تُبنى كلٌّ منها على ما قبلها، وإلى جانبها دوراتٌ ودبلوماتٌ مستقلّة.',
+    programsStageCourses: 'مقرّرات المرحلة',
+    programsStageEmpty: 'لم تُضَف مقرّرات هذه المرحلة بعد.',
+    programsStageNote: 'المقرّرات المعروضة هي المرئيّة في كتالوج الكلّية، وقد تُفتح للتسجيل في مواعيد مختلفة.',
+    programsExtraTitle: 'الدورات والدبلومات',
+    programsExtraDesc: 'برامج مستقلّة لا ترتبط بمرحلةٍ من مراحل الدرجات، تُدرَس على حدة.',
+    programsEmpty: 'لم تُنشر برامج الكلّية بعد.',
+    degreeFoundation: 'درجة البكالوريوس',
+    degreeAdvanced: 'درجة الماجستير',
+    degreeResearch: 'درجة الدكتوراه',
+    courseUnit: 'مقرّر',
+
     // المقرّرات
     coursesTitle: 'كتالوج المقرّرات',
     coursesEmpty: 'لا مقرّرات معروضة في الوقت الحاضر.',
@@ -382,6 +397,21 @@ export const strings = {
       'Admission is granted through an application reviewed by the academic board; accounts are not opened from the app. Please apply on the college website and you will be emailed once accepted.',
     applyAction: 'Apply for admission',
     browseAsGuest: 'Browse courses without signing in',
+
+    programsTitle: 'Academic programmes',
+    programsIntro:
+      'Three progressive degrees, each building on the one before, alongside standalone courses and diplomas.',
+    programsStageCourses: 'Stage courses',
+    programsStageEmpty: 'No courses have been added to this stage yet.',
+    programsStageNote:
+      'These are the courses visible in the college catalogue; enrolment may open at different times.',
+    programsExtraTitle: 'Courses and diplomas',
+    programsExtraDesc: 'Standalone programmes that are not tied to any degree stage.',
+    programsEmpty: 'The college programmes have not been published yet.',
+    degreeFoundation: 'Bachelor’s degree',
+    degreeAdvanced: 'Master’s degree',
+    degreeResearch: 'Doctoral degree',
+    courseUnit: 'courses',
 
     coursesTitle: 'Course catalogue',
     coursesEmpty: 'No courses are currently listed.',

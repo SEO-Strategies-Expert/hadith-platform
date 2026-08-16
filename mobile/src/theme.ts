@@ -9,32 +9,32 @@ import { I18nManager, Platform, type TextStyle } from 'react-native';
 /* ————————————— الألوان ————————————— */
 
 export const colors = {
-  navy: '#123159',
-  navyDark: '#01183A',
+  navy: '#102B46',
+  navyDark: '#061A33',
   /** أغمق درجة في الموقع — لخلفيّات الهيرو والأشرطة. */
-  navyDeep: '#071630',
-  navyMid: '#0B2144',
-  navySoft: '#17406F',
+  navyDeep: '#061A33',
+  navyMid: '#0C233D',
+  navySoft: '#284058',
 
-  gold: '#D8AB4A',
-  goldLight: '#F9EDAB',
-  goldDark: '#B98732',
+  gold: '#D9A12E',
+  goldLight: '#F6D474',
+  goldDark: '#B28426',
   /** أفتح لمعةٍ في التدرّج المعدني. */
-  goldHi: '#FFF8DE',
-  goldDeep: '#A87C1D',
+  goldHi: '#FAE7B3',
+  goldDeep: '#8F6A1E',
 
-  cream: '#FDFBF5',
-  cream100: '#F8F2E3',
-  cream200: '#F1E8D3',
+  cream: '#FCFBF8',
+  cream100: '#F7F3EB',
+  cream200: '#F0E8D9',
 
   surface: '#FFFFFF',
-  border: '#E7E1D4',
-  borderStrong: '#D6CDB8',
+  border: '#E8DCC5',
+  borderStrong: '#D8C9A9',
 
-  text: '#01183A',
-  textMuted: '#5C6B80',
-  textOnNavy: '#FDFBF5',
-  textOnNavyMuted: '#B9C4D4',
+  text: '#061A33',
+  textMuted: '#647587',
+  textOnNavy: '#FCFBF8',
+  textOnNavyMuted: '#B6C2D0',
 
   success: '#1F7A46',
   successBg: '#E8F5EE',
@@ -51,11 +51,11 @@ export const colors = {
 export const goldGradient = {
   colors: [
     colors.goldHi,
-    '#F7E6AE',
-    '#E7C46C',
-    '#C79A31',
-    '#EFD489',
-    '#F7E6AE',
+    '#FAE7B3',
+    '#F6D474',
+    '#B28426',
+    '#E6B84E',
+    '#FAE7B3',
     colors.goldHi,
   ] as const,
   locations: [0, 0.18, 0.4, 0.56, 0.72, 0.88, 1] as const,

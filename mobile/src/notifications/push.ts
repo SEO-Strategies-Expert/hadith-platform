@@ -73,7 +73,7 @@ async function ensureAndroidChannel(N: NotificationsModule): Promise<void> {
   await N.setNotificationChannelAsync('default', {
     name: 'تنبيهات الكلّية',
     importance: N.AndroidImportance.DEFAULT,
-    lightColor: '#D8AB4A',
+    lightColor: '#D9A12E',
   });
 }
 
