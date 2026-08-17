@@ -11,7 +11,8 @@
         "EXPO_PUBLIC_API_URL": "https://hadith-platform-hassan67844-4138s-projects.vercel.app",
         "EXPO_PUBLIC_WEBSITE_URL": "https://hadith-platform-hassan67844-4138s-projects.vercel.app",
         "EXPO_PUBLIC_EAS_PROJECT_ID": "99e90574-5977-4972-a5f4-6a0f7aa2696c"
-      }
+      },
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
@@ -22,7 +23,8 @@
         "EXPO_PUBLIC_API_URL": "https://hadith-platform-hassan67844-4138s-projects.vercel.app",
         "EXPO_PUBLIC_WEBSITE_URL": "https://hadith-platform-hassan67844-4138s-projects.vercel.app",
         "EXPO_PUBLIC_EAS_PROJECT_ID": "99e90574-5977-4972-a5f4-6a0f7aa2696c"
-      }
+      },
+      "channel": "preview"
     },
     "production": {
       "autoIncrement": true,
@@ -30,7 +32,8 @@
         "EXPO_PUBLIC_API_URL": "https://hadith-platform-hassan67844-4138s-projects.vercel.app",
         "EXPO_PUBLIC_WEBSITE_URL": "https://hadith-platform-hassan67844-4138s-projects.vercel.app",
         "EXPO_PUBLIC_EAS_PROJECT_ID": "99e90574-5977-4972-a5f4-6a0f7aa2696c"
-      }
+      },
+      "channel": "production"
     }
   },
   "submit": {
