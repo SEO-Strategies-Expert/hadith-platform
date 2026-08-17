@@ -121,6 +121,11 @@ const CHROME_JS = `
 true;
 `;
 
+/**
+ * ملاحظة: إخفاء إطار الموقع صار **على الخادم** عبر `?app=1` (انظر `proxy.ts`
+ * و`(site)/layout.tsx`) — حتميٌّ ومفحوص. الحقن أدناه بقي **شبكة أمان** فقط،
+ * لأنّ نسخةً قديمة من التطبيق قد تفتح رابطًا بلا المعامل.
+ */
 export function SiteWebView({ url, origin }: { url: string; origin: string }) {
   const { t } = useI18n();
   const [loading, setLoading] = useState(true);

@@ -80,7 +80,10 @@ export function siteOrigin(fromApi: string | null | undefined): string {
 export function sitePageUrl(origin: string, lang: Lang, path: string, hash?: string | null): string {
   const isHome = path === 'index.html' || path === '';
   const base = isHome ? (lang === 'ar' ? '/' : '/en') : lang === 'ar' ? `/${path}` : `/en/${path}`;
-  return `${origin}${base}${hash ? `#${hash}` : ''}`;
+  // `app=1` يجعل الخادم يحذف هيدر الموقع وشريطه وفوتره، فلا يجتمع هيدران داخل
+  // التطبيق. القرار على الخادم لا بحقن CSS في الـWebView: الحقن كان لا يُنفَّذ
+  // على الجهاز أحيانًا فتظهر الصفحة بإطارها كاملًا.
+  return `${origin}${base}?app=1${hash ? `#${hash}` : ''}`;
 }
 
 /** لوحة تحكّم الموقع — صفحةُ ويبٍ لا شاشةَ تطبيق، فتُفتح في المتصفّح. */

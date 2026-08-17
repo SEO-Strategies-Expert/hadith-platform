@@ -21,7 +21,9 @@ export default async function SiteLayout({
   const currentSlug = toSlug(rest || undefined);
 
   const skipLabel = lang === "ar" ? "انتقل إلى المحتوى" : "Skip to content";
-  const isPortal = currentSlug === "student-login";
+  // بوابة الطالب بلا إطار أصلًا، وكذلك الصفحة المفتوحة داخل التطبيق.
+  const inApp = h.get("x-app-shell") === "1";
+  const isPortal = currentSlug === "student-login" || inApp;
 
   return (
     <html lang={lang} dir={lang === "ar" ? "rtl" : "ltr"}>
