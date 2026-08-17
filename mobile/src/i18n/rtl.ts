@@ -99,10 +99,17 @@ export function useRTLBootstrap(): RtlStatus {
         if (alive) setStatus('ready');
       }, 1500);
 
+      // `expo-updates` أوّلًا: `DevSettings.reload` لا تعمل في نسخة الإصدار،
+      // أي في الـAPK الذي بيد العميل — فكان الاتّجاه لا يُطبَّق هناك أصلًا.
       try {
-        DevSettings.reload('applying right-to-left layout');
+        const Updates = await import('expo-updates');
+        await Updates.reloadAsync();
       } catch {
-        if (alive) setStatus('ready');
+        try {
+          DevSettings.reload('applying right-to-left layout');
+        } catch {
+          if (alive) setStatus('ready');
+        }
       }
     })();
 
@@ -120,4 +127,40 @@ export function useRTLBootstrap(): RtlStatus {
   }, [status]);
 
   return status;
+}
+
+/**
+ * يقلب اتّجاه الواجهة ليوافق اللغة المختارة، ثمّ يعيد تحميل التطبيق مرّةً.
+ *
+ * لماذا إعادة تحميل؟ `I18nManager.isRTL` يُقرأ من الثوابت الأصليّة **مرّةً عند
+ * تحميل الوحدة**، و`forceRTL` لا تفعل أكثر من كتابة تفضيلٍ يُقرأ في الإقلاع
+ * التالي. فبلا إعادة تحميلٍ تتبدّل النصوص ويبقى التخطيط مقلوبًا — وهو ما رآه
+ * العميل: إنجليزيّةٌ داخل تخطيطٍ من اليمين لليسار.
+ *
+ * ولماذا `expo-updates` لا `DevSettings`؟ لأنّ `DevSettings.reload` **لا تعمل
+ * في نسخة الإصدار** — أي في الـAPK الذي بيد العميل بالضبط. و`Updates.reloadAsync`
+ * تعمل في الإصدار والتطوير معًا، والحزمة مثبَّتة أصلًا للتحديث عن بُعد.
+ */
+export async function applyDirectionForLang(lang: 'ar' | 'en'): Promise<void> {
+  if (Platform.OS === 'web') return; // الويب يُدار بـ`document.dir`
+  const wantRTL = lang === 'ar';
+  if (I18nManager.isRTL === wantRTL) return; // الاتّجاه صحيحٌ أصلًا
+
+  try {
+    I18nManager.allowRTL(true);
+    I18nManager.forceRTL(wantRTL);
+  } catch {
+    return; // تعذّر ضبط الاتّجاه: لا نُعيد التحميل بلا فائدة
+  }
+
+  try {
+    const Updates = await import('expo-updates');
+    await Updates.reloadAsync();
+  } catch {
+    try {
+      DevSettings.reload('applying layout direction');
+    } catch {
+      /* لا سبيل لإعادة التحميل — يسري الاتّجاه عند الفتح التالي. */
+    }
+  }
 }

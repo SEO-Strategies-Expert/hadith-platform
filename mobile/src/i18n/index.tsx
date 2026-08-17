@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { I18nManager, Platform } from 'react-native';
 import { getPref, setPref } from '../auth/storage';
+import { applyDirectionForLang } from './rtl';
 import { strings, type Lang, type StringKey } from './strings';
 
 export { primeRTL, useRTLBootstrap, type RtlStatus } from './rtl';
@@ -72,13 +73,19 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   // الويب: اتّجاه المستند يُضبط يدويًّا (I18nManager لا يكفي في المتصفّح).
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof document === 'undefined') return;
-    document.documentElement.dir = 'rtl';
+    // الاتّجاه يتبع اللغة: الإنجليزيّة LTR والعربيّة RTL.
+    // كان مثبَّتًا على 'rtl' فكانت الواجهة الإنجليزيّة تُعرض بمحاذاةٍ مقلوبة.
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
   }, [lang]);
 
   const setLang = useCallback((next: Lang) => {
     setLangState(next);
     void setPref('lang', next);
+    // على الأصيل الاتّجاه قرارٌ عامّ في `I18nManager` يُقرأ مرّةً عند الإقلاع،
+    // فلا يكفي تبديل النصوص: لا بدّ من قلب الاتّجاه ثمّ إعادة تحميلٍ واحدة.
+    // بدونها تظهر الإنجليزيّة داخل تخطيطٍ من اليمين لليسار.
+    void applyDirectionForLang(next);
   }, []);
 
   const value = useMemo<I18nValue>(() => {

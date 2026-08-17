@@ -80,7 +80,10 @@ const config: ExpoConfig = {
      * وحدها، ولا أثر لها في Expo Go — فهناك `strings.xml` هو ملفّ Expo
      * Go وقيمته `unset`. مسارُ Expo Go يُعالَج في `src/i18n/rtl.ts`.
      */
-    ['expo-localization', { supportsRTL: true, forcesRTL: true }],
+    // `supportsRTL` وحدها: يُسمح بالاتّجاهين ويُختار وقت التشغيل حسب لغة
+    // المستخدم. `forcesRTL` كانت تُثبّت RTL على مستوى النظام، فتظهر الواجهة
+    // الإنجليزيّة داخل تخطيطٍ مقلوب مهما بدّل المستخدم اللغة.
+    ['expo-localization', { supportsRTL: true }],
     [
       'expo-splash-screen',
       {
