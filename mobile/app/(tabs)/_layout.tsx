@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import React from 'react';
 import type { ColorValue } from 'react-native';
 import { Tabs } from 'expo-router';
@@ -45,7 +46,14 @@ export default function TabsLayout() {
           paddingTop: 4,
           paddingBottom: insets.bottom + 4,
         },
-        tabBarLabelStyle: { fontFamily: fonts.bodyMedium, fontSize: 10.5, lineHeight: 17 },
+        // `includeFontPadding` هنا أيضًا: تسميات التبويبات عربيّة، وبدونها
+        // تُقتصّ أعالي الحروف على أندرويد كما في بقيّة النصوص.
+        tabBarLabelStyle: {
+          fontFamily: fonts.bodyMedium,
+          fontSize: 10.5,
+          lineHeight: 17,
+          ...(Platform.OS === 'android' ? { includeFontPadding: true } : {}),
+        },
         sceneStyle: { backgroundColor: colors.cream },
       }}
     >

@@ -148,6 +148,13 @@ export const fontFamily = fonts.body;
  * للثلث و`1.9` للنسخ — والنسب هنا مطابقة.
  */
 export const THULUTH_LINE = 2.25;
+
+/**
+ * حشوة الخطّ على أندرويد. تُطبَّق على كل نصّ عربيّ في التطبيق لا على الثلث
+ * وحده: التشكيل في النسخ والمتن يتجاوز الصندوق كذلك، وإن كان أقلّ ظهورًا.
+ * على iOS والويب لا معنى لها فتُترك.
+ */
+const androidInk = Platform.OS === 'android' ? { includeFontPadding: true } : {};
 export const NASKH_LINE = 1.9;
 
 /**
@@ -160,12 +167,18 @@ const thuluthSize = (fontSize: number) => ({
   fontSize,
   // التشكيل يخرج عن صندوق النصّ رأسيًّا؛ هذا الاتّساع يمنع اقتصاصه.
   lineHeight: Math.round(fontSize * THULUTH_LINE),
+  // أندرويد يقصّ ما يتجاوز مقاييس الخطّ المعلَنة (ascent/descent)، وحبر
+  // الثلث يتجاوزها فعلًا — فتُؤكل أعالي الكاف واللام وعلامات التشكيل مهما
+  // اتّسع `lineHeight`. `includeFontPadding` يُبقي حشوة الخطّ فيتّسع الصندوق
+  // للحبر الحقيقيّ. علّةٌ لا تظهر في المتصفّح إطلاقًا، ولذلك مضت إلى الجهاز.
+  ...androidInk,
 });
 
 const naskhSize = (fontSize: number) => ({
   fontFamily: fonts.naskhBold,
   fontSize,
   lineHeight: Math.round(fontSize * NASKH_LINE),
+  ...androidInk,
 });
 
 export const typography = {
@@ -178,6 +191,7 @@ export const typography = {
     fontFamily: fonts.thuluthAltBold,
     fontSize: 30,
     lineHeight: 46,
+    ...androidInk,
   },
   /** عنوان قسم — نسخ. */
   display: naskhSize(23),
@@ -185,12 +199,12 @@ export const typography = {
   /** عنوان بطاقة — نسخ، وهو أبرز ما يميّز البطاقات عن المتن. */
   heading: naskhSize(16.5),
 
-  body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 26 },
-  bodyStrong: { fontFamily: fonts.bodyBold, fontSize: 15, lineHeight: 26 },
-  small: { fontFamily: fonts.body, fontSize: 13, lineHeight: 23 },
-  smallStrong: { fontFamily: fonts.bodyMedium, fontSize: 13, lineHeight: 23 },
-  tiny: { fontFamily: fonts.body, fontSize: 11.5, lineHeight: 20 },
-  tinyStrong: { fontFamily: fonts.bodyMedium, fontSize: 11.5, lineHeight: 20 },
+  body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 26, ...androidInk },
+  bodyStrong: { fontFamily: fonts.bodyBold, fontSize: 15, lineHeight: 26, ...androidInk },
+  small: { fontFamily: fonts.body, fontSize: 13, lineHeight: 23, ...androidInk },
+  smallStrong: { fontFamily: fonts.bodyMedium, fontSize: 13, lineHeight: 23, ...androidInk },
+  tiny: { fontFamily: fonts.body, fontSize: 11.5, lineHeight: 20, ...androidInk },
+  tinyStrong: { fontFamily: fonts.bodyMedium, fontSize: 11.5, lineHeight: 20, ...androidInk },
 } as const;
 
 /* ————————————— الاتّجاه ————————————— */
