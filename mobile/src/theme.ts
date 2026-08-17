@@ -150,11 +150,22 @@ export const fontFamily = fonts.body;
 export const THULUTH_LINE = 2.25;
 
 /**
- * حشوة الخطّ على أندرويد. تُطبَّق على كل نصّ عربيّ في التطبيق لا على الثلث
- * وحده: التشكيل في النسخ والمتن يتجاوز الصندوق كذلك، وإن كان أقلّ ظهورًا.
- * على iOS والويب لا معنى لها فتُترك.
+ * حبر الخطّ العربيّ — ولا سيّما الثلث — يتجاوز صندوق النصّ من أعلى، فتُقتصّ
+ * أعالي الكاف واللام وعلامات التشكيل.
+ *
+ * ⚠️ `includeFontPadding` **لا تُصلح هذا**: قيمتها الافتراضيّة `true` أصلًا على
+ * أندرويد، فضبطها صراحةً لا يغيّر شيئًا. العلاج الفعليّ **هامشٌ رأسيّ** يوسّع
+ * صندوق النصّ نفسه ليسع الحبر، مع هامشٍ سالب يعوّض الزيادة فلا تتباعد الأسطر.
+ *
+ * النسبة مشتقّة من مقاس الخطّ لا رقمًا ثابتًا: الاقتصاص يكبر بكبر الخطّ.
  */
-const androidInk = Platform.OS === 'android' ? { includeFontPadding: true } : {};
+const inkRoom = (fontSize: number, ratio = 0.34) => {
+  const pad = Math.ceil(fontSize * ratio);
+  return {
+    paddingTop: pad,
+    marginTop: -Math.round(pad * 0.72),
+  };
+};
 export const NASKH_LINE = 1.9;
 
 /**
@@ -167,18 +178,14 @@ const thuluthSize = (fontSize: number) => ({
   fontSize,
   // التشكيل يخرج عن صندوق النصّ رأسيًّا؛ هذا الاتّساع يمنع اقتصاصه.
   lineHeight: Math.round(fontSize * THULUTH_LINE),
-  // أندرويد يقصّ ما يتجاوز مقاييس الخطّ المعلَنة (ascent/descent)، وحبر
-  // الثلث يتجاوزها فعلًا — فتُؤكل أعالي الكاف واللام وعلامات التشكيل مهما
-  // اتّسع `lineHeight`. `includeFontPadding` يُبقي حشوة الخطّ فيتّسع الصندوق
-  // للحبر الحقيقيّ. علّةٌ لا تظهر في المتصفّح إطلاقًا، ولذلك مضت إلى الجهاز.
-  ...androidInk,
+  ...inkRoom(fontSize, 0.34),
 });
 
 const naskhSize = (fontSize: number) => ({
   fontFamily: fonts.naskhBold,
   fontSize,
   lineHeight: Math.round(fontSize * NASKH_LINE),
-  ...androidInk,
+  ...inkRoom(fontSize, 0.2),
 });
 
 export const typography = {
@@ -191,7 +198,7 @@ export const typography = {
     fontFamily: fonts.thuluthAltBold,
     fontSize: 30,
     lineHeight: 46,
-    ...androidInk,
+    ...inkRoom(30, 0.3),
   },
   /** عنوان قسم — نسخ. */
   display: naskhSize(23),
@@ -199,12 +206,12 @@ export const typography = {
   /** عنوان بطاقة — نسخ، وهو أبرز ما يميّز البطاقات عن المتن. */
   heading: naskhSize(16.5),
 
-  body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 26, ...androidInk },
-  bodyStrong: { fontFamily: fonts.bodyBold, fontSize: 15, lineHeight: 26, ...androidInk },
-  small: { fontFamily: fonts.body, fontSize: 13, lineHeight: 23, ...androidInk },
-  smallStrong: { fontFamily: fonts.bodyMedium, fontSize: 13, lineHeight: 23, ...androidInk },
-  tiny: { fontFamily: fonts.body, fontSize: 11.5, lineHeight: 20, ...androidInk },
-  tinyStrong: { fontFamily: fonts.bodyMedium, fontSize: 11.5, lineHeight: 20, ...androidInk },
+  body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 26, ...inkRoom(15, 0.12) },
+  bodyStrong: { fontFamily: fonts.bodyBold, fontSize: 15, lineHeight: 26, ...inkRoom(15, 0.12) },
+  small: { fontFamily: fonts.body, fontSize: 13, lineHeight: 23, ...inkRoom(13, 0.12) },
+  smallStrong: { fontFamily: fonts.bodyMedium, fontSize: 13, lineHeight: 23, ...inkRoom(13, 0.12) },
+  tiny: { fontFamily: fonts.body, fontSize: 11.5, lineHeight: 20, ...inkRoom(11.5, 0.12) },
+  tinyStrong: { fontFamily: fonts.bodyMedium, fontSize: 11.5, lineHeight: 20, ...inkRoom(11.5, 0.12) },
 } as const;
 
 /* ————————————— الاتّجاه ————————————— */
