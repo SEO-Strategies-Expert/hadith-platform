@@ -475,3 +475,56 @@ export type NavPayload = {
   /** `null` ما لم يُضبط `header.liveUrl` في لوحة التحكّم. */
   live: string | null;
 };
+
+/* ————— صفحات المحتوى (`/pages/{slug}`) ————— */
+
+/**
+ * كتلةٌ واحدة من متن صفحةٍ محتوائيّة.
+ *
+ * الخادم يفكّ `bodyHtml` المحرَّر في اللوحة إلى هذه الكتل البسيطة، فيرسمها
+ * التطبيق بمكوّناته وخطوطه — لا في إطار ويب. والمصدر واحد: ما يُحرَّر في
+ * اللوحة يظهر في الموقع والتطبيق معًا بلا نسختين تفترقان.
+ */
+export type PageBlock =
+  | { type: 'heading'; level: 2 | 3; text: string }
+  | { type: 'paragraph'; text: string }
+  | { type: 'list'; items: string[] }
+  /** `url` مطلقٌ جاهزٌ للعرض — الخادم يبني الأصل قبل الإرسال. */
+  | { type: 'image'; url: string; alt?: string }
+  | { type: 'quote'; text: string };
+
+export type PageContent = {
+  slug: string;
+  title: string;
+  heroTitle: string | null;
+  heroIntro: string | null;
+  heroImage: string | null;
+  blocks: PageBlock[];
+};
+
+/* ————— التحقّق العلني من وثيقة (`/verify/{code}`) ————— */
+
+/** بيانات العرض العلنيّ وحدها — لا بريد ولا هاتف ولا رقم جامعيّ. */
+export type PublicCertificate = {
+  kind: 'CERTIFICATE' | 'IJAZA';
+  holderName: string;
+  titleAr: string;
+  titleEn: string;
+  serial: string;
+  verifyCode: string;
+  issuedAt: string;
+  courseAr: string | null;
+  courseEn: string | null;
+  stageAr: string | null;
+  stageEn: string | null;
+  isnadAr: string | null;
+  isnadEn: string | null;
+  grantedByAr: string | null;
+  grantedByEn: string | null;
+};
+
+/** `unknown` تعني: لا وثيقة بهذا الرمز — وهي جوابٌ صحيح لا خطأ. */
+export type VerifyResult = {
+  status: 'valid' | 'revoked' | 'unknown';
+  certificate: PublicCertificate | null;
+};

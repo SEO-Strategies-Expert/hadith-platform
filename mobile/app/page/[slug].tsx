@@ -1,47 +1,52 @@
 import React, { useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useI18n } from '../../src/i18n';
-import { sitePageUrl } from '../../src/nav/links';
-import { cachedSiteOrigin } from '../../src/nav/store';
-import { colors } from '../../src/theme';
-import { SiteWebView } from '../../src/ui/SiteWebView';
+import { colors, spacing } from '../../src/theme';
+import { SitePageView } from '../../src/ui/PageBody';
 
 /**
- * صفحةٌ من موقع الكلّية داخل التطبيق.
+ * صفحةٌ محتوائيّة من صفحات الكلّية — **مرسومةً أصيلًا داخل التطبيق**.
  *
- * شاشةٌ واحدة تكفي الصفحات المحتوائيّة كلّها: `slug` هو المسار كما هو
- * مخزَّن في `nav_links` (`about.html`)، و`hash` المِرساة إن وُجدت
- * (`vision`)، و`title` عنوان العنصر في القائمة كي يظهر في الترويسة قبل
- * أن تُحمَّل الصفحة — لا بعدها.
+ * كانت هذه الشاشة تحمّل الصفحة في إطار ويب، ونسختُها في المتصفّح تعرض
+ * «افتحها من الموقع». وكلاهما مرفوض: القارئ يبقى في التطبيق من أوّله
+ * إلى آخره. فصار المصدر `/api/v1/pages/{slug}` يردّ المتن **كتلًا**
+ * (عنوان/فقرة/قائمة/صورة/اقتباس) يرسمها `SitePageView` بخطوط الكلّية
+ * وألوانها — والنصّ نفسه من قاعدة البيانات نفسها، فما يُحرَّر في اللوحة
+ * يظهر هنا وفي الموقع معًا.
+ *
+ * `slug` هو المسار كما هو مخزَّن في `nav_links` (`about.html`) — تُقصّ
+ * لاحقتُه في `getPage`. و`title` عنوان العنصر في القائمة كي تظهر
+ * الترويسة صحيحةً قبل وصول الردّ لا بعده، ثمّ يحلّ محلّه عنوان الصفحة
+ * من القاعدة. و`hash` يُقبل ويُهمَل: الصفحة تُعرض كاملةً ولا مِرساةَ
+ * في شاشةٍ أصيلة.
  *
  * وزرّ الرجوع يأتي من ترويسة التطبيق (`BrandHeader` في `app/_layout.tsx`)،
  * فالشاشة لا ترسم رأسًا لنفسها.
  */
 export default function SitePageScreen() {
-  const { slug, hash, title } = useLocalSearchParams<{
+  const { slug, title } = useLocalSearchParams<{
     slug: string;
     hash?: string;
     title?: string;
   }>();
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
 
-  /**
-   * يُثبَّت مرّةً لعمر الشاشة: لو تغيّر الأصل بعد دفء الذاكرة لأُعيد
-   * تحميل الصفحة تحت يد القارئ بلا سبب.
-   */
-  const [origin] = useState(cachedSiteOrigin);
+  /** عنوان الترويسة: من القائمة أوّلًا، ثمّ من القاعدة حين يصل الردّ. */
+  const [heading, setHeading] = useState<string>(() => String(title || ''));
 
   const path = String(slug ?? '');
-  const url = sitePageUrl(origin, lang, path, hash || null);
 
   return (
     <>
-      <Stack.Screen options={{ title: title || t('sitePage') }} />
+      <Stack.Screen options={{ title: heading || t('sitePage') }} />
       {/* الحافّة السفلى وحدها: الترويسة تبتلع هامش شريط الحالة أعلاه. */}
       <SafeAreaView style={styles.host} edges={['bottom']}>
-        <SiteWebView url={url} origin={origin} />
+        <ScrollView contentContainerStyle={styles.content}>
+          <SitePageView slug={path} onTitle={setHeading} />
+          <View style={{ height: spacing.xxl }} />
+        </ScrollView>
       </SafeAreaView>
     </>
   );
@@ -49,4 +54,7 @@ export default function SitePageScreen() {
 
 const styles = StyleSheet.create({
   host: { flex: 1, backgroundColor: colors.cream },
+  // لا حشوَ أفقيّ هنا: الهيرو يمتدّ من حافّةٍ إلى حافّة، والمتن يأخذ
+  // هامشه من `SitePageView` نفسه.
+  content: { paddingBottom: spacing.xl },
 });

@@ -232,7 +232,11 @@ export const strings = {
     certificateIsnad: 'الإسناد',
     certificateGrantedBy: 'المُجيز',
     certificateOpenPdf: 'فتح الوثيقة',
-    certificateVerify: 'صفحة التحقّق',
+    certificateVerify: 'التحقّق من الوثيقة',
+    certificateVerifying: 'يجري التحقّق…',
+    certificateVerifyValid: 'الوثيقة صحيحة وسارية.',
+    certificateVerifyRevoked: 'هذه الوثيقة ملغاة.',
+    certificateVerifyUnknown: 'لا وثيقة بهذا الرمز.',
     kindCERTIFICATE: 'شهادة',
     kindIJAZA: 'إجازة',
 
@@ -293,8 +297,7 @@ export const strings = {
     facultyCouncilHead: 'رئيس المجلس',
     contactTitle: 'تواصل معنا',
     contactBody: 'لأيّ استفسار عن القبول أو المقرّرات أو الرسوم، تفضّل بمراسلة إدارة الكلّية.',
-    contactOpenSite: 'صفحة التواصل على الموقع',
-    visitWebsite: 'موقع الكلّية',
+    aboutCollege: 'عن الكلّية',
 
     // ضيف
     guestNotice: 'سجّل الدخول للوصول إلى هذا القسم.',
@@ -304,6 +307,7 @@ export const strings = {
     menu: 'القائمة',
     menuStudentPortal: 'بوابة الطالب',
     menuAdminConsole: 'لوحة تحكّم الموقع',
+    menuAdminOnDesktop: 'إدارة الموقع ومحتواه تجري من لوحة التحكّم على الحاسوب.',
     menuOpensInBrowser: 'تُفتح في المتصفّح',
     menuPages: 'صفحات الكلّية',
     menuLive: 'البثّ المباشر',
@@ -312,11 +316,10 @@ export const strings = {
     menuExpand: 'عرض الصفحات الفرعيّة',
     menuCollapse: 'طيّ الصفحات الفرعيّة',
 
-    // صفحات الموقع داخل التطبيق
-    sitePage: 'صفحة من الموقع',
-    pageError: 'تعذّر تحميل هذه الصفحة من موقع الكلّية.',
-    pageOpenInBrowser: 'فتح الصفحة في المتصفّح',
-    pageWebNotice: 'صفحات الموقع تُعرض داخل التطبيق على الهاتف؛ وفي المتصفّح تُفتح في تبويب مستقلّ.',
+    // صفحات الكلّية — مرسومةً أصيلًا داخل التطبيق
+    sitePage: 'صفحة الكلّية',
+    pageError: 'تعذّر تحميل محتوى هذه الصفحة.',
+    pageEmpty: 'لا محتوى منشورًا في هذه الصفحة بعد.',
   },
 
   en: {
@@ -532,7 +535,11 @@ export const strings = {
     certificateIsnad: 'Chain of transmission',
     certificateGrantedBy: 'Granted by',
     certificateOpenPdf: 'Open document',
-    certificateVerify: 'Verification page',
+    certificateVerify: 'Verify this document',
+    certificateVerifying: 'Verifying…',
+    certificateVerifyValid: 'This document is valid.',
+    certificateVerifyRevoked: 'This document has been revoked.',
+    certificateVerifyUnknown: 'No document matches this code.',
     kindCERTIFICATE: 'Certificate',
     kindIJAZA: 'Ijaza',
 
@@ -588,8 +595,7 @@ export const strings = {
     facultyCouncilHead: 'Board chair',
     contactTitle: 'Contact us',
     contactBody: 'For any question about admission, courses or fees, please write to the college administration.',
-    contactOpenSite: 'Contact page on the website',
-    visitWebsite: 'College website',
+    aboutCollege: 'About the college',
 
     guestNotice: 'Sign in to reach this section.',
     goToLogin: 'Go to sign in',
@@ -597,6 +603,7 @@ export const strings = {
     menu: 'Menu',
     menuStudentPortal: 'Student portal',
     menuAdminConsole: 'Site control panel',
+    menuAdminOnDesktop: 'The site and its content are managed from the control panel on a computer.',
     menuOpensInBrowser: 'Opens in your browser',
     menuPages: 'College pages',
     menuLive: 'Live broadcast',
@@ -606,11 +613,9 @@ export const strings = {
     menuExpand: 'Show sub-pages',
     menuCollapse: 'Hide sub-pages',
 
-    sitePage: 'Website page',
-    pageError: 'Could not load this page from the college website.',
-    pageOpenInBrowser: 'Open the page in your browser',
-    pageWebNotice:
-      'Website pages are shown inside the app on a phone; in a browser they open in a separate tab.',
+    sitePage: 'College page',
+    pageError: 'Could not load this page’s content.',
+    pageEmpty: 'Nothing has been published on this page yet.',
   },
 } as const;
 

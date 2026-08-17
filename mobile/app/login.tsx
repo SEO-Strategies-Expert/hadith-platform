@@ -5,7 +5,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../src/auth/AuthContext';
 import { useI18n } from '../src/i18n';
 import { messageOf } from '../src/api/client';
-import { APPLY_URL } from '../src/config';
 import { colors, goldHairline, latinInput, navyScrim, radius, spacing } from '../src/theme';
 import { Button } from '../src/ui/Button';
 import { Field } from '../src/ui/Field';
@@ -14,7 +13,6 @@ import { GoldTitle, OrnamentRule } from '../src/ui/gold';
 import { RemoteImage } from '../src/ui/RemoteImage';
 import { LOGO_URL, PILLAR_IMAGES } from '../src/ui/assets';
 import { ErrorState } from '../src/ui/states';
-import { openExternal } from '../src/ui/openLink';
 
 export default function LoginScreen() {
   const { t } = useI18n();
@@ -132,7 +130,15 @@ export default function LoginScreen() {
             <Txt variant="small" color={colors.textOnNavyMuted}>
               {t('noAccountBody')}
             </Txt>
-            <Button label={t('applyAction')} onPress={() => void openExternal(APPLY_URL)} />
+            <Button
+              label={t('applyAction')}
+              onPress={() =>
+                router.push({
+                  pathname: '/page/[slug]',
+                  params: { slug: 'admissions.html', title: t('applyAction') },
+                })
+              }
+            />
           </LinearGradient>
 
           <Button label={t('browseAsGuest')} kind="ghost" onPress={() => router.replace('/')} />

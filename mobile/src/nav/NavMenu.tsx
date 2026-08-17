@@ -14,10 +14,8 @@ import { Card, LivePulse, Row, Txt } from '../ui/kit';
 import { openExternal } from '../ui/openLink';
 import { ErrorState, LoadingState, useQuery } from '../ui/states';
 import {
-  adminUrl,
   headerIcon,
   resolveTarget,
-  siteOrigin,
   socialIcon,
   type IconName,
   type NavTarget,
@@ -265,8 +263,6 @@ function NavMenuSheet({ onClose }: { onClose: () => void }) {
   const isAdmin = me?.role === 'ADMIN';
 
   const data = nav.data;
-  /** يعمل قبل وصول الردّ: يسقط إلى الموقع المضبوط في `.env`. */
-  const origin = siteOrigin(data?.site.url);
   const live = data?.live ?? null;
   const social = data?.social ?? [];
 
@@ -275,6 +271,8 @@ function NavMenuSheet({ onClose }: { onClose: () => void }) {
     (target: NavTarget, title: string) => {
       onClose();
       if (target.kind === 'external') {
+        // موقعٌ ليس للكلّية (`sunnah.one`، `dorar.net`…): هذا وحده ما
+        // يُفتح خارج التطبيق، وفتحُه خارجًا هو الصواب.
         void openExternal(target.url);
         return;
       }
@@ -282,10 +280,9 @@ function NavMenuSheet({ onClose }: { onClose: () => void }) {
         router.navigate(target.href);
         return;
       }
-      router.push({
-        pathname: '/page/[slug]',
-        params: { slug: target.path, hash: target.hash ?? '', title },
-      });
+      // صفحةٌ محتوائيّة: تُرسم أصيلًا في `page/[slug]` لا في متصفّح.
+      // والمِرساة تُهمَل — الصفحة تُعرض كاملةً في شاشةٍ واحدة.
+      router.push({ pathname: '/page/[slug]', params: { slug: target.path, title } });
     },
     [onClose]
   );
@@ -381,19 +378,21 @@ function NavMenuSheet({ onClose }: { onClose: () => void }) {
           ) : null}
 
           {/*
-            لوحة تحكّم الموقع ويبٌ لا تطبيق: لا نظير لها في الشاشات
-            الأصيلة، ولا تُعرض في `WebView` لأنّها لوحة تحريرٍ كاملة تحتاج
-            جلسة المتصفّح ورفعَ الملفّات. فتُفتح في متصفّح النظام، والسطر
-            الصغير تحتها يقول ذلك قبل الضغط لا بعده.
+            لوحة تحكّم الموقع لوحةُ تحريرٍ كاملة على الحاسوب: رفعُ ملفّات،
+            ومحرّرُ نصٍّ طويل، وجداولُ عريضة. ولا نظير لها في التطبيق.
+            فلم يعد لها بندٌ يضغطه المدير: لا رابطَ يخرج إلى المتصفّح ولا
+            عنوانَ يُعرض — سطرٌ مكتوب يقول أين تُدار، وكفى.
           */}
           {authed && isAdmin ? (
-            <MenuRow
-              icon="shield-checkmark-outline"
-              label={t('menuAdminConsole')}
-              hint={t('menuOpensInBrowser')}
-              trailing="open-outline"
-              onPress={() => void openExternal(adminUrl(origin))}
-            />
+            <Card style={{ gap: spacing.xs }}>
+              <Row gap={spacing.sm}>
+                <Ionicons name="shield-checkmark-outline" size={18} color={colors.navy} />
+                <Txt variant="smallStrong">{t('menuAdminConsole')}</Txt>
+              </Row>
+              <Txt variant="tiny" color={colors.textMuted}>
+                {t('menuAdminOnDesktop')}
+              </Txt>
+            </Card>
           ) : null}
         </Section>
 

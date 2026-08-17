@@ -1,26 +1,26 @@
 import type { Href } from 'expo-router';
 import type { Ionicons } from '@expo/vector-icons';
-import { WEBSITE_URL } from '../config';
-import type { Lang } from '../i18n';
 
 /**
- * ترجمة روابط الموقع إلى وجهاتٍ في التطبيق.
+ * ترجمة روابط القائمة إلى وجهاتٍ **داخل التطبيق**.
  *
- * القاعدة الحاكمة: **الشاشة الأصيلة تسبق الويب دائمًا.** الكلّية بنت في
- * التطبيق شاشاتٍ حقيقيّة للمقرّرات والأخبار والهيئة والتواصل والدخول،
- * وهي أسرع وأليق بالجهاز من صفحةٍ محمَّلة في `WebView`. فما له نظيرٌ
- * أصيل يذهب إليه، وما ليس له يُفتح من الموقع كما هو — الموقع متجاوبٌ
- * أصلًا وبهويّة الكلّية، فإعادةُ كتابة سبعٍ وثلاثين صفحةً شاشةً شاشة
- * عملٌ بلا عائد، وتفريقٌ للمحتوى في موضعين يفترقان مع أوّل تحديث.
+ * القاعدة الحاكمة بعد إعادة البناء: **لا شيء يخرج إلى موقع الكلّية.**
+ * ما له شاشةٌ أصيلة مبنيّة (المقرّرات، الأخبار، الهيئة، التواصل، الدخول،
+ * البرامج) يذهب إليها؛ وما بقي من الصفحات المحتوائيّة يُرسم أصيلًا في
+ * `app/page/[slug].tsx` من `/api/v1/pages/{slug}` — والنصّ مصدرُه قاعدة
+ * البيانات نفسها التي يقرأ منها الموقع، فلا نسختان تفترقان.
+ *
+ * ولا يخرج إلى المتصفّح إلّا ما ليس من الكلّية أصلًا: المواقع البحثيّة
+ * (`sunnah.one`، `dorar.net`…) المعلَّمة `external` في القاعدة.
  */
 
 export type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
 /**
  * وجهةُ عنصرٍ في القائمة:
- *  · `native` — شاشة في التطبيق.
- *  · `page`   — صفحة من الموقع تُعرض داخل التطبيق في `WebView`.
- *  · `external` — موقعٌ آخر (`sunnah.one`…) يُفتح في متصفّح النظام.
+ *  · `native` — شاشة مبنيّة في التطبيق.
+ *  · `page`   — صفحة محتوائيّة تُرسم أصيلًا في `page/[slug]`.
+ *  · `external` — موقعٌ آخر لا صلة له بالكلّية (`sunnah.one`…).
  */
 export type NavTarget =
   | { kind: 'native'; href: Href }
@@ -62,43 +62,12 @@ export function resolveTarget(href: string, external: boolean): NavTarget {
   return { kind: 'page', path, hash };
 }
 
-/**
- * أصل الموقع الذي تُبنى عليه روابط الصفحات. يُقدَّم ما يرسله الخادم
- * (وهو المضيف الذي وصله الطلب فعلًا، فيوافق نسخةَ التطوير ونسخةَ
- * الإنتاج تلقائيًّا) على الثابت المضبوط في `.env`.
+/*
+ * حُذف من هنا كلّ ما كان يبني رابطًا إلى موقع الكلّية —
+ * `siteOrigin` و`sitePageUrl` و`adminUrl` و`isSameOrigin`. لم يعد في
+ * التطبيق طريقٌ يخرج إليه: الصفحات تُقرأ من الواجهة وتُرسم أصيلًا،
+ * ولوحةُ التحكّم تُدار من الحاسوب لا من التطبيق.
  */
-export function siteOrigin(fromApi: string | null | undefined): string {
-  const s = (fromApi ?? '').trim().replace(/\/+$/, '');
-  return s || WEBSITE_URL;
-}
-
-/**
- * رابط صفحة الموقع بلغة الواجهة — منقول عن `siteHref` في
- * `src/lib/site-links.ts` بالموقع: الإنجليزيّة تحت `/en`، والرئيسة
- * مسارها الجذر لا `index.html`.
- */
-export function sitePageUrl(origin: string, lang: Lang, path: string, hash?: string | null): string {
-  const isHome = path === 'index.html' || path === '';
-  const base = isHome ? (lang === 'ar' ? '/' : '/en') : lang === 'ar' ? `/${path}` : `/en/${path}`;
-  // `app=1` يجعل الخادم يحذف هيدر الموقع وشريطه وفوتره، فلا يجتمع هيدران داخل
-  // التطبيق. القرار على الخادم لا بحقن CSS في الـWebView: الحقن كان لا يُنفَّذ
-  // على الجهاز أحيانًا فتظهر الصفحة بإطارها كاملًا.
-  return `${origin}${base}?app=1${hash ? `#${hash}` : ''}`;
-}
-
-/** لوحة تحكّم الموقع — صفحةُ ويبٍ لا شاشةَ تطبيق، فتُفتح في المتصفّح. */
-export function adminUrl(origin: string): string {
-  return `${origin}/admin`;
-}
-
-/** أمِنَ الرابطُ ووقع على نفس أصل الموقع؟ عندئذٍ يبقى داخل `WebView`. */
-export function isSameOrigin(url: string, origin: string): boolean {
-  try {
-    return new URL(url).origin === new URL(origin).origin;
-  } catch {
-    return false;
-  }
-}
 
 /* ————————————— الأيقونات ————————————— */
 

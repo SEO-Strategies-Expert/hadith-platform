@@ -18,6 +18,7 @@ import type {
   NewsItem,
   NotificationsPage,
   Paged,
+  PageContent,
   PaymentsPage,
   ProgressResult,
   QuizOverview,
@@ -26,6 +27,7 @@ import type {
   StartAttemptResult,
   SubmitAttemptResult,
   TokenPair,
+  VerifyResult,
 } from './types';
 
 /** كل نداءات الواجهة في موضع واحد — لا `fetch` في أيّ شاشة. */
@@ -73,6 +75,20 @@ export const getPublicSessions = (limit = 20) =>
  * تُقرأ من القاعدة حيًّا: ما يعدّله المدير في اللوحة يظهر هنا بلا إصدارٍ جديد.
  */
 export const getNav = () => apiRequest<NavPayload>('/nav');
+
+/**
+ * صفحةٌ محتوائيّة **مفكَّكةً إلى كتل** يرسمها التطبيق أصليًّا.
+ *
+ * `slug` هو المسار بلا لاحقة (`about`)؛ وما جاء من شجرة القائمة يحمل
+ * `.html` فيُقصّ هنا لا في كلّ نداء. والمِرساة (`#vision`) لا معنى لها
+ * للخادم: الصفحة تُرجَع كاملةً والقارئ يمرّ عليها.
+ */
+export const getPage = (slugOrPath: string, lang: 'ar' | 'en') => {
+  const slug = slugOrPath.trim().replace(/^\/+/, '').replace(/#.*$/, '').replace(/\.html?$/i, '');
+  return apiRequest<PageContent>(`/pages/${encodeURIComponent(slug || 'index')}`, {
+    query: { lang },
+  });
+};
 
 /* ————— الطالب ————— */
 
@@ -138,6 +154,13 @@ export const saveAssignment = (
 
 export const getCertificates = (args?: PageArgs) =>
   apiRequest<Paged<Certificate>>('/me/certificates', { auth: true, query: page(args) });
+
+/**
+ * التحقّق العلنيّ من وثيقة برمزها — مسارٌ عامّ بلا مصادقة.
+ * تُعرض نتيجته **داخل الشاشة**؛ لا صفحةَ تحقّقٍ تُفتح في المتصفّح.
+ */
+export const verifyCertificateCode = (code: string) =>
+  apiRequest<VerifyResult>(`/verify/${encodeURIComponent(code)}`);
 
 export const getPayments = (args?: PageArgs) =>
   apiRequest<PaymentsPage>('/me/payments', { auth: true, query: page(args) });

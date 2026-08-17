@@ -6,7 +6,10 @@ import type { ExpoConfig } from 'expo/config';
  * ويُقرأ في الكود من `src/config.ts` وحده — لا رابط مكتوب داخل أيّ شاشة.
  */
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL?.trim() || 'http://localhost:3000';
-const websiteUrl = process.env.EXPO_PUBLIC_WEBSITE_URL?.trim() || 'https://hadith-platform-hassan67844-4138s-projects.vercel.app';
+/*
+  لا `websiteUrl` هنا بعد اليوم: لم يبقَ في التطبيق طريقٌ يخرج إلى موقع
+  الكلّية — كلّ صفحاته تُقرأ من `/api/v1/pages` وتُرسم أصيلًا.
+*/
 const easProjectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID?.trim() || undefined;
 
 const NAVY_DARK = '#01183A';
@@ -126,7 +129,6 @@ const config: ExpoConfig = {
 
   extra: {
     apiBaseUrl,
-    websiteUrl,
     eas: easProjectId ? { projectId: easProjectId } : undefined,
   },
 };

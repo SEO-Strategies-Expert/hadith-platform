@@ -2,7 +2,6 @@ import Constants from 'expo-constants';
 
 type Extra = {
   apiBaseUrl?: string;
-  websiteUrl?: string;
   eas?: { projectId?: string };
 };
 
@@ -16,15 +15,15 @@ export const API_BASE_URL = stripTrailingSlash(extra.apiBaseUrl ?? 'http://local
 /** جذر واجهة النسخة الأولى — كل نداءات الشبكة تُبنى عليه. */
 export const API_V1 = `${API_BASE_URL}/api/v1`;
 
-/** موقع الكلّية العلني — للروابط الخارجيّة (طلب الالتحاق، التحقّق من الوثائق). */
-export const WEBSITE_URL = stripTrailingSlash(extra.websiteUrl ?? API_BASE_URL);
-
-/** صفحة طلب الالتحاق: لا تسجيل ذاتيّ داخل التطبيق، فالقبول يمرّ بالموقع. */
-export const APPLY_URL = `${WEBSITE_URL}/admissions.html`;
-export const CONTACT_URL = `${WEBSITE_URL}/contact.html`;
+/**
+ * لا ثابتَ هنا لموقع الكلّية بعد اليوم.
+ *
+ * كانت `WEBSITE_URL` و`APPLY_URL` و`CONTACT_URL` و`verifyUrl` تبني روابط
+ * تخرج بالمستخدم من التطبيق إلى المتصفّح — وهو ما رفضه العميل صراحةً.
+ * صار لكلٍّ منها نظيرٌ داخليّ: صفحة القبول والتواصل تُرسمان أصيلًا من
+ * `/api/v1/pages/{slug}`، والتحقّق من الوثيقة يجري من `/api/v1/verify/{code}`
+ * وتُعرض نتيجته في الشاشة نفسها.
+ */
 
 /** معرّف مشروع EAS — يلزم لاستخراج رمز إشعارات Expo. */
 export const EAS_PROJECT_ID = extra.eas?.projectId;
-
-/** رابط التحقّق العلني من وثيقة بالرمز. */
-export const verifyUrl = (code: string) => `${WEBSITE_URL}/verify.html?code=${encodeURIComponent(code)}`;

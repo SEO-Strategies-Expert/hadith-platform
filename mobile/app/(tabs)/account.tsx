@@ -4,13 +4,11 @@ import { useRouter, type Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../src/auth/AuthContext';
 import { useI18n } from '../../src/i18n';
-import { WEBSITE_URL } from '../../src/config';
 import { colors, spacing } from '../../src/theme';
 import { Button } from '../../src/ui/Button';
 import { Badge, Card, InfoRow, NavyPanel, PressableCard, Row, Screen, Txt } from '../../src/ui/kit';
 import { GoldTitle, OrnamentRule } from '../../src/ui/gold';
 import { RequireAuth } from '../../src/ui/RequireAuth';
-import { openExternal } from '../../src/ui/openLink';
 import { useInstructorText } from '../../src/instructor/ui';
 
 type LinkRow = { label: string; href: Href; icon: React.ComponentProps<typeof Ionicons>['name']; badge?: string };
@@ -150,7 +148,20 @@ export default function AccountScreen() {
 
       {renderLinks(publicLinks)}
 
-      <Button label={t('visitWebsite')} kind="ghost" onPress={() => void openExternal(WEBSITE_URL)} />
+      {/*
+        كان هنا زرُّ «موقع الكلّية» يخرج بالمستخدم إلى المتصفّح. صار
+        ينتقل إلى صفحة «عن الكلّية» مرسومةً أصيلًا داخل التطبيق.
+      */}
+      <Button
+        label={t('aboutCollege')}
+        kind="ghost"
+        onPress={() =>
+          router.push({
+            pathname: '/page/[slug]',
+            params: { slug: 'about.html', title: t('aboutCollege') },
+          })
+        }
+      />
 
       {authed ? (
         <Button label={busy ? t('loggingOut') : t('logout')} kind="danger" loading={busy} onPress={confirmSignOut} />

@@ -5,7 +5,6 @@ import { useAuth } from '../../src/auth/AuthContext';
 import { useI18n } from '../../src/i18n';
 import { getCourses, getFaculty, getMySessions, getNews, getPublicSessions } from '../../src/api/endpoints';
 import type { CourseCard, FacultyMember, Paged, SessionPublic, SessionStudent } from '../../src/api/types';
-import { APPLY_URL } from '../../src/config';
 import { colors, spacing } from '../../src/theme';
 import { Button } from '../../src/ui/Button';
 import { NavyPanel, SectionTitle, SectionTitleOnNavy, Txt } from '../../src/ui/kit';
@@ -13,7 +12,6 @@ import { CourseTile, NewsLeadTile, NewsTile, PillarTile, SessionTile } from '../
 import { Hero, StatsBand } from '../../src/ui/Hero';
 import { heroSlide, PILLAR_IMAGES } from '../../src/ui/assets';
 import { QueryView, useQuery } from '../../src/ui/states';
-import { openExternal } from '../../src/ui/openLink';
 
 /** حصيلةُ الإحصاءات — تُجلب مرّةً وتُشتقّ منها المراحل بلا مسارٍ إضافي. */
 type Stats = { courses: Paged<CourseCard>; faculty: Paged<FacultyMember> };
@@ -107,7 +105,16 @@ export default function HomeScreen() {
           vision={t('heroVision')}
           actions={
             <>
-              <Button label={t('applyAction')} onPress={() => void openExternal(APPLY_URL)} />
+              {/* القبول والتسجيل: صفحةٌ أصيلة في التطبيق لا صفحةُ موقع. */}
+              <Button
+                label={t('applyAction')}
+                onPress={() =>
+                  router.push({
+                    pathname: '/page/[slug]',
+                    params: { slug: 'admissions.html', title: t('applyAction') },
+                  })
+                }
+              />
               <Button label={t('heroExplore')} kind="onNavy" onPress={() => router.push('/courses')} />
             </>
           }

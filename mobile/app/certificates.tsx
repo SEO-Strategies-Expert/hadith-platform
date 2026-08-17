@@ -1,14 +1,65 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useI18n } from '../src/i18n';
-import { getCertificates } from '../src/api/endpoints';
-import { verifyUrl } from '../src/config';
+import { getCertificates, verifyCertificateCode } from '../src/api/endpoints';
+import { messageOf } from '../src/api/client';
 import { colors, spacing } from '../src/theme';
 import { Button } from '../src/ui/Button';
 import { Badge, Card, Divider, InfoRow, Row, Screen, Txt } from '../src/ui/kit';
 import { RequireAuth } from '../src/ui/RequireAuth';
 import { PagedView, usePagedQuery } from '../src/ui/states';
 import { openExternal } from '../src/ui/openLink';
+
+/**
+ * التحقّق من الوثيقة — **داخل الشاشة**.
+ *
+ * كان الزرّ يفتح `verify.html` على موقع الكلّية في متصفّح النظام. صار
+ * ينادي `/api/v1/verify/{code}` ويعرض جوابه سطرًا تحته: صحيحة، أو ملغاة،
+ * أو لا وثيقة بهذا الرمز. فلا يخرج المستخدم من التطبيق ليعرف حال وثيقته.
+ */
+function VerifyRow({ code }: { code: string }) {
+  const { t } = useI18n();
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<{ tone: 'ok' | 'bad'; text: string } | null>(null);
+
+  const run = useCallback(() => {
+    setBusy(true);
+    setResult(null);
+    verifyCertificateCode(code)
+      .then((r) => {
+        if (r.status === 'valid') setResult({ tone: 'ok', text: t('certificateVerifyValid') });
+        else if (r.status === 'revoked') setResult({ tone: 'bad', text: t('certificateVerifyRevoked') });
+        else setResult({ tone: 'bad', text: t('certificateVerifyUnknown') });
+      })
+      .catch((err: unknown) => setResult({ tone: 'bad', text: messageOf(err) }))
+      .finally(() => setBusy(false));
+  }, [code, t]);
+
+  return (
+    <View style={{ gap: spacing.sm }}>
+      <Button
+        label={busy ? t('certificateVerifying') : t('certificateVerify')}
+        kind="ghost"
+        small
+        loading={busy}
+        onPress={run}
+      />
+      {result ? (
+        <Row gap={spacing.sm}>
+          <Ionicons
+            name={result.tone === 'ok' ? 'checkmark-circle-outline' : 'alert-circle-outline'}
+            size={17}
+            color={result.tone === 'ok' ? colors.success : colors.danger}
+          />
+          <Txt variant="smallStrong" color={result.tone === 'ok' ? colors.success : colors.danger}>
+            {result.text}
+          </Txt>
+        </Row>
+      ) : null}
+    </View>
+  );
+}
 
 export default function CertificatesScreen() {
   return (
@@ -65,12 +116,7 @@ function CertificatesList() {
               {cert.pdfUrl ? (
                 <Button label={t('certificateOpenPdf')} onPress={() => void openExternal(cert.pdfUrl)} />
               ) : null}
-              <Button
-                label={t('certificateVerify')}
-                kind="ghost"
-                small
-                onPress={() => void openExternal(verifyUrl(cert.verifyCode))}
-              />
+              <VerifyRow code={cert.verifyCode} />
             </Card>
           ))}
           {list.hasMore ? (
