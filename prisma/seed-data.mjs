@@ -54,7 +54,6 @@ export const headerNav = [
   { labelAr: "القبول", labelEn: "Admissions", href: "admissions.html", icon: "i-admission" },
   { labelAr: "ديوان العلماء", labelEn: "Scholars' Forum", href: "diwan.html", icon: "i-diwan" },
   { labelAr: "المكتبة الرقمية", labelEn: "Digital Library", href: "library.html", icon: "i-diglib" },
-  { labelAr: "الاعتماد", labelEn: "Accreditation", href: "accreditation.html", icon: "i-accredit" },
   { labelAr: "الأخبار", labelEn: "News", href: "news.html", icon: "i-news" },
   { labelAr: "التواصل", labelEn: "Contact", href: "contact.html", icon: "i-contact" },
 ];

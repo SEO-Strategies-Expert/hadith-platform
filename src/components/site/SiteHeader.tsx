@@ -17,6 +17,7 @@ const T = {
     home: "الرئيسية",
     live: "البث المباشر",
     uniSocial: "صفحات الجامعة",
+    accreditation: "الإعتماد",
   },
   en: {
     platforms: "College platforms",
@@ -31,6 +32,7 @@ const T = {
     home: "Home",
     live: "Live broadcast",
     uniSocial: "University social pages",
+    accreditation: "Accreditation",
   },
 } as const;
 
@@ -187,20 +189,11 @@ export async function SiteHeader({
                 return (
                   <li key={item.id} className={item.children.length ? "has-drop" : undefined}>
                     <Link
-                      className={item.href === "university.html" ? "nav-item nav-item-university" : "nav-item"}
+                      className="nav-item"
                       href={siteHref(lang, item.href)}
                       aria-current={active ? "page" : undefined}
                     >
-                      <span className={item.href === "university.html" ? "ic ic-university" : "ic"}>
-                        {item.href === "university.html" ? (
-                          <img src="/assets/img/university-logo.png" alt="" className="nav-university-logo" />
-                        ) : (
-                          <svg aria-hidden="true">
-                            <use href={`#${item.icon ?? "i-arrow"}`} />
-                          </svg>
-                        )}
-                      </span>
-                      <em className={item.href === "university.html" && lang === "ar" ? "thuluth gold-text" : undefined}>
+                      <em>
                         {lang === "ar" ? item.labelAr : item.labelEn}
                       </em>
                     </Link>
@@ -220,6 +213,12 @@ export async function SiteHeader({
           </nav>
 
           <div className="menubar-end">
+            <Link className="accreditation-link" href={siteHref(lang, "accreditation.html")} aria-label={t.accreditation}>
+              <span className="accreditation-logo">
+                <img src="/assets/img/university-logo.png" alt="" width={40} height={40} />
+              </span>
+              <span className={lang === "ar" ? "thuluth gold-text" : undefined}>{t.accreditation}</span>
+            </Link>
             <Link className="btn btn-gold btn-student" href={siteHref(lang, "student-login.html")}>
               <span className="btn-student-ic">
                 <svg aria-hidden="true">
