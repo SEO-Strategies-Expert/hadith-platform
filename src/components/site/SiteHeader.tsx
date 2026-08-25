@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { Lang } from "@/lib/site-data";
 import { getHeaderNav, getSocialLinks, getSettingsMap } from "@/lib/site-data";
 import { siteHref, counterpartPath } from "@/lib/site-links";
+import { auth } from "@/auth";
+import { studentLogout } from "@/app/(site)/student-actions";
 
 const T = {
   ar: {
@@ -18,6 +20,7 @@ const T = {
     live: "البث المباشر",
     uniSocial: "صفحات الجامعة",
     accreditation: "الإعتماد",
+    logout: "تسجيل الخروج",
   },
   en: {
     platforms: "College platforms",
@@ -33,6 +36,7 @@ const T = {
     live: "Live broadcast",
     uniSocial: "University social pages",
     accreditation: "Accreditation",
+    logout: "Log out",
   },
 } as const;
 
@@ -45,12 +49,15 @@ export async function SiteHeader({
   currentSlug: string;
   pathname: string;
 }) {
-  const [nav, social, settings] = await Promise.all([
+  const [nav, social, settings, session] = await Promise.all([
     getHeaderNav(),
     getSocialLinks(),
     getSettingsMap(),
+    auth(),
   ]);
   const t = T[lang];
+  const isStudent = session?.user?.role === "STUDENT";
+  const logout = studentLogout.bind(null, lang);
   const brandName = lang === "ar" ? settings.get("site.shortAr") : settings.get("site.shortEn");
   // السقوط إلى الاسم المختصر ثم إلى نصّ ثابت: الاسم يدخل في قالب نصّي لـaria-label،
   // وقيمة غائبة كانت تُطبع حرفيًّا «undefined» فيقرأها قارئ الشاشة.
@@ -219,14 +226,22 @@ export async function SiteHeader({
               </span>
               <span className={lang === "ar" ? "thuluth gold-text" : undefined}>{t.accreditation}</span>
             </Link>
-            <Link className="btn btn-gold btn-student" href={siteHref(lang, "student-login.html")}>
-              <span className="btn-student-ic">
-                <svg aria-hidden="true">
-                  <use href="#i-student" />
-                </svg>
-              </span>
-              <span className="btn-student-label">{t.login}</span>
-            </Link>
+            {isStudent ? (
+              <form action={logout}>
+                <button className="btn btn-gold btn-student" type="submit">
+                  <span className="btn-student-label">{t.logout}</span>
+                </button>
+              </form>
+            ) : (
+              <Link className="btn btn-gold btn-student" href={siteHref(lang, "student-login.html")}>
+                <span className="btn-student-ic">
+                  <svg aria-hidden="true">
+                    <use href="#i-student" />
+                  </svg>
+                </span>
+                <span className="btn-student-label">{t.login}</span>
+              </Link>
+            )}
             <button className="nav-toggle" type="button" aria-expanded="false" aria-controls="mainnav" aria-label={t.menu}>
               <svg aria-hidden="true">
                 <use href="#i-menu" />

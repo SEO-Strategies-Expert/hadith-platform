@@ -186,21 +186,26 @@ const bindHeroSlides: Binder = async ($, lang) => {
 const bindFacultyRail: Binder = async ($, lang) => {
   const rail = $("#facultyRail");
   if (rail.length === 0) return;
+  rail.find("br").remove();
   const rows = await prisma.scholar.findMany(visibleOrder);
   if (rows.length === 0) return;
 
   const html = rows
     .map((s, i) => {
+      const clean = (v: string) =>
+        v
+          .replace(/&lt;br\s*\/?&gt;\s*&lt;\/br&gt;/gi, " ")
+          .replace(/<br\s*\/?>(?:\s*<\/br>)?/gi, " ")
+          .replace(/\s+/g, " ")
+          .trim();
       const photo = mediaUrl(s.photoUrl, fallbackImage(i));
-      const rank = (lang === "ar" ? s.rankAr : s.rankEn) ?? "";
-      const name = lang === "ar" ? s.nameAr : s.nameEn;
-      const spec = (lang === "ar" ? s.specAr : s.specEn) ?? "";
+      const rank = clean((lang === "ar" ? s.rankAr : s.rankEn) ?? "");
+      const spec = clean((lang === "ar" ? s.specAr : s.specEn) ?? "");
       return (
         `<li class="person reveal">` +
         `<div class="person-photo"><img src="${esc(photo)}" alt="" loading="lazy" width="520" height="650"></div>` +
         `<div class="person-body">` +
         `<span class="person-rank">${esc(rank)}</span>` +
-        `<b>${esc(name)}</b>` +
         `<span class="person-spec">${esc(spec)}</span>` +
         `</div></li>`
       );

@@ -28,10 +28,10 @@ export const socialLinks = [
 ];
 
 export const heroSlides = [
-  { imageAr: "assets/img/slide-1.jpg", imageEn: "assets/img/slide-1-en.jpg", altAr: "درسٌ علميٌّ مباشرٌ من قاعة الكلّية يتابعه الطلبة على الشاشة", altEn: "A live lecture hall where students follow a senior scholar on screen", order: 1 },
-  { imageAr: "assets/img/slide-2.jpg", imageEn: "assets/img/slide-2-en.jpg", altAr: "دواوين المذاكرات العلمية بين علماء الحديث النبوي وباحثيه وطلبته", altEn: "The college's scholarly discussion councils", order: 2 },
-  { imageAr: "assets/img/slide-3.jpg", imageEn: "assets/img/slide-3-en.jpg", altAr: "مناهج تعليمية متناسبة مع مراحل التخصّص في علوم الحديث النبوي", altEn: "A curriculum aligned with the stages of specialization", order: 3 },
-  { imageAr: "assets/img/slide-4.jpg", imageEn: "assets/img/slide-4-en.jpg", altAr: "إكمال برنامج الكلّية يعني بداية العالِميّة في علوم الحديث النبوي", altEn: "Completing the program marks the beginning of the ʿālamiyyah", order: 4 },
+  { imageAr: "assets/img/hero-custom-1.png", imageEn: "assets/img/slide-1-en.jpg", altAr: "درسٌ علميٌّ مباشرٌ من قاعة الكلّية يتابعه الطلبة على الشاشة", altEn: "A live lecture hall where students follow a senior scholar on screen", order: 1 },
+  { imageAr: "assets/img/hero-custom-2.png", imageEn: "assets/img/slide-2-en.jpg", altAr: "دواوين المذاكرات العلمية بين علماء الحديث النبوي وباحثيه وطلبته", altEn: "The college's scholarly discussion councils", order: 2 },
+  { imageAr: "assets/img/hero-custom-3.png", imageEn: "assets/img/slide-3-en.jpg", altAr: "مناهج تعليمية متناسبة مع مراحل التخصّص في علوم الحديث النبوي", altEn: "A curriculum aligned with the stages of specialization", order: 3 },
+  { imageAr: "assets/img/hero-custom-4.png", imageEn: "assets/img/slide-4-en.jpg", altAr: "إكمال برنامج الكلّية يعني بداية العالِميّة في علوم الحديث النبوي", altEn: "Completing the program marks the beginning of the ʿālamiyyah", order: 4 },
 ];
 
 // روابط الهيدر (مع القوائم المنسدلة) — parentIndex يشير إلى العنصر الأب داخل هذه المصفوفة

@@ -336,7 +336,8 @@ svg.brandicon{fill:currentColor;stroke:none}
   backdrop-filter:blur(8px);transition:.24s var(--ease);
 }
 .arrow:hover{background:var(--gold);border-color:var(--gold);color:var(--navy-950)}
-html[dir="rtl"] .hero-nav #heroPrev svg,html[dir="rtl"] .hero-nav #heroNext svg{transform:scaleX(-1)}
+.arrow svg{width:20px;height:20px;display:block}
+html[dir="rtl"] .arrow svg{transform:scaleX(-1)}
 
 /* شريط الإجراءات أسفل الهيرو */
 .hero-bar{background:linear-gradient(180deg,var(--navy-900),var(--navy-950));border-top:1px solid rgba(217,174,75,.24)}

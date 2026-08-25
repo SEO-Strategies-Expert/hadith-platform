@@ -4,7 +4,8 @@ export type Lang = "ar" | "en";
 
 export async function getHeaderNav() {
   return prisma.navLink.findMany({
-    where: { menu: "HEADER", parentId: null, visible: true },
+    // Keep the university link out of the college header; the university identity is already represented by the accreditation control.
+    where: { menu: "HEADER", parentId: null, visible: true, href: { not: "university.html" } },
     orderBy: { order: "asc" },
     include: { children: { orderBy: { order: "asc" }, where: { visible: true } } },
   });
