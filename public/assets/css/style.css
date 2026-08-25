@@ -231,9 +231,9 @@ svg.brandicon{fill:currentColor;stroke:none}
   content:"";position:absolute;inset:0;pointer-events:none;opacity:.14;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cg fill='none' stroke='%23D9AE4B' stroke-width='.9'%3E%3Cpath d='M48 4 62 18 48 32 34 18z'/%3E%3Cpath d='M48 64 62 78 48 92 34 78z'/%3E%3Cpath d='M0 48 14 34 28 48 14 62z'/%3E%3Cpath d='M96 48 82 34 68 48 82 62z'/%3E%3C/g%3E%3C/svg%3E");
 }
-.menubar>.container{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;
-  gap:10px;padding-block:9px;position:relative;z-index:1;max-width:1460px}
-@media(min-width:1600px){.menubar>.container{max-width:1620px}}
+.menubar>.container{display:grid;grid-template-columns:minmax(360px,auto) minmax(0,1fr) auto;align-items:center;
+  gap:10px;padding-block:9px;padding-inline:clamp(18px,2.2vw,48px);position:relative;z-index:1;max-width:min(100%,1760px)}
+@media(min-width:1800px){.menubar>.container{max-width:min(100%,1780px)}}
 
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
 .brand-mark{position:relative;flex:none;display:grid;place-items:center}
@@ -253,7 +253,7 @@ svg.brandicon{fill:currentColor;stroke:none}
 .mainnav{min-width:0;display:flex;justify-content:center}
 /* justify-self:start يمنع تمدّد الطرف الثالث ليملأ مسار الشبكة المُفرَّغ حين يخرج .mainnav من التخطيط عند الطيّ */
 .menubar-end{flex:none;justify-self:start}
-.mainnav-list{display:flex;align-items:center;gap:4px;max-width:100%;padding:4px;border:1px solid rgba(217,174,75,.16);border-radius:14px;background:rgba(7,22,48,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.mainnav-list{display:flex;align-items:center;gap:4px;max-width:100%;min-width:0;padding:4px;border:1px solid rgba(217,174,75,.16);border-radius:14px;background:rgba(7,22,48,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
 .nav-collapsed .mainnav-list{visibility:hidden}
 .mainnav-list>li{position:relative;flex:0 0 auto}
 .nav-item{
@@ -280,13 +280,13 @@ svg.brandicon{fill:currentColor;stroke:none}
 .drop a:hover{background:var(--navy-800);color:var(--gold-1)}
 
 /* طرف المِنيو بار */
-.menubar-end{display:flex;align-items:center;gap:11px;flex:none}
+.menubar-end{position:relative;z-index:3;display:flex;align-items:center;gap:11px;flex:none}
 
-.accreditation-link{height:42px;display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:12px;border:1px solid rgba(217,174,75,.34);background:rgba(255,255,255,.08);color:var(--cream-50);font-size:13px;font-weight:800;white-space:nowrap;transition:background .22s var(--ease),border-color .22s var(--ease),transform .22s var(--ease)}
+.accreditation-link{height:46px;min-width:126px;display:flex;align-items:center;justify-content:center;gap:9px;padding:6px 12px;border-radius:14px;border:1px solid rgba(217,174,75,.38);background:rgba(255,255,255,.08);color:var(--gold-1);font-size:14px;font-weight:900;line-height:1;white-space:nowrap;overflow:hidden;flex:0 0 auto;transition:background .22s var(--ease),border-color .22s var(--ease),transform .22s var(--ease)}
 .accreditation-link:hover{background:rgba(217,174,75,.16);border-color:rgba(217,174,75,.72);transform:translateY(-1px)}
-.accreditation-logo{width:32px;height:32px;display:grid;place-items:center;flex:none;border-radius:10px;background:rgba(248,242,227,.96);box-shadow:0 5px 12px rgba(0,0,0,.22)}
-.accreditation-logo img{width:27px;height:27px;object-fit:contain}
-.accreditation-link .thuluth{font-size:15px;line-height:1.2}
+.accreditation-logo{width:34px;height:34px;display:grid;place-items:center;flex:none;border-radius:10px;background:rgba(248,242,227,.96);box-shadow:0 5px 12px rgba(0,0,0,.22)}
+.accreditation-logo img{width:28px;height:28px;object-fit:contain}
+.accreditation-link .thuluth{display:block;background:none;color:var(--gold-1);-webkit-text-fill-color:currentColor;filter:none;font-family:'PlexAr','IBM Plex Sans Arabic','Segoe UI',system-ui,sans-serif!important;font-size:14px;font-weight:900;line-height:1;padding:0}
 
 
 .nav-toggle{display:none;background:rgba(255,255,255,.1);border:1px solid var(--gold-soft);border-radius:11px;
@@ -336,6 +336,7 @@ svg.brandicon{fill:currentColor;stroke:none}
   backdrop-filter:blur(8px);transition:.24s var(--ease);
 }
 .arrow:hover{background:var(--gold);border-color:var(--gold);color:var(--navy-950)}
+html[dir="rtl"] .hero-nav #heroPrev svg,html[dir="rtl"] .hero-nav #heroNext svg{transform:scaleX(-1)}
 
 /* شريط الإجراءات أسفل الهيرو */
 .hero-bar{background:linear-gradient(180deg,var(--navy-900),var(--navy-950));border-top:1px solid rgba(217,174,75,.24)}
@@ -770,6 +771,10 @@ svg.brandicon{fill:currentColor;stroke:none}
 /* ==========================================================================
    الأخبار والفعاليات
    ========================================================================== */
+html[dir="rtl"] .news-grid,html[dir="rtl"] .news-lead,html[dir="rtl"] .news-list,html[dir="rtl"] .news-list li a,html[dir="rtl"] .news-mini,html[dir="rtl"] .news-feature{direction:rtl;text-align:right}
+html[dir="rtl"] .news-list li a{grid-template-columns:104px minmax(0,1fr)}
+html[dir="rtl"] .news-list img,html[dir="rtl"] .news-mini img{grid-column:1}
+html[dir="rtl"] .news-list li a>div,html[dir="rtl"] .news-mini>div{grid-column:2}
 .news-grid{display:grid;grid-template-columns:1.35fr 1fr .78fr;gap:28px;align-items:start}
 .news-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;
   font-size:12.5px;font-weight:700;color:var(--ink-soft)}
@@ -944,12 +949,22 @@ svg.brandicon{fill:currentColor;stroke:none}
 /* ==========================================================================
    استجابة الهيدر ذي الطبقتين
    ========================================================================== */
-@media(max-width:1400px){
+@media(max-width:1720px){
+  .accreditation-link{min-width:auto;padding-inline:9px}
+  .accreditation-link .thuluth{display:none}
+  .brand-name{font-size:clamp(11px,.9vw,15px);line-height:1.65}
+  .nav-item{padding:8px 10px}
+  .nav-item em{font-size:12.2px}
+}
+@media(max-width:1500px){
+  .menubar>.container{grid-template-columns:minmax(300px,auto) minmax(0,1fr) auto;gap:8px}
   .nav-item{padding:7px 8px 6px}
   .nav-item em{font-size:11.2px}
-  .brand-emblem{width:72px;height:72px}
+  .brand-emblem{width:64px;height:64px}
 }
 @media(max-width:1320px){
+  .accreditation-link{min-width:auto;padding-inline:9px}
+  .accreditation-link .thuluth{display:none}
   .brand-en{display:none}
   .brand-name{font-size:13.5px;line-height:1.66}
 }

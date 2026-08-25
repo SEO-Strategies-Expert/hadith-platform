@@ -384,8 +384,8 @@
     var end   = document.querySelector('.menubar-end');
     if (!bar || !box || !nav || !brand || !end) return;
 
-    var COLLAPSE_AT = 14;   // هامش أمان للطيّ
-    var EXPAND_AT   = 46;   // هامش أوسع للفرد — يمنع التذبذب
+    var COLLAPSE_AT = 8;    // هامش أمان للطيّ
+    var EXPAND_AT   = 24;   // هامش أوسع للفرد — يمنع التذبذب
 
     // يقيس كل شيء في الوضع المفرود دائمًا، ثم يعيد الحالة كما كانت
     function measure() {
