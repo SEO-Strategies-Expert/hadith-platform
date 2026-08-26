@@ -184,6 +184,11 @@ body:not([data-page="home"]) .ticker{box-shadow:0 8px 24px rgba(7,22,48,.12)}
 .gold-text.gold-text,
 .issue-name.issue-name{padding-block:1em!important;margin-block:-1em!important}
 
+/* Hero titles need their decorative thuluth padding, but unlike inline
+   headings they participate in a vertical text stack. Negative margins here
+   pull the title over the kicker and the intro on pages such as Takhrij Lab. */
+.page-hero .page-title.gold-text{padding-block:.35em!important;margin:0 0 12px!important}
+
 /* عناوين الأقسام الفرعية في الصفحات الداخلية بخطّ ThuluthAlt (أوضح للقراءة
    من خطّ الثلث المزخرف) — نفس خطّ عناوين أقسام الرئيسية. */
 .split-copy h2.thuluth,

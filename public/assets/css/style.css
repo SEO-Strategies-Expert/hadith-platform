@@ -1106,7 +1106,7 @@ html[dir="rtl"] .news-list li a>div,html[dir="rtl"] .news-mini>div{grid-column:2
      lockup beside the emblem instead of wrapping into multiple short lines. */
   .foot-brand .row{width:100%;flex-wrap:nowrap;gap:10px}
   .foot-brand img{width:58px;height:58px;flex:none}
-  .foot-brand .nm.thuluth{min-width:0;white-space:nowrap;font-size:clamp(8px,2.5vw,11px);line-height:1.5;letter-spacing:-.15px}
+  .foot-brand .nm.thuluth{min-width:0;white-space:nowrap;font-size:clamp(10px,3.1vw,13px);line-height:1.5;letter-spacing:-.15px}
   /* أخفِ الروابط السريعة لكن أبقِ زرّ تبديل اللغة (أيقونة فقط) ظاهرًا دائمًا */
   .navbar-links{display:flex;gap:0;padding-inline-start:8px;margin-inline-start:6px;
     border-inline-start:1px solid rgba(217,174,75,.24)}
@@ -1362,6 +1362,7 @@ html[dir="rtl"] .news-list li a>div,html[dir="rtl"] .news-mini>div{grid-column:2
 @media(max-width:600px){
   .site-head{display:flex;flex-direction:column}
   .menubar{order:1}
+  .menubar>.container{padding-top:16px}
   .navbar{order:2;border-top:1px solid rgba(217,174,75,.18)}
 
   /* صفّ الهويّة: الشعار والاسم بمحاذاة البداية */
