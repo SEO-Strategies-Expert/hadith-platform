@@ -44,5 +44,8 @@ body{font-family:'PlexAr','Segoe UI',system-ui,-apple-system,sans-serif;letter-s
 
 /* Foot column hover indent flips automatically via logical props; nothing needed */
 
+/* Compact English desktop navigation so longer Latin labels remain expanded. */
+@media (min-width:1021px) and (max-width:1500px){.menubar>.container{column-gap:6px}.brand-copy{max-width:210px}.brand-name-en{font-size:14px}.nav-item{padding-inline:7px}.nav-item em{font-size:11px}.mainnav-list{gap:1px}}
+
 /* Keep numbers Western already in content; ensure tabular alignment stays LTR */
 .thread-stats b,.facts b,.stat b{direction:ltr}

@@ -92,7 +92,7 @@ export async function SiteHeader({
           </ul>
 
           <nav className="navbar-links" aria-label={t.quickLinks}>
-            <Link
+            <a
               className="lang-switch"
               href={counterpartPath(lang, pathname)}
               hrefLang={lang === "ar" ? "en" : "ar"}
@@ -102,7 +102,7 @@ export async function SiteHeader({
                 <use href="#i-globe" />
               </svg>{" "}
               {t.switchTo}
-            </Link>
+            </a>
           </nav>
 
           <div className="navbar-icons">

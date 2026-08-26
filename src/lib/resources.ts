@@ -486,6 +486,7 @@ export const resources: Record<string, ResourceConfig> = {
     descAr: "صور واجهة الصفحة الرئيسية (عربي/إنجليزي).",
     orderBy: { order: "asc" },
     columns: [
+      { name: "order", label: "الترتيب" },
       { name: "imageAr", label: "الصورة (عربي)", kind: "image" },
       { name: "imageEn", label: "الصورة (إنجليزي)", kind: "image" },
       { name: "visible", label: "ظاهر", kind: "bool" },

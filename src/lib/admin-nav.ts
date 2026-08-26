@@ -63,6 +63,7 @@ export const adminNav: NavSection[] = [
       { label: "الإصدارات والمجلة", href: "/admin/publications", icon: BookMarked },
       { label: "المكتبة والمصادر", href: "/admin/library", icon: Library },
       { label: "الوسائط والصور", href: "/admin/media", icon: Images },
+      { label: "شرائح الصفحة الرئيسية", href: "/admin/slides", icon: Images },
     ],
   },
   {
