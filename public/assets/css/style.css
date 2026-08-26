@@ -643,11 +643,14 @@ html[dir="rtl"] .arrow svg{transform:scaleX(-1)}
    ========================================================================== */
 .waves{display:block;width:100%;height:auto;margin-bottom:-4px;background:var(--navy-950)}
 .site-foot{background:linear-gradient(180deg,var(--navy-900),var(--navy-950));color:var(--cream-200);position:relative;overflow:hidden}
-.foot-top{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:36px;padding-block:58px 34px}
+.foot-top{display:grid;grid-template-columns:1.9fr 1fr 1fr 1fr;gap:36px;padding-block:58px 34px}
 .foot-brand{display:flex;flex-direction:column;gap:15px}
 .foot-brand .row{display:flex;align-items:center;gap:15px}
 .foot-brand img{width:76px;height:76px;object-fit:contain;filter:drop-shadow(0 0 20px rgba(217,174,75,.32))}
 .foot-brand .nm{font-size:21px;line-height:2}
+/* Keep the Arabic college name and emblem as a single desktop lockup. */
+.foot-brand .row{flex-wrap:nowrap}
+.foot-brand .nm.thuluth{white-space:nowrap;font-size:16px;letter-spacing:-.15px}
 .foot-brand p{margin:0;font-size:14px;line-height:1.92;color:rgba(241,232,211,.7);max-width:44ch}
 .foot-col h5{margin:0 0 17px;font-size:15.5px;font-weight:800;color:var(--gold-1);position:relative;padding-bottom:11px}
 .foot-col h5::after{content:"";position:absolute;bottom:0;inset-inline-start:0;width:46px;height:2px;background:linear-gradient(90deg,var(--gold-1),transparent)}
