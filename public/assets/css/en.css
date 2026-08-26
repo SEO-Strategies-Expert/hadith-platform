@@ -18,9 +18,9 @@ body{font-family:'PlexAr','Segoe UI',system-ui,-apple-system,sans-serif;letter-s
 .page-title{padding-top:0;line-height:1.14}
 .section-title{padding-top:0}
 
-/* Brand — English lockup replaces the Arabic thuluth name */
-.brand-copy{max-width:260px}
-.brand-name-en{display:block;font-size:clamp(14px,1.05vw,18px);font-weight:700;line-height:1.2;letter-spacing:.2px}
+/* Brand — English lockup replaces the Arabic thuluth name. */
+.brand-copy{max-width:390px}
+.brand-name-en{display:block;white-space:nowrap;font-size:clamp(13px,.95vw,18px);font-weight:700;line-height:1.2;letter-spacing:.2px}
 .brand-sub-en{display:block;font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;
   color:var(--gold-2);margin-top:3px}
 
@@ -45,7 +45,40 @@ body{font-family:'PlexAr','Segoe UI',system-ui,-apple-system,sans-serif;letter-s
 /* Foot column hover indent flips automatically via logical props; nothing needed */
 
 /* Compact English desktop navigation so longer Latin labels remain expanded. */
-@media (min-width:1021px) and (max-width:1500px){.menubar>.container{column-gap:6px}.brand-copy{max-width:210px}.brand-name-en{font-size:14px}.nav-item{padding-inline:7px}.nav-item em{font-size:11px}.mainnav-list{gap:1px}}
+@media (min-width:1021px) and (max-width:1500px){.menubar>.container{column-gap:6px}.brand-copy{max-width:360px}.brand-name-en{font-size:13px}.nav-item{padding-inline:7px}.nav-item em{font-size:11px}.mainnav-list{gap:1px}}
+
+/* A quieter English desktop lockup leaves more room for the longer navigation
+   labels without changing the hierarchy of the header. */
+@media (min-width:1021px){
+  .brand{gap:10px}
+  .brand-emblem{width:58px;height:58px}
+  .brand-copy{max-width:360px}
+  .brand-name-en{font-size:clamp(13px,.82vw,15px)}
+  .brand-sub-en{font-size:10px}
+  .nav-item{padding:7px 9px 6px}
+  .nav-item em{font-size:11.5px}
+}
+
+/* The English labels need more horizontal room than the Arabic labels. On
+   desktop, keep every navigation item visible by moving the fitted menu onto a
+   second, wrapped row instead of hiding it behind the mobile menu button. */
+@media (min-width:1021px){
+  html[lang="en"] .menubar.nav-collapsed>.container{grid-template-columns:minmax(0,1fr) auto}
+  html[lang="en"] .menubar.nav-collapsed .mainnav{
+    position:static;grid-column:1 / -1;grid-row:2;display:block;
+    max-height:none;overflow:visible;opacity:1;visibility:visible;
+    background:none;border:0;box-shadow:none;
+  }
+  html[lang="en"] .menubar.nav-collapsed .mainnav-list{
+    display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;
+    gap:4px;max-width:none;padding:4px;
+  }
+  html[lang="en"] .menubar.nav-collapsed .mainnav-list>li{width:auto}
+  html[lang="en"] .menubar.nav-collapsed .nav-item{justify-content:center;padding:9px 13px}
+  html[lang="en"] .menubar.nav-collapsed .nav-item em{font-size:11.5px}
+  html[lang="en"] .menubar.nav-collapsed .drop{display:none}
+  html[lang="en"] .menubar.nav-collapsed .nav-toggle{display:none}
+}
 
 /* Keep numbers Western already in content; ensure tabular alignment stays LTR */
 .thread-stats b,.facts b,.stat b{direction:ltr}

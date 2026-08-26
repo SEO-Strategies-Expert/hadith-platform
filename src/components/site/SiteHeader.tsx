@@ -4,6 +4,7 @@ import { getHeaderNav, getSocialLinks, getSettingsMap } from "@/lib/site-data";
 import { siteHref, counterpartPath } from "@/lib/site-links";
 import { auth } from "@/auth";
 import { studentLogout } from "@/app/(site)/student-actions";
+import { LocaleSwitch } from "@/components/site/LocaleSwitch";
 
 const T = {
   ar: {
@@ -92,8 +93,7 @@ export async function SiteHeader({
           </ul>
 
           <nav className="navbar-links" aria-label={t.quickLinks}>
-            <a
-              className="lang-switch"
+            <LocaleSwitch
               href={counterpartPath(lang, pathname)}
               hrefLang={lang === "ar" ? "en" : "ar"}
               lang={lang === "ar" ? "en" : "ar"}
@@ -102,7 +102,7 @@ export async function SiteHeader({
                 <use href="#i-globe" />
               </svg>{" "}
               {t.switchTo}
-            </a>
+            </LocaleSwitch>
           </nav>
 
           <div className="navbar-icons">
