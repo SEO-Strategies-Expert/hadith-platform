@@ -330,7 +330,7 @@ html[dir="rtl"] .ticker-track{animation-name:tickerRtlArabic}
 @media(min-width:761px){
   /* Show more of the desktop slide artwork while preserving its crop-safe cover. */
   .slide.is-active img{animation:kb-desktop 10s ease-out both}
-  @keyframes kb-desktop{from{transform:scale(.97)}to{transform:scale(.92)}}
+  @keyframes kb-desktop{from{transform:scale(.84)}to{transform:scale(.80)}}
 }
 
 .hero-nav{position:absolute;bottom:22px;inset-inline:0;z-index:5;display:flex;align-items:center;justify-content:center;gap:14px}
@@ -953,6 +953,8 @@ html[dir="rtl"] .news-list li a>div,html[dir="rtl"] .news-mini>div{grid-column:2
   .foot-top{justify-items:center;text-align:center}
   .foot-brand{align-items:center}
   .foot-brand .row,.foot-social{justify-content:center}
+  .foot-brand .row{flex-wrap:nowrap;gap:10px}
+  .foot-brand .nm.thuluth{min-width:0;white-space:nowrap;font-size:clamp(10px,3.1vw,13px);line-height:1.5;letter-spacing:-.15px}
   .foot-brand p{max-width:34ch}
   .foot-col{width:100%;text-align:center}
   .foot-col h5::after{left:50%;inset-inline-start:auto;transform:translateX(-50%)}
