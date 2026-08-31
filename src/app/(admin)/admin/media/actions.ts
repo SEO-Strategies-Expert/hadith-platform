@@ -15,6 +15,7 @@ export async function uploadMedia(
   const file = formData.get("file") as File | null;
   if (!file || file.size === 0) return "اختر ملفًا أولًا.";
   if (file.size > 8 * 1024 * 1024) return "الحجم الأقصى 8 ميجابايت.";
+  if (!file.type.startsWith("image/")) return "يمكن رفع ملفات الصور فقط.";
 
   if (!process.env.BLOB_READ_WRITE_TOKEN)
     return "تخزين الصور غير مُفعّل بعد (BLOB_READ_WRITE_TOKEN مفقود).";

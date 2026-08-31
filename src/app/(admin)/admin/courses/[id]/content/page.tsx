@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronUp, ChevronDown, Pencil, Plus, Paperclip, Eye, EyeOff } from "lucide-react";
+import { ChevronUp, ChevronDown, Pencil, Plus, Paperclip, Eye, EyeOff, FileQuestion } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
@@ -43,9 +43,10 @@ function MoveButton({
   );
 }
 
-export default async function CourseContentPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CourseContentPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string }> }) {
   await requireUser();
   const { id } = await params;
+  const { created } = await searchParams;
 
   const course = await prisma.course.findUnique({
     where: { id },
@@ -72,6 +73,10 @@ export default async function CourseContentPage({ params }: { params: Promise<{ 
         desc={`${course.titleAr} — الوحدات والدروس التي يراها الطالب في بوابته.`}
         action={{ href: `${base}/modules/new`, label: "إضافة وحدة" }}
       />
+      <div className="workflow-steps mb-6">
+        <Link href={`/admin/courses/${id}`}><b>✓</b><span>بيانات المقرر</span></Link><Link href={base} className="active"><b>٢</b><span>المواد والروابط</span></Link><Link href={`/admin/quizzes/new?courseId=${id}`}><b>٣</b><span>الاختبارات والتكاليف</span></Link><Link href={`/admin/courses/${id}`}><b>٤</b><span>المراجعة والنشر</span></Link>
+      </div>
+      {created === "1" && <div role="status" className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] font-bold text-emerald-800"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emerald-600 text-white">✓</span><span>تم إنشاء المقرر بنجاح. انتقلت الآن إلى الخطوة الثانية؛ أضف الوحدات والدروس والمواد والروابط.</span></div>}
 
       <div className="mb-4 flex flex-wrap gap-2">
         <Link
@@ -80,6 +85,8 @@ export default async function CourseContentPage({ params }: { params: Promise<{ 
         >
           كل المقرّرات ←
         </Link>
+        <Link href={`/admin/quizzes?courseId=${id}`} className="rounded-lg border border-black/10 bg-white px-3.5 py-2 text-[12.5px] font-bold text-navy-700 hover:border-gold/50">الاختبارات ←</Link>
+        <Link href={`/admin/assignments?courseId=${id}`} className="rounded-lg border border-black/10 bg-white px-3.5 py-2 text-[12.5px] font-bold text-navy-700 hover:border-gold/50">التكاليف ←</Link>
         <Link
           href={`/admin/courses/${id}`}
           className="rounded-lg border border-black/10 bg-white px-3.5 py-2 text-[12.5px] font-bold text-navy-700 hover:border-gold/50"
@@ -116,6 +123,7 @@ export default async function CourseContentPage({ params }: { params: Promise<{ 
                 </div>
 
                 <div className="flex items-center gap-1">
+                  <Link href={`/admin/quizzes/new?courseId=${id}&moduleId=${m.id}`} className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-[12px] font-bold text-navy-700 hover:bg-gold/10" title="إضافة اختبار في نهاية الوحدة"><FileQuestion size={15}/> اختبار</Link>
                   <MoveButton action={moveModule.bind(null, id, m.id, "up")} dir="up" />
                   <MoveButton action={moveModule.bind(null, id, m.id, "down")} dir="down" />
                   <Link
@@ -189,6 +197,7 @@ export default async function CourseContentPage({ params }: { params: Promise<{ 
                               >
                                 <Pencil size={16} />
                               </Link>
+                              <Link href={`/admin/quizzes/new?courseId=${id}&moduleId=${m.id}&afterLessonId=${l.id}`} className="grid h-9 w-9 place-items-center rounded-lg text-gold-3 hover:bg-gold/10" title="إضافة اختبار بعد هذا الدرس"><FileQuestion size={16}/></Link>
                               <DeleteButton action={deleteLesson.bind(null, id, l.id)} />
                             </div>
                           </td>
@@ -200,12 +209,12 @@ export default async function CourseContentPage({ params }: { params: Promise<{ 
               )}
 
               <div className="border-t border-black/5 px-4 py-3">
-                <Link
+                <div className="flex flex-wrap gap-2"><Link
                   href={`${base}/modules/${m.id}/lessons/new`}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[12.5px] font-bold text-navy-800 hover:border-gold/50"
                 >
                   <Plus size={15} /> إضافة درس إلى «{m.titleAr}»
-                </Link>
+                </Link><Link href={`/admin/quizzes/new?courseId=${id}&moduleId=${m.id}`} className="inline-flex items-center gap-1.5 rounded-lg border border-gold/40 bg-gold/5 px-3 py-1.5 text-[12.5px] font-bold text-navy-800 hover:bg-gold/10"><FileQuestion size={15}/> إضافة اختبار في نهاية الوحدة</Link></div>
               </div>
             </Card>
           ))}

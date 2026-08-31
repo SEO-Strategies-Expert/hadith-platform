@@ -23,7 +23,7 @@ export function ActionForm({
   const [error, formAction, pending] = useActionState(action, undefined);
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} className="admin-action-form space-y-5">
       {children}
 
       {error && (

@@ -95,6 +95,33 @@ export async function createCertificate(
   redirect(`/admin/certificates/${issuedId}?issued=1`);
 }
 
+export async function issueCourseCertificates(
+  _prev: string | undefined,
+  formData: FormData
+): Promise<string | undefined> {
+  const admin = await requireUser();
+  const courseId = String(formData.get("courseId") ?? "").trim();
+  const titleAr = String(formData.get("titleAr") ?? "").trim();
+  const titleEn = String(formData.get("titleEn") ?? "").trim();
+  if (!courseId) return "اختر المقرر.";
+  if (!titleAr || !titleEn) return "أدخل عنوان الشهادة باللغتين.";
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    include: { enrollments: { where: { status: "COMPLETED" }, select: { userId: true } } },
+  });
+  if (!course) return "المقرر غير موجود.";
+  if (!course.enrollments.length) return "لا يوجد طلاب أكملوا هذا المقرر بعد.";
+  const existing = await prisma.certificate.findMany({ where: { courseId, userId: { in: course.enrollments.map(e => e.userId) }, revoked: false }, select: { userId: true } });
+  const issued = new Set(existing.map(c => c.userId));
+  const targets = course.enrollments.filter(e => !issued.has(e.userId));
+  if (!targets.length) return "سبق إصدار شهادات لكل الطلاب المكتملين في هذا المقرر.";
+  for (const enrollment of targets) {
+    await issueCertificate({ kind: "CERTIFICATE", userId: enrollment.userId, courseId, titleAr, titleEn, issuedById: admin.id ?? null });
+  }
+  revalidatePath("/admin/certificates");
+  redirect(`/admin/certificates?batch=${targets.length}`);
+}
+
 export async function revokeCertificate(
   id: string,
   _prev: string | undefined,

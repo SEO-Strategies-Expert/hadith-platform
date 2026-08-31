@@ -86,6 +86,19 @@ export async function createQuiz(
   if (!r.ok) return r.error;
 
   const created = await prisma.quiz.create({ data: r.data });
+  const moduleId = optionalText(formData.get("moduleId"));
+  const afterLessonId = optionalText(formData.get("afterLessonId"));
+  if (moduleId && r.data.courseId) {
+    const module = await prisma.module.findUnique({ where: { id: moduleId }, select: { courseId: true } });
+    if (module?.courseId === r.data.courseId) {
+      const lessons = await prisma.lesson.findMany({ where: { moduleId }, orderBy: [{ order: "asc" }, { id: "asc" }], select: { id: true, order: true } });
+      const anchor = afterLessonId ? lessons.find(l => l.id === afterLessonId) : null;
+      const order = anchor ? anchor.order + 1 : ((lessons.at(-1)?.order ?? 0) + 1);
+      if (anchor) await prisma.lesson.updateMany({ where: { moduleId, order: { gte: order } }, data: { order: { increment: 1 } } });
+      await prisma.lesson.create({ data: { moduleId, titleAr: r.data.titleAr, titleEn: r.data.titleEn, kind: "QUIZ", quizId: created.id, order, visible: r.data.visible } });
+      revalidatePath(`/admin/courses/${r.data.courseId}/content`);
+    }
+  }
   revalidatePath(listPath);
   // نأخذه مباشرةً إلى شاشة الأسئلة: اختبارٌ بلا أسئلة لا معنى له.
   redirect(questionsPath(created.id));

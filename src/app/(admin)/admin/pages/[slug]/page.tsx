@@ -4,6 +4,7 @@ import { PageHeader, Card, Field, TextArea, Select } from "@/components/admin/ui
 import { ImagePickerField } from "@/components/admin/ImagePickerField";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { updatePage } from "../actions";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 function Section({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
   return (
@@ -64,12 +65,12 @@ export default async function EditPagePage({
               </div>
             </Section>
 
-            <Section title="محتوى الصفحة (HTML)">
+            <Section title="محتوى الصفحة" desc="محرر مرئي بسيط: عدّل النص والعناوين والقوائم كما ستظهر للزائر.">
               <div className="sm:col-span-2">
-                <TextArea label="المحتوى (عربي)" name="bodyHtmlAr" defaultValue={p.bodyHtmlAr} dir="rtl" rows={12} hint="محتوى الصفحة بصيغة HTML — عدّل بحذر." />
+                <RichTextEditor label="المحتوى (عربي)" name="bodyHtmlAr" value={p.bodyHtmlAr} dir="rtl" />
               </div>
               <div className="sm:col-span-2">
-                <TextArea label="Content (English)" name="bodyHtmlEn" defaultValue={p.bodyHtmlEn} dir="ltr" rows={12} />
+                <RichTextEditor label="Content (English)" name="bodyHtmlEn" value={p.bodyHtmlEn} dir="ltr" />
               </div>
             </Section>
 

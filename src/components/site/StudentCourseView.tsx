@@ -1,227 +1,65 @@
-/**
- * صفحة المقرّر داخل بوابة الطالب: شجرة الوحدات والدروس مع علامات الإنجاز.
- *
- * التحقّق من الصلاحيّة يقع هنا لا في الصفحة الموجِّهة، لأنّ `src/proxy.ts`
- * يحمي `/student` و`/en/student` وحدهما ولا يغطّي المسارات الفرعيّة.
- */
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { Lang } from "@/lib/site-data";
 import { currentUser } from "@/lib/guard";
-import {
-  getCourseTree,
-  getProgressMap,
-  flattenLessons,
-  isEnrolled,
-  title,
-} from "@/lib/lms";
+import { getCourseTree, getProgressMap, flattenLessons, isEnrolled, title } from "@/lib/lms";
 import { StudentQuizAssignmentLinks } from "@/components/site/StudentQuizAssignmentLinks";
-import { ProgressBar, Pill, studentHref, num, clampPct } from "@/components/site/StudentPortalKit";
+import { studentHref, num, clampPct } from "@/components/site/StudentPortalKit";
 
 const T = {
-  ar: {
-    kicker: "مقرّر دراسيّ",
-    back: "لوحة الطالب",
-    instructor: "المحاضر",
-    stage: "المرحلة",
-    progress: "نسبة الإنجاز",
-    lessons: "الدروس",
-    lesson: "درس",
-    lessonsCount: "عدد الدروس",
-    done: "أُنجز",
-    notDone: "لم يُنجَز",
-    minutes: "دقيقة",
-    emptyModules: "لم تُضَف وحدات دراسيّة لهذا المقرّر بعد.",
-    emptyLessons: "لا دروس في هذه الوحدة بعد.",
-    start: "ابدأ من أوّل درس",
-    preview: "معاينة مجّانيّة",
-    kinds: {
-      VIDEO: "مرئي",
-      PDF: "ملفّ",
-      TEXT: "متن",
-      LIVE: "مجلس مباشر",
-      QUIZ: "اختبار",
-    } as Record<string, string>,
-  },
-  en: {
-    kicker: "Course",
-    back: "Student dashboard",
-    instructor: "Instructor",
-    stage: "Stage",
-    progress: "Completion",
-    lessons: "Lessons",
-    lesson: "Lesson",
-    lessonsCount: "Lessons",
-    done: "Completed",
-    notDone: "Not completed",
-    minutes: "min",
-    emptyModules: "No modules have been added to this course yet.",
-    emptyLessons: "No lessons in this module yet.",
-    start: "Start with the first lesson",
-    preview: "Free preview",
-    kinds: {
-      VIDEO: "Video",
-      PDF: "File",
-      TEXT: "Text",
-      LIVE: "Live session",
-      QUIZ: "Quiz",
-    } as Record<string, string>,
-  },
+  ar: { course:"مقرر دراسي", back:"العودة إلى مقرراتي", instructor:"يقدمه", progress:"تقدمك", complete:"مكتمل", curriculum:"محتوى المقرر", sections:"أقسام", lessons:"دروس", continue:"متابعة التعلم", start:"ابدأ التعلم", preview:"معاينة", empty:"لم يُضف محتوى لهذا المقرر بعد.", min:"د", about:"عن هذا المقرر", kinds:{VIDEO:"فيديو",PDF:"ملف",TEXT:"قراءة",LIVE:"مباشر",QUIZ:"اختبار"} as Record<string,string> },
+  en: { course:"Course", back:"Back to my courses", instructor:"Created by", progress:"Your progress", complete:"complete", curriculum:"Course content", sections:"sections", lessons:"lectures", continue:"Continue learning", start:"Start course", preview:"Preview", empty:"No course content has been added yet.", min:"min", about:"About this course", kinds:{VIDEO:"Video",PDF:"File",TEXT:"Reading",LIVE:"Live",QUIZ:"Quiz"} as Record<string,string> },
 } as const;
 
 export async function StudentCourseView({ lang, courseId }: { lang: Lang; courseId: string }) {
   const user = await currentUser();
   if (!user?.id) redirect(lang === "en" ? "/en/student-login.html" : "/student-login.html");
-
-  // لا يُكشف وجود المقرّر لغير المسجَّل — نفس الجواب في الحالتين.
-  const [enrolled, course] = await Promise.all([
-    isEnrolled(user.id, courseId),
-    getCourseTree(courseId),
-  ]);
+  const [enrolled, course] = await Promise.all([isEnrolled(user.id, courseId), getCourseTree(courseId)]);
   if (!enrolled || !course || !course.visible) notFound();
-
   const t = T[lang];
   const lessons = flattenLessons(course);
-  const progress = await getProgressMap(user.id, lessons.map((l) => l.id));
-  const doneCount = lessons.filter((l) => progress.get(l.id)).length;
+  const progress = await getProgressMap(user.id, lessons.map(l => l.id));
+  const doneCount = lessons.filter(l => progress.get(l.id)).length;
   const pct = lessons.length ? clampPct((doneCount / lessons.length) * 100) : 0;
+  const nextLesson = lessons.find(l => !progress.get(l.id)) ?? lessons[0];
+  const duration = lessons.reduce((sum, lesson) => sum + (lesson.durationMin ?? 0), 0);
 
-  // «ابدأ/تابع» يقفز إلى أوّل درس غير منجَز، وإلّا فأوّل درس.
-  const nextLesson = lessons.find((l) => !progress.get(l.id)) ?? lessons[0];
-
-  return (
-    <main id="main">
-      <section className="page-hero orn-navy">
-        <div className="container">
-          <div className="page-hero-copy reveal">
-            <p className="page-kicker">{t.kicker}</p>
-            <h1 className="page-title thuluth gold-text">
-              {title(lang, course.titleAr, course.titleEn)}
-            </h1>
-            <div className="page-meta">
-              {course.stage && (
-                <span>
-                  {t.stage}: {title(lang, course.stage.titleAr, course.stage.titleEn)}
-                </span>
-              )}
-              {course.instructor && (
-                <span>
-                  {t.instructor}: {title(lang, course.instructor.nameAr, course.instructor.nameEn)}
-                </span>
-              )}
-              <span>
-                {t.lessonsCount}: {num(lessons.length, lang)}
-              </span>
-            </div>
-            <div className="page-actions" style={{ marginTop: 22 }}>
-              {nextLesson && (
-                <Link className="btn btn-gold" href={studentHref(lang, `/lesson/${nextLesson.id}`)}>
-                  {t.start}
-                </Link>
-              )}
-              <Link className="btn btn-outline-ink" href={studentHref(lang)}>
-                {t.back}
-              </Link>
-            </div>
+  return <main id="main" className="learning-page">
+    <header className="learning-topbar"><Link href={studentHref(lang)}>← {t.back}</Link><span>{title(lang, course.titleAr, course.titleEn)}</span></header>
+    <section className="learning-hero">
+      <div className="container learning-hero-grid">
+        <div className="learning-hero-copy">
+          <div className="learning-kicker">{t.course}</div>
+          <h1>{title(lang, course.titleAr, course.titleEn)}</h1>
+          {(title(lang, course.summaryAr, course.summaryEn) || title(lang, course.descAr, course.descEn)) && <p>{title(lang, course.summaryAr, course.summaryEn) || title(lang, course.descAr, course.descEn)}</p>}
+          <div className="learning-meta">
+            {course.instructor && <span>{t.instructor} <b>{title(lang, course.instructor.nameAr, course.instructor.nameEn)}</b></span>}
+            {course.stage && <span>{title(lang, course.stage.titleAr, course.stage.titleEn)}</span>}
           </div>
         </div>
-      </section>
-
-      <section className="inner-section white orn-cream">
-        <div className="container">
-          <div className="callout reveal">
-            <h3>{t.progress}</h3>
-            <p>
-              {num(doneCount, lang)} / {num(lessons.length, lang)} {t.lessons}
-            </p>
-            <ProgressBar pct={pct} lang={lang} label={t.progress} />
+        <aside className="learning-side-card">
+          <div className="learning-cover" style={course.imageUrl ? {backgroundImage:`linear-gradient(rgba(7,22,48,.12),rgba(7,22,48,.65)),url(${course.imageUrl})`} : undefined}><span>▶</span></div>
+          <div className="learning-side-body">
+            <div className="learning-progress-label"><b>{t.progress}</b><strong>{num(pct,lang)}%</strong></div>
+            <div className="learning-progress"><i style={{width:`${pct}%`}} /></div>
+            <small>{num(doneCount,lang)} / {num(lessons.length,lang)} {t.lessons} · {t.complete}</small>
+            {nextLesson && <Link className="learning-primary" href={studentHref(lang, `/lesson/${nextLesson.id}`)}>{doneCount ? t.continue : t.start}</Link>}
           </div>
-        </div>
-      </section>
-
-      <section className="inner-section cream orn-cream">
-        <div className="container">
-          <header className="section-cap reveal">
-            <h2 className="thuluth">{t.lessons}</h2>
-          </header>
-
-          {course.modules.length === 0 ? (
-            <p>{t.emptyModules}</p>
-          ) : (
-            <div style={{ display: "grid", gap: 22 }}>
-              {course.modules.map((m, mi) => (
-                <article className="info-card reveal" key={m.id}>
-                  <div className="num">{num(mi + 1, lang)}</div>
-                  <h3>{title(lang, m.titleAr, m.titleEn)}</h3>
-                  {title(lang, m.descAr, m.descEn) && <p>{title(lang, m.descAr, m.descEn)}</p>}
-
-                  {m.lessons.length === 0 ? (
-                    <p style={{ marginTop: 12 }}>{t.emptyLessons}</p>
-                  ) : (
-                    <ul style={{ listStyle: "none", margin: "16px 0 0", padding: 0, display: "grid", gap: 10 }}>
-                      {m.lessons.map((l, li) => {
-                        const isDone = progress.get(l.id) === true;
-                        return (
-                          <li key={l.id}>
-                            <Link
-                              href={studentHref(lang, `/lesson/${l.id}`)}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 12,
-                                flexWrap: "wrap",
-                                padding: "12px 14px",
-                                borderRadius: 12,
-                                border: "1px solid rgba(18,49,89,.12)",
-                                background: isDone ? "rgba(217,174,75,.10)" : "rgba(255,255,255,.7)",
-                              }}
-                            >
-                              {/* علامة الإنجاز — رمز نصّي ليعمل بلا أيقونات ولا JS */}
-                              <span
-                                aria-hidden="true"
-                                style={{
-                                  width: 24,
-                                  height: 24,
-                                  flex: "0 0 24px",
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  borderRadius: "50%",
-                                  fontSize: 13,
-                                  fontWeight: 900,
-                                  color: isDone ? "#123159" : "#8f9bad",
-                                  background: isDone ? "#D8AB4A" : "rgba(18,49,89,.08)",
-                                  border: "1px solid rgba(18,49,89,.14)",
-                                }}
-                              >
-                                {isDone ? "✓" : num(li + 1, lang)}
-                              </span>
-                              <span style={{ fontWeight: 800, color: "#123159", flex: "1 1 200px" }}>
-                                {title(lang, l.titleAr, l.titleEn)}
-                              </span>
-                              <span style={{ display: "inline-flex", gap: 8, flexWrap: "wrap" }}>
-                                <Pill tone="muted">{t.kinds[l.kind] ?? l.kind}</Pill>
-                                {l.durationMin ? (
-                                  <Pill tone="muted">
-                                    {num(l.durationMin, lang)} {t.minutes}
-                                  </Pill>
-                                ) : null}
-                                {l.freePreview && <Pill>{t.preview}</Pill>}
-                              </span>
-                              <span className="sr-only">{isDone ? t.done : t.notDone}</span>
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-          <StudentQuizAssignmentLinks lang={lang} courseId={courseId} />
-</main>
-  );
+        </aside>
+      </div>
+    </section>
+    <section className="learning-body"><div className="container learning-layout"><div className="learning-main">
+      {(title(lang, course.descAr, course.descEn) || title(lang, course.summaryAr, course.summaryEn)) && <section className="learning-about"><h2>{t.about}</h2><p>{title(lang, course.descAr, course.descEn) || title(lang, course.summaryAr, course.summaryEn)}</p></section>}
+      <div className="learning-curriculum-head"><h2>{t.curriculum}</h2><span>{num(course.modules.length,lang)} {t.sections} · {num(lessons.length,lang)} {t.lessons}{duration ? ` · ${num(duration,lang)} ${t.min}` : ""}</span></div>
+      {!course.modules.length ? <div className="learning-empty">{t.empty}</div> : <div className="learning-curriculum">
+        {course.modules.map((module, mi) => { const moduleDone = module.lessons.filter(l => progress.get(l.id)).length; return <details key={module.id} open={mi === 0}>
+          <summary><span><b>{title(lang,module.titleAr,module.titleEn)}</b><small>{num(moduleDone,lang)}/{num(module.lessons.length,lang)} {t.lessons}</small></span><i>⌄</i></summary>
+          <div className="learning-lessons">{module.lessons.map((lesson, li) => { const done = progress.get(lesson.id) === true; return <Link key={lesson.id} href={studentHref(lang, `/lesson/${lesson.id}`)} className={done ? "is-done" : ""}>
+            <span className="lesson-check">{done ? "✓" : "○"}</span><span className="lesson-title"><b>{num(li+1,lang)}. {title(lang,lesson.titleAr,lesson.titleEn)}</b><small>{t.kinds[lesson.kind] ?? lesson.kind}{lesson.freePreview ? ` · ${t.preview}` : ""}</small></span><span className="lesson-duration">{lesson.durationMin ? `${num(lesson.durationMin,lang)} ${t.min}` : "›"}</span>
+          </Link>; })}</div>
+        </details>; })}
+      </div>}
+    </div></div></section>
+    <StudentQuizAssignmentLinks lang={lang} courseId={courseId} />
+  </main>;
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Filter, ScrollText, ShieldCheck } from "lucide-react";
+import { Filter, ScrollText, ShieldCheck, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
 import { formatVerifyCode } from "@/lib/certificates";
@@ -58,6 +58,7 @@ export default async function CertificatesPage({
         desc="وثائق الكلّية برقم توثيقٍ ورمز تحقّقٍ علنيّ. الوثيقة لا تُحذف — تُلغى ويبقى أثرها."
         action={{ href: "/admin/certificates/new", label: "إصدار وثيقة" }}
       />
+      <div className="mb-5 flex justify-end"><Link href="/admin/certificates/batch" className="inline-flex items-center gap-2 rounded-xl bg-navy-800 px-4 py-2.5 text-[13px] font-extrabold text-white hover:bg-navy-700"><Users size={16}/> إصدار جماعي حسب المقرر</Link></div>
 
       <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-[12.5px] text-sky-900">
         <ShieldCheck size={16} className="mt-0.5 shrink-0" />

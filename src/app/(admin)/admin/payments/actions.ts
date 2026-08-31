@@ -130,6 +130,10 @@ export async function createPayment(
   await prisma.payment.create({
     data: { userId: parsed.data.userId, ...commonData(parsed.data, enrollment.value) },
   });
+  if (parsed.data.status === "PAID" || parsed.data.status === "WAIVED") {
+    await prisma.user.update({ where: { id: parsed.data.userId }, data: { status: "ACTIVE" } });
+    if (enrollment.value) await prisma.enrollment.update({ where: { id: enrollment.value }, data: { status: "ACTIVE" } });
+  }
 
   revalidatePath("/admin/payments");
   redirect("/admin/payments");
@@ -155,6 +159,10 @@ export async function updatePayment(
     where: { id },
     data: commonData(parsed.data, enrollment.value),
   });
+  if (parsed.data.status === "PAID" || parsed.data.status === "WAIVED") {
+    await prisma.user.update({ where: { id: current.userId }, data: { status: "ACTIVE" } });
+    if (enrollment.value) await prisma.enrollment.update({ where: { id: enrollment.value }, data: { status: "ACTIVE" } });
+  }
 
   revalidatePath("/admin/payments");
   redirect("/admin/payments");

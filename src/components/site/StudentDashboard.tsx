@@ -37,6 +37,7 @@ const T = {
       DONE: "مقبول ومكتمل",
       ARCHIVED: "مؤرشف",
     } as Record<string, string>,
+    card: "البطاقة الجامعية", active: "طالب فعّال", inactive: "الحساب غير مفعّل",
   },
   en: {
     kicker: "Student portal",
@@ -64,6 +65,7 @@ const T = {
       DONE: "Accepted",
       ARCHIVED: "Archived",
     } as Record<string, string>,
+    card: "Student ID", active: "Active student", inactive: "Inactive account",
   },
 } as const;
 
@@ -129,6 +131,11 @@ export async function StudentDashboard({ lang }: { lang: Lang }) {
       <section className="inner-section white orn-cream">
         <div className="container">
           <div className="content-split">
+            <div className="reveal" style={{borderRadius:22,overflow:"hidden",boxShadow:"0 18px 45px rgba(7,22,48,.16)",background:"linear-gradient(135deg,#071630,#17406f)",color:"white",padding:24,minHeight:230,display:"flex",flexDirection:"column",justifyContent:"space-between"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:16}}><img src="/assets/img/logo-official.png" alt="" style={{width:64,height:64,objectFit:"contain"}}/><div style={{textAlign:lang === "ar" ? "left":"right",fontSize:12,opacity:.8}}>{t.card}<br/><b style={{color:"#e2bc5e"}}>{profile?.status === "ACTIVE" ? t.active : t.inactive}</b></div></div>
+              <div><div style={{fontSize:22,fontWeight:900}}>{profile?.name}</div><div dir="ltr" style={{marginTop:5,letterSpacing:1.5,color:"#f6e2a0",fontWeight:800}}>{profile?.studentNo ?? "—"}</div></div>
+              <div style={{display:"flex",justifyContent:"space-between",gap:12,fontSize:12,opacity:.85}}><span>{profile?.program ?? t.none}</span><span>{profile?.country ?? t.none}</span></div>
+            </div>
             <div className="split-copy reveal">
               <h2 className="thuluth">{t.profile}</h2>
               <div style={{ display: "grid", gap: 2, marginTop: 16 }}>

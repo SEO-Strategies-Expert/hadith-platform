@@ -38,6 +38,15 @@ body {
   font-family: "IBM Plex Sans Arabic", "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
+.workflow-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); max-width:960px; overflow:hidden; border:1px solid #dfe3ea; border-radius:16px; background:#fff; }
+.workflow-steps>div,.workflow-steps>a { display:flex; align-items:center; gap:10px; padding:14px; color:var(--ink-soft); border-inline-end:1px solid #edf0f4; font-size:13px; font-weight:700; transition:.15s; }
+.workflow-steps>a:hover { background:#fffaf0; color:var(--navy-900); }
+.workflow-steps>div:last-child,.workflow-steps>a:last-child { border:0; }
+.workflow-steps b { display:grid; place-items:center; width:28px; height:28px; flex:none; border-radius:50%; background:#eef1f6; color:var(--navy-800); }
+.workflow-steps .active { background:#fffaf0; color:var(--navy-900); }
+.workflow-steps .active b { background:var(--gold); color:var(--navy-950); }
+@media (max-width:640px) { .workflow-steps { grid-template-columns:1fr 1fr; } .workflow-steps>div { padding:10px; font-size:11.5px; } }
+
 body {
   background: #eef1f6;
   color: var(--ink);
@@ -50,3 +59,16 @@ body {
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: #c9cfda; border-radius: 8px; }
 ::-webkit-scrollbar-thumb:hover { background: #aab3c2; }
+
+/* شريط تمرير واحد فقط داخل قائمة التنقل؛ جسم الشريط نفسه لا يتمرر. */
+.admin-sidebar-scroll { scrollbar-width: thin; scrollbar-color: rgba(246,226,160,.38) transparent; }
+.admin-sidebar-scroll::-webkit-scrollbar { width: 6px; }
+.admin-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.admin-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(246,226,160,.35); border-radius: 999px; }
+.admin-nav-group[open] > summary .admin-nav-chevron { transform: rotate(180deg); }
+
+/* كل بطاقة تحتوي نموذج إنشاء/تعديل تتمركز تلقائياً مهما كان عرضها الأقصى. */
+.max-w-2xl:has(.admin-action-form),
+.max-w-3xl:has(.admin-action-form),
+.max-w-4xl:has(.admin-action-form),
+.max-w-5xl:has(.admin-action-form) { margin-inline: auto; }

@@ -3,6 +3,8 @@ import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { uploadMedia, deleteMedia } from "./actions";
+import { MediaDropzone } from "@/components/admin/MediaDropzone";
+import { Images, HardDrive } from "lucide-react";
 
 export default async function MediaPage({
   searchParams,
@@ -14,7 +16,7 @@ export default async function MediaPage({
 
   return (
     <div>
-      <PageHeader title="الوسائط والصور" desc="رفع الصور وإدارتها (Vercel Blob)." />
+      <PageHeader title="مكتبة الوسائط" desc="ارفع الصور، عاينها، ثم استخدم روابطها في صفحات الموقع والمقررات." />
 
       {uploaded && (
         <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] font-bold text-emerald-700">
@@ -22,21 +24,19 @@ export default async function MediaPage({
         </div>
       )}
 
-      <Card className="mb-6 max-w-2xl p-6">
-        <ActionForm action={uploadMedia} cancelHref="/admin/media" submitLabel="رفع الصورة">
-          <label className="block">
-            <span className="mb-1.5 block text-[13px] font-bold text-navy-900">اختر صورة (حتى 8MB)</span>
-            <input
-              type="file"
-              name="file"
-              accept="image/*"
-              className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-[13px] file:mr-3 file:rounded-lg file:border-0 file:bg-navy-800 file:px-3 file:py-1.5 file:text-white"
-            />
-          </label>
+      <div className="mb-5 grid gap-3 sm:grid-cols-2">
+        <div className="flex items-center gap-3 rounded-2xl border border-black/5 bg-white p-4 shadow-sm"><span className="grid h-11 w-11 place-items-center rounded-xl bg-gold/15 text-gold-3"><Images size={21}/></span><div><b className="block text-xl text-navy-900">{media.length}</b><span className="text-[12px] text-ink-soft">صورة في المكتبة</span></div></div>
+        <div className="flex items-center gap-3 rounded-2xl border border-black/5 bg-white p-4 shadow-sm"><span className="grid h-11 w-11 place-items-center rounded-xl bg-sky-100 text-sky-700"><HardDrive size={21}/></span><div><b className="block text-xl text-navy-900">8 MB</b><span className="text-[12px] text-ink-soft">الحد الأقصى لكل صورة</span></div></div>
+      </div>
+
+      <Card className="mb-7 max-w-4xl p-6">
+        <ActionForm action={uploadMedia} cancelHref="/admin/media" submitLabel="رفع الصورة إلى المكتبة">
+          <MediaDropzone />
         </ActionForm>
       </Card>
 
       <Card className="p-5">
+        <div className="mb-4 flex items-center justify-between border-b border-black/5 pb-4"><div><h2 className="text-[16px] font-extrabold text-navy-900">الصور المرفوعة</h2><p className="mt-1 text-[11.5px] text-ink-soft">أحدث الصور تظهر أولًا</p></div></div>
         {media.length === 0 ? (
           <EmptyState label="لا توجد وسائط بعد. ارفع أول صورة." />
         ) : (

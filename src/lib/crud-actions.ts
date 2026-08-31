@@ -58,10 +58,15 @@ export async function createRecord(
   const data = coerce(cfg.fields, formData);
   const err = validate(cfg.fields, data);
   if (err) return err;
+  let created: { id: string };
   try {
-    await (prisma as any)[cfg.model].create({ data });
+    created = await (prisma as any)[cfg.model].create({ data });
   } catch (e) {
     return friendly(e);
+  }
+  if (resourceKey === "courses") {
+    revalidatePath("/admin/courses");
+    redirect(`/admin/courses/${created.id}/content?created=1`);
   }
   revalidatePath(`/admin/${resourceKey}`);
   redirect(`/admin/${resourceKey}`);

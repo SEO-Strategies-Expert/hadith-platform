@@ -42,6 +42,7 @@ export type NavSection = {
 
 export const adminNav: NavSection[] = [
   {
+    title: "الرئيسية",
     items: [
       { label: "لوحة القيادة", href: "/admin", icon: LayoutDashboard },
       { label: "صندوق الوارد", href: "/admin/inbox", icon: Inbox },
@@ -56,8 +57,6 @@ export const adminNav: NavSection[] = [
       { label: "خطوات المسارات", href: "/admin/steps", icon: ListOrdered },
       { label: "الجداول (الاعتماد والخطة)", href: "/admin/curriculum", icon: Table },
       { label: "التنقّل والقوائم", href: "/admin/navigation", icon: Navigation },
-      { label: "الهيئة العلمية", href: "/admin/faculty", icon: GraduationCap },
-      { label: "البرامج والمقرّرات", href: "/admin/programs", icon: BookOpen },
       { label: "الأخبار والفعاليات", href: "/admin/news", icon: Newspaper },
       { label: "ديوان العلماء", href: "/admin/diwan", icon: MessagesSquare },
       { label: "الإصدارات والمجلة", href: "/admin/publications", icon: BookMarked },
@@ -67,34 +66,32 @@ export const adminNav: NavSection[] = [
     ],
   },
   {
-    // نظام التعلّم: ما يدخل به المدير المادّة العلميّة ويفتحها للطلاب.
-    title: "التعليم",
+    title: "التعليم والمقررات",
     items: [
+      { label: "البرامج والمراحل", href: "/admin/programs", icon: BookOpen },
       { label: "المقرّرات ومحتواها", href: "/admin/courses", icon: Layers },
       { label: "المجالس المباشرة", href: "/admin/sessions", icon: Radio },
-      { label: "تسجيل الطلاب", href: "/admin/enrollments", icon: UserCheck },
+      { label: "الاختبارات", href: "/admin/quizzes", icon: FileQuestion },
+      { label: "الواجبات", href: "/admin/assignments", icon: ClipboardList },
     ],
   },
   {
-    title: "التعليم",
+    title: "الطلاب والشؤون الأكاديمية",
     items: [
-      { label: "المقرّرات ومحتواها", href: "/admin/courses", icon: Layers },
-      { label: "المجالس المباشرة", href: "/admin/sessions", icon: Radio },
-      { label: "تسجيل الطلاب", href: "/admin/enrollments", icon: UserCheck },
-      { label: "الاختبارات", href: "/admin/quizzes", icon: FileQuestion },
-      { label: "الواجبات", href: "/admin/assignments", icon: ClipboardList },
+      { label: "حسابات الطلاب", href: "/admin/students", icon: GraduationCap },
+      { label: "تسجيل الطلاب بالمقررات", href: "/admin/enrollments", icon: UserCheck },
       { label: "الشهادات والإجازات", href: "/admin/certificates", icon: ScrollText },
       { label: "الرسوم والمدفوعات", href: "/admin/payments", icon: Wallet },
     ],
   },
   {
-    title: "النظام",
+    title: "الفريق والنظام",
     items: [
-      { label: "حسابات الطلاب", href: "/admin/students", icon: GraduationCap },
+      { label: "الهيئة العلمية", href: "/admin/faculty", icon: GraduationCap },
       { label: "أعضاء هيئة التدريس", href: "/admin/instructors", icon: UserCog, adminOnly: true },
+      { label: "المستخدمون والأدوار", href: "/admin/users", icon: Users, adminOnly: true },
       { label: "الإعدادات العامة", href: "/admin/settings", icon: Settings },
       { label: "تحسين محركات البحث", href: "/admin/seo", icon: Search },
-      { label: "المستخدمون والأدوار", href: "/admin/users", icon: Users, adminOnly: true },
     ],
   },
 ];

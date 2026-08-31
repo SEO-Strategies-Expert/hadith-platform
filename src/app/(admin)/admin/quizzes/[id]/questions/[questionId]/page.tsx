@@ -3,9 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
 import { PageHeader, Card } from "@/components/admin/ui";
 import { ActionForm } from "@/components/admin/ActionForm";
-import { ResourceFields } from "@/components/admin/ResourceFields";
-import { questionFields } from "../../../fields";
-import { ChoicesEditor } from "../../../ChoicesEditor";
+import { QuestionEditor } from "../../../QuestionEditor";
 import { updateQuestion } from "../../../actions";
 
 export default async function EditQuestionPage({
@@ -31,8 +29,7 @@ export default async function EditQuestionPage({
           action={updateQuestion.bind(null, id, questionId)}
           cancelHref={`/admin/quizzes/${id}/questions`}
         >
-          <ResourceFields fields={questionFields} record={question} />
-          <ChoicesEditor choices={question.choices} />
+          <QuestionEditor record={question} choices={question.choices} />
         </ActionForm>
       </Card>
     </div>

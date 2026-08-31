@@ -3,6 +3,7 @@ import { PageHeader, Card, Field, TextArea } from "@/components/admin/ui";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { CALENDLY_URL_SETTING_KEY } from "@/lib/calendly";
 import { saveSettings } from "./actions";
+import { ImagePickerField } from "@/components/admin/ImagePickerField";
 
 /**
  * مفاتيح تعرفها اللوحة وقد لا يكون لها صفٌّ في القاعدة بعد.
@@ -12,6 +13,11 @@ import { saveSettings } from "./actions";
  */
 const EXTRA_KEYS: { key: string; group: string }[] = [
   { key: CALENDLY_URL_SETTING_KEY, group: "admissions" },
+  { key: "certificate.logo", group: "certificate" },
+  { key: "certificate.signature1", group: "certificate" },
+  { key: "certificate.signature1Name", group: "certificate" },
+  { key: "certificate.signature2", group: "certificate" },
+  { key: "certificate.signature2Name", group: "certificate" },
 ];
 
 const LABELS: Record<string, string> = {
@@ -31,6 +37,11 @@ const LABELS: Record<string, string> = {
   "header.universityUrl": "رابط منصّة الجامعة",
   "header.universitySocialUrl": "رابط صفحات الجامعة على التواصل",
   [CALENDLY_URL_SETTING_KEY]: "رابط حجز المقابلة العلميّة (Calendly)",
+  "certificate.logo": "شعار الشهادة",
+  "certificate.signature1": "التوقيع الإلكتروني الأول",
+  "certificate.signature1Name": "اسم وصفة صاحب التوقيع الأول",
+  "certificate.signature2": "التوقيع الإلكتروني الثاني",
+  "certificate.signature2Name": "اسم وصفة صاحب التوقيع الثاني",
 };
 
 const HINTS: Record<string, string> = {
@@ -46,6 +57,7 @@ const GROUP_TITLES: Record<string, string> = {
   university: "الجامعة",
   header: "روابط الهيدر (البث والجامعة)",
   admissions: "القبول والمقابلات",
+  certificate: "تصميم الشهادات والتواقيع",
 };
 
 function isLtr(key: string) {
@@ -110,7 +122,9 @@ export default async function SettingsPage({
                     const value = s.value;
                     return (
                       <div key={s.key} className={isLong(s.key) ? "sm:col-span-2" : ""}>
-                        {isLong(s.key) ? (
+                        {/^certificate\.(logo|signature\d)$/.test(s.key) ? (
+                          <ImagePickerField label={label} name={s.key} defaultValue={value} />
+                        ) : isLong(s.key) ? (
                           <TextArea label={label} name={s.key} defaultValue={value} dir={isLtr(s.key) ? "ltr" : "rtl"} />
                         ) : (
                           <Field

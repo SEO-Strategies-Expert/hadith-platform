@@ -33,7 +33,7 @@ export default async function CertificatePage({
   const { id } = await params;
   const flags = await searchParams;
 
-  const cert = await prisma.certificate.findUnique({
+  const [cert, certificateSettings] = await Promise.all([prisma.certificate.findUnique({
     where: { id },
     select: {
       id: true,
@@ -54,8 +54,9 @@ export default async function CertificatePage({
       stage: { select: { titleAr: true } },
       issuedBy: { select: { name: true } },
     },
-  });
+  }), prisma.setting.findMany({ where: { key: { startsWith: "certificate." } }, select: { key: true, value: true } })]);
   if (!cert) notFound();
+  const design = Object.fromEntries(certificateSettings.map(s => [s.key, String(s.value ?? "")]));
 
   const arPath = verifyPath("ar", cert.verifyCode);
   const enPath = verifyPath("en", cert.verifyCode);
@@ -102,6 +103,23 @@ export default async function CertificatePage({
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="grid gap-5">
+          <Card className="overflow-hidden p-2">
+            <div className="relative min-h-[430px] border-[6px] border-double border-gold bg-cream-50 px-8 py-9 text-center sm:px-14">
+              <div className="absolute inset-3 border border-gold/30" />
+              <div className="relative">
+                <img src={design["certificate.logo"] || "/assets/img/logo-official.png"} alt="" className="mx-auto mb-4 h-20 w-20 object-contain" />
+                <div className="text-sm font-bold tracking-wide text-gold-3">الكلّية العليا للحديث النبوي</div>
+                <h2 className="my-5 text-3xl font-extrabold text-navy-900">{cert.titleAr}</h2>
+                <p className="text-sm text-ink-soft">تشهد بأن الطالب/ة</p>
+                <div className="my-3 text-2xl font-extrabold text-navy-800">{cert.user.name}</div>
+                <p className="mx-auto max-w-xl leading-8 text-ink-soft">قد أتم بنجاح {cert.course?.titleAr ?? cert.stage?.titleAr ?? "متطلبات البرنامج"}</p>
+                <div className="mt-10 grid grid-cols-2 gap-8">
+                  {[1,2].map(n => design[`certificate.signature${n}`] && <div key={n} className="text-xs text-navy-800"><img src={design[`certificate.signature${n}`]} alt="توقيع إلكتروني" className="mx-auto h-14 max-w-40 object-contain"/><div className="mt-1 border-t border-gold/50 pt-2">{design[`certificate.signature${n}Name`]}</div></div>)}
+                </div>
+                <div className="mt-8 flex justify-between gap-4 text-[11px] text-ink-soft"><span>{formatDateTime(cert.issuedAt)}</span><span dir="ltr">{cert.serial}</span></div>
+              </div>
+            </div>
+          </Card>
           <Card className="p-6">
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <Badge tone={kindTone(cert.kind)}>{kindLabel(cert.kind)}</Badge>
