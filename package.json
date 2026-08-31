@@ -11,6 +11,7 @@
     "seed": "node prisma/seed.mjs",
     "import": "node prisma/import.mjs",
     "import:dry": "node prisma/import.mjs --dry",
+    "import:youtube-course": "node prisma/import-youtube-course.mjs",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate deploy",
     "db:setup": "prisma db push && node prisma/seed.mjs && node prisma/import.mjs"

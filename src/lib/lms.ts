@@ -27,14 +27,20 @@ export async function getStudentCourses(userId: string) {
 }
 
 /**
- * هل يملك الطالب حقّ دخول المقرّر؟
- * الطلاب المسجَّلون فقط — عدا الدروس المعلَّمة `freePreview` (تُفحص على حدة).
+ * هل يملك المستخدم حقّ دخول المقرّر؟
+ * الطالب يحتاج تسجيلًا فعّالًا، بينما يملك المدير والمحرّر وصول معاينة كاملًا
+ * كي يختبرا تجربة الطالب من صفحات المقرّر نفسها بلا إنشاء تسجيلات وهميّة.
+ * الدروس المعلَّمة `freePreview` تُفحص على حدة في صفحة الدرس.
  */
 export async function isEnrolled(userId: string, courseId: string): Promise<boolean> {
-  const e = await prisma.enrollment.findUnique({
-    where: { userId_courseId: { userId, courseId } },
-    select: { status: true },
-  });
+  const [user, e] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId }, select: { role: true } }),
+    prisma.enrollment.findUnique({
+      where: { userId_courseId: { userId, courseId } },
+      select: { status: true },
+    }),
+  ]);
+  if (user?.role === "ADMIN" || user?.role === "EDITOR") return true;
   return Boolean(e && (ACTIVE_ENROLLMENT as readonly string[]).includes(e.status));
 }
 

@@ -1,221 +1,44 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { BookOpen, CalendarDays, CreditCard, LogOut, ScrollText, UserRound } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { currentUser } from "@/lib/guard";
 import type { Lang } from "@/lib/site-data";
-import { longDate, mediaUrl } from "@/lib/site-format";
-import { siteHref } from "@/lib/site-links";
 import { studentLogout } from "@/app/(site)/student-actions";
 import { StudentCourses, StudentSessions } from "@/components/site/StudentCourses";
 import { StudentCertificates } from "@/components/site/StudentCertificates";
 import { StudentPayments } from "@/components/site/StudentPayments";
 
-const T = {
-  ar: {
-    kicker: "بوابة الطالب",
-    welcome: "مرحبًا",
-    logout: "تسجيل الخروج",
-    profile: "بياناتي",
-    email: "البريد الإلكتروني",
-    studentNo: "الرقم الجامعي",
-    program: "البرنامج",
-    country: "الدولة",
-    phone: "رقم الهاتف",
-    none: "—",
-    application: "حالة طلب الالتحاق",
-    noApplication: "لا يوجد طلب التحاق مرتبط ببريدك.",
-    submitted: "أُرسل في",
-    news: "آخر الأخبار",
-    library: "المكتبة الرقمية",
-    diwan: "ديوان العلماء",
-    contact: "تواصل مع الكلّية",
-    goCourses: "مقرّراتي",
-    goSessions: "مجالسي",
-    statuses: {
-      NEW: "قيد الاستلام",
-      IN_PROGRESS: "قيد المراجعة",
-      DONE: "مقبول ومكتمل",
-      ARCHIVED: "مؤرشف",
-    } as Record<string, string>,
-    card: "البطاقة الجامعية", active: "طالب فعّال", inactive: "الحساب غير مفعّل",
-  },
-  en: {
-    kicker: "Student portal",
-    welcome: "Welcome",
-    logout: "Sign out",
-    profile: "My details",
-    email: "Email address",
-    studentNo: "Student number",
-    program: "Programme",
-    country: "Country",
-    phone: "Phone",
-    none: "—",
-    application: "Application status",
-    noApplication: "No application is linked to your email.",
-    submitted: "Submitted on",
-    news: "Latest news",
-    library: "Digital library",
-    diwan: "Scholars' forum",
-    contact: "Contact the college",
-    goCourses: "My courses",
-    goSessions: "My sessions",
-    statuses: {
-      NEW: "Received",
-      IN_PROGRESS: "Under review",
-      DONE: "Accepted",
-      ARCHIVED: "Archived",
-    } as Record<string, string>,
-    card: "Student ID", active: "Active student", inactive: "Inactive account",
-  },
+const T={
+ ar:{portal:"بوابة الطالب",welcome:"مرحبًا",subtitle:"كل ما تحتاجه للدراسة في مكان واحد",courses:"المقررات",sessions:"المجالس",certificates:"الشهادات",payments:"المدفوعات",profile:"الملف الشخصي",logout:"خروج",card:"البطاقة الجامعية",active:"طالب فعّال",inactive:"غير مفعّل",studentNo:"الرقم الجامعي",program:"البرنامج",country:"الدولة",email:"البريد",application:"طلب الالتحاق",noApplication:"لا يوجد طلب مرتبط",accepted:"مقبول"},
+ en:{portal:"Student portal",welcome:"Welcome",subtitle:"Everything you need to study, in one place",courses:"Courses",sessions:"Sessions",certificates:"Certificates",payments:"Payments",profile:"Profile",logout:"Sign out",card:"Student ID",active:"Active student",inactive:"Inactive",studentNo:"Student no.",program:"Programme",country:"Country",email:"Email",application:"Application",noApplication:"No linked application",accepted:"Accepted"}
 } as const;
 
-export async function StudentDashboard({ lang }: { lang: Lang }) {
-  const user = await currentUser();
-  if (!user?.id) redirect(lang === "en" ? "/en/student-login.html" : "/student-login.html");
-
-  const t = T[lang];
-  const [profile, application, news] = await Promise.all([
-    prisma.user.findUnique({ where: { id: user.id } }),
-    user.email
-      ? prisma.admissionApplication.findFirst({
-          where: { email: user.email },
-          orderBy: { createdAt: "desc" },
-        })
-      : null,
-    prisma.newsItem.findMany({ where: { visible: true }, orderBy: { date: "desc" }, take: 3 }),
-  ]);
-
-  // `page-meta` مصمَّم لخلفيّة كحليّة، فبيانات الطالب على خلفيّة بيضاء
-  // تُصاغ بتنسيقٍ مضمَّن ليبقى النصّ مقروءًا.
-  const row = (label: string, value: string | null | undefined) => (
-    <div
-      style={{
-        display: "flex",
-        gap: 12,
-        flexWrap: "wrap",
-        padding: "10px 0",
-        borderBottom: "1px solid rgba(18,49,89,.10)",
-      }}
-    >
-      <span style={{ fontWeight: 800, color: "#123159", minWidth: 150 }}>{label}</span>
-      <span style={{ color: "#3d4a5c" }}>{value || t.none}</span>
+export async function StudentDashboard({lang}:{lang:Lang}){
+ const user=await currentUser(); if(!user?.id) redirect(lang==="en"?"/en/student-login.html":"/student-login.html"); const t=T[lang];
+ const [profile,application,courses,sessions,certificates,payments]=await Promise.all([
+  prisma.user.findUnique({where:{id:user.id}}),
+  user.email?prisma.admissionApplication.findFirst({where:{email:user.email},orderBy:{createdAt:"desc"},select:{status:true,program:true}}):null,
+  prisma.enrollment.count({where:{userId:user.id,status:{in:["ACTIVE","COMPLETED"]}}}),
+  prisma.liveSession.count({where:{visible:true,startsAt:{gte:new Date()},OR:[{course:{enrollments:{some:{userId:user.id}}}},{stage:{stageEnrollments:{some:{userId:user.id}}}},{isPublic:true}]}}),
+  prisma.certificate.count({where:{userId:user.id,revoked:false}}),
+  prisma.payment.count({where:{userId:user.id}}),
+ ]);
+ if(!profile) redirect(lang==="en"?"/en/student-login.html":"/student-login.html");
+ const nav=[
+  {href:"#my-courses",label:t.courses,count:courses,Icon:BookOpen},{href:"#my-sessions",label:t.sessions,count:sessions,Icon:CalendarDays},
+  {href:"#my-certificates",label:t.certificates,count:certificates,Icon:ScrollText},{href:"#my-payments",label:t.payments,count:payments,Icon:CreditCard},
+ ];
+ return <main id="main" className="student-dashboard-modern">
+  <section className="student-dash-top" id="student-profile"><div className="container">
+   <div className="student-dash-welcome"><div><span>{t.portal}</span><h1>{t.welcome}، {profile.name}</h1><p>{t.subtitle}</p></div><form action={studentLogout.bind(null,lang)}><button type="submit"><LogOut size={16}/>{t.logout}</button></form></div>
+   <div className="student-dash-grid">
+    <div className="student-id-compact"><div className="student-id-head"><img src="/assets/img/logo-official.png" alt=""/><span>{t.card}<b>{profile.status==="ACTIVE"?t.active:t.inactive}</b></span></div><div className="student-id-name">{profile.name}<small dir="ltr">{profile.studentNo??"—"}</small></div><div className="student-id-foot"><span>{profile.program??"—"}</span><span>{profile.country??"—"}</span></div></div>
+    <div className="student-quick-area"><div className="student-quick-grid">{nav.map(({href,label,count,Icon})=><Link key={href} href={href}><span><Icon size={20}/></span><b>{count}</b><small>{label}</small></Link>)}</div>
+     <div className="student-mini-profile"><div><UserRound size={17}/><span><b>{t.email}</b><small dir="ltr">{profile.email}</small></span></div><div><span><b>{t.application}</b><small>{application?.program??t.noApplication}</small></span><em>{application?.status==="DONE"?t.accepted:application?.status??"—"}</em></div></div>
     </div>
-  );
-
-  return (
-    <main id="main">
-      <section className="page-hero orn-navy">
-        <div className="container">
-          <div className="page-hero-copy reveal">
-            <p className="page-kicker">{t.kicker}</p>
-            <h1 className="page-title thuluth gold-text">
-              {t.welcome} {profile?.name ?? ""}
-            </h1>
-            <div className="page-actions">
-              <Link className="btn btn-gold" href="#my-courses">
-                {t.goCourses}
-              </Link>
-              <Link className="btn btn-outline-ink" href="#my-sessions">
-                {t.goSessions}
-              </Link>
-              <form action={studentLogout.bind(null, lang)}>
-                <button className="btn btn-outline" type="submit">
-                  {t.logout}
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="inner-section white orn-cream">
-        <div className="container">
-          <div className="content-split">
-            <div className="reveal" style={{borderRadius:22,overflow:"hidden",boxShadow:"0 18px 45px rgba(7,22,48,.16)",background:"linear-gradient(135deg,#071630,#17406f)",color:"white",padding:24,minHeight:230,display:"flex",flexDirection:"column",justifyContent:"space-between"}}>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:16}}><img src="/assets/img/logo-official.png" alt="" style={{width:64,height:64,objectFit:"contain"}}/><div style={{textAlign:lang === "ar" ? "left":"right",fontSize:12,opacity:.8}}>{t.card}<br/><b style={{color:"#e2bc5e"}}>{profile?.status === "ACTIVE" ? t.active : t.inactive}</b></div></div>
-              <div><div style={{fontSize:22,fontWeight:900}}>{profile?.name}</div><div dir="ltr" style={{marginTop:5,letterSpacing:1.5,color:"#f6e2a0",fontWeight:800}}>{profile?.studentNo ?? "—"}</div></div>
-              <div style={{display:"flex",justifyContent:"space-between",gap:12,fontSize:12,opacity:.85}}><span>{profile?.program ?? t.none}</span><span>{profile?.country ?? t.none}</span></div>
-            </div>
-            <div className="split-copy reveal">
-              <h2 className="thuluth">{t.profile}</h2>
-              <div style={{ display: "grid", gap: 2, marginTop: 16 }}>
-                {row(t.email, profile?.email)}
-                {row(t.studentNo, profile?.studentNo)}
-                {row(t.program, profile?.program)}
-                {row(t.country, profile?.country)}
-                {row(t.phone, profile?.phone)}
-              </div>
-            </div>
-
-            <div className="callout reveal">
-              <h3>{t.application}</h3>
-              {application ? (
-                <>
-                  <p style={{ fontWeight: 800 }}>
-                    {t.statuses[application.status] ?? application.status}
-                  </p>
-                  <p>
-                    {application.program ?? ""} — {t.submitted}{" "}
-                    {longDate(application.createdAt, lang, { arabicDigits: lang === "ar" })}
-                  </p>
-                </>
-              ) : (
-                <p>{t.noApplication}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* المقرّرات والمجالس من `lib/lms.ts` — مرتبطة بالطالب لا قوائم عامّة */}
-      <StudentCourses lang={lang} userId={user.id} />
-      <StudentSessions lang={lang} userId={user.id} />
-      <StudentCertificates lang={lang} userId={user.id} />
-      <StudentPayments lang={lang} />
-
-      <section className="inner-section cream orn-cream">
-        <div className="container">
-          <header className="section-cap reveal">
-            <h2 className="thuluth">{t.news}</h2>
-          </header>
-          <div className="card-grid">
-            {news.map((n) => (
-              <article className="image-card reveal" key={n.id}>
-                <Link href={`${siteHref(lang, "news-detail.html")}?item=${n.slug ?? n.id}`}>
-                  <div className="thumb">
-                    <img
-                      src={mediaUrl(n.imageUrl, "/assets/img/news-1.jpg")}
-                      alt=""
-                      width={800}
-                      height={500}
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="body">
-                    <h3>{lang === "ar" ? n.titleAr : n.titleEn}</h3>
-                    <div className="card-foot">
-                      <span>{longDate(n.date, lang, { arabicDigits: lang === "ar" })}</span>
-                      <strong>{lang === "ar" ? "←" : "→"}</strong>
-                    </div>
-                  </div>
-                </Link>
-              </article>
-            ))}
-          </div>
-
-          <div className="page-actions" style={{ marginTop: 24 }}>
-            <Link className="btn btn-gold" href={siteHref(lang, "library.html")}>
-              {t.library}
-            </Link>
-            <Link className="btn btn-outline-ink" href={siteHref(lang, "diwan.html")}>
-              {t.diwan}
-            </Link>
-            <Link className="btn btn-outline-ink" href={siteHref(lang, "contact.html")}>
-              {t.contact}
-            </Link>
-          </div>
-        </div>
-      </section>
-    </main>
-  );
+   </div>
+  </div></section>
+  <StudentCourses lang={lang} userId={user.id}/><StudentSessions lang={lang} userId={user.id}/><StudentCertificates lang={lang} userId={user.id}/><StudentPayments lang={lang}/>
+ </main>;
 }

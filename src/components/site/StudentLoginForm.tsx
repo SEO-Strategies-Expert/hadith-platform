@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import type { Lang } from "@/lib/site-data";
 import { studentLogin } from "@/app/(site)/student-actions";
 
@@ -24,22 +25,23 @@ const T = {
 export function StudentLoginForm({ lang }: { lang: Lang }) {
   const [error, formAction, pending] = useActionState(studentLogin.bind(null, lang), undefined);
   const t = T[lang];
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <form action={formAction}>
-      <div className="field">
+    <form action={formAction} className="student-login-form">
+      <div className="field student-login-field">
         <label htmlFor="login-email">{t.email}</label>
-        <input id="login-email" name="email" type="email" autoComplete="email" dir="ltr" required />
+        <div><Mail size={18}/><input id="login-email" name="email" type="email" autoComplete="email" dir="ltr" placeholder="name@example.com" required /></div>
       </div>
-      <div className="field" style={{ marginTop: 14 }}>
+      <div className="field student-login-field" style={{ marginTop: 16 }}>
         <label htmlFor="login-password">{t.password}</label>
-        <input
+        <div><LockKeyhole size={18}/><input
           id="login-password"
           name="password"
-          type="password"
+          type={showPassword ? "text" : "password"}
           autoComplete="current-password"
           required
-        />
+        /><button type="button" onClick={() => setShowPassword(v=>!v)} aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button></div>
       </div>
 
       {error && (
@@ -60,8 +62,7 @@ export function StudentLoginForm({ lang }: { lang: Lang }) {
       )}
 
       <button
-        className="btn btn-gold btn-lg"
-        style={{ width: "100%", justifyContent: "center", marginTop: 20 }}
+        className="student-login-submit"
         type="submit"
         disabled={pending}
       >

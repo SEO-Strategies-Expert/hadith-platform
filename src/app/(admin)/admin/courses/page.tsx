@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Pencil, ListTree } from "lucide-react";
+import { Eye, Pencil, ListTree } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
@@ -88,7 +88,7 @@ export default async function CoursesPage() {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-ink-soft">{c._count.enrollments}</td>
+                      <td className="px-4 py-3 text-ink-soft"><Link href={`/admin/enrollments?courseId=${c.id}`} className="font-bold text-navy-700 underline decoration-gold/60 underline-offset-4" title="عرض طلاب المقرر">{c._count.enrollments} طالب ←</Link></td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap items-center gap-1">
                           {c.published ? <Badge tone="green">منشور</Badge> : <Badge tone="gray">مسوّدة</Badge>}
@@ -97,6 +97,15 @@ export default async function CoursesPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
+                          <Link
+                            href={`/student/course/${c.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-gold/40 bg-gold/5 px-2.5 py-1.5 text-[12px] font-bold text-navy-800 hover:bg-gold/10"
+                            title="معاينة المقرّر كما يراه الطالب الملتحق"
+                          >
+                            <Eye size={15} /> معاينة الطالب
+                          </Link>
                           <Link
                             href={`/admin/courses/${c.id}/content`}
                             className="inline-flex items-center gap-1.5 rounded-lg border border-black/10 px-2.5 py-1.5 text-[12px] font-bold text-navy-800 hover:border-gold/50"

@@ -618,7 +618,9 @@ const bindCourses: Binder = async ($, lang) => {
       .map((c, i) =>
         imageCard(
           {
-            href: link(lang, c.href, "#"),
+            // `href` is an optional override; without one, the card still
+            // needs to expose the course's public details.
+            href: link(lang, c.href, `course/${c.id}`),
             image: mediaUrl(c.imageUrl, fallbackImage(i)),
             title: lang === "ar" ? c.titleAr : c.titleEn,
             desc: lang === "ar" ? c.descAr : c.descEn,

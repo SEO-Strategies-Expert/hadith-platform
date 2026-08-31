@@ -22,6 +22,7 @@ const T = {
     uniSocial: "صفحات الجامعة",
     accreditation: "الإعتماد",
     logout: "تسجيل الخروج",
+    account: "حسابي", profile: "الملف الشخصي", myCourses: "مقرراتي", mySessions: "مجالسي", myCertificates: "شهاداتي", myPayments: "مدفوعاتي", library: "المكتبة الرقمية",
   },
   en: {
     platforms: "College platforms",
@@ -38,6 +39,7 @@ const T = {
     uniSocial: "University social pages",
     accreditation: "Accreditation",
     logout: "Log out",
+    account: "My account", profile: "Profile", myCourses: "My courses", mySessions: "My sessions", myCertificates: "Certificates", myPayments: "Payments", library: "Digital library",
   },
 } as const;
 
@@ -227,11 +229,22 @@ export async function SiteHeader({
               <span className={lang === "ar" ? "thuluth gold-text" : undefined}>{t.accreditation}</span>
             </Link>
             {isStudent ? (
-              <form action={logout}>
-                <button className="btn btn-gold btn-student" type="submit">
-                  <span className="btn-student-label">{t.logout}</span>
-                </button>
-              </form>
+              <details className="student-account-menu">
+                <summary className="btn btn-gold btn-student">
+                  <span className="btn-student-ic"><svg aria-hidden="true"><use href="#i-student" /></svg></span>
+                  <span className="btn-student-label">{session.user.name || t.account}</span><span className="student-account-arrow">⌄</span>
+                </summary>
+                <div className="student-account-drop">
+                  <div className="student-account-head"><b>{session.user.name}</b><small>{session.user.email}</small></div>
+                  <Link href={`${siteHref(lang, "student")}#student-profile`}><span>◉</span>{t.profile}</Link>
+                  <Link href={`${siteHref(lang, "student")}#my-courses`}><span>▤</span>{t.myCourses}</Link>
+                  <Link href={`${siteHref(lang, "student")}#my-sessions`}><span>◷</span>{t.mySessions}</Link>
+                  <Link href={`${siteHref(lang, "student")}#my-certificates`}><span>◇</span>{t.myCertificates}</Link>
+                  <Link href={`${siteHref(lang, "student")}#my-payments`}><span>▣</span>{t.myPayments}</Link>
+                  <Link href={siteHref(lang, "library.html")}><span>▥</span>{t.library}</Link>
+                  <form action={logout}><button type="submit"><span>↪</span>{t.logout}</button></form>
+                </div>
+              </details>
             ) : (
               <Link className="btn btn-gold btn-student" href={siteHref(lang, "student-login.html")}>
                 <span className="btn-student-ic">

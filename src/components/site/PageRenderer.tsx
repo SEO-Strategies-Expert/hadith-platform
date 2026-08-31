@@ -5,6 +5,8 @@ import { getPageBySlug } from "@/lib/site-content";
 import { injectDiwanThreads } from "@/lib/diwan-html";
 import { applyHeroOverrides } from "@/lib/page-hero";
 import { bindPageSections, type PageParams } from "@/lib/site-sections";
+import { currentUser } from "@/lib/guard";
+import { StudentCourseRequestPage } from "@/components/site/StudentCourseRequestPage";
 
 export async function PageRenderer({
   slug,
@@ -15,6 +17,12 @@ export async function PageRenderer({
   lang: Lang;
   params?: PageParams;
 }) {
+  if (slug === "admissions") {
+    const viewer = await currentUser();
+    if (viewer?.role === "STUDENT") {
+      return <StudentCourseRequestPage lang={lang} selectedCourseId={params?.courseId} />;
+    }
+  }
   const page = await getPageBySlug(slug);
   if (!page || page.status !== "PUBLISHED") notFound();
 

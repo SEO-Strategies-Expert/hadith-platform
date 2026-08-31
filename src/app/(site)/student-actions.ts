@@ -3,6 +3,9 @@
 import { AuthError } from "next-auth";
 import { signIn, signOut } from "@/auth";
 import type { Lang } from "@/lib/site-data";
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
+import { currentUser } from "@/lib/guard";
 
 /** دخول الطالب من بوابة الطلاب — يستخدم نفس مزوّد المصادقة. */
 export async function studentLogin(
@@ -29,4 +32,23 @@ export async function studentLogin(
 
 export async function studentLogout(lang: Lang) {
   await signOut({ redirectTo: lang === "en" ? "/en/student-login.html" : "/student-login.html" });
+}
+
+export type CourseRequestState = { ok: boolean; message: string } | undefined;
+export async function requestCourseEnrollment(lang: Lang, _prev: CourseRequestState, formData: FormData): Promise<CourseRequestState> {
+  const user = await currentUser();
+  const ar = lang === "ar";
+  if (!user?.id || user.role !== "STUDENT") return { ok:false, message:ar?"سجّل دخولك بحساب طالب أولًا.":"Sign in with a student account first." };
+  const courseId=String(formData.get("courseId")??"").trim();
+  const feeRaw=String(formData.get("feeOption")??"free");
+  const feeOption=["full","reduced","free"].includes(feeRaw)?feeRaw:"free";
+  if(!courseId)return {ok:false,message:ar?"اختر المقرر الذي تريد التسجيل فيه.":"Choose a course."};
+  const course=await prisma.course.findFirst({where:{id:courseId,visible:true,published:true},select:{id:true,titleAr:true,titleEn:true}});
+  if(!course)return {ok:false,message:ar?"المقرر غير متاح للتسجيل حاليًا.":"This course is not open for registration."};
+  const existing=await prisma.enrollment.findUnique({where:{userId_courseId:{userId:user.id,courseId}}});
+  if(existing && existing.status!=="CANCELLED")return {ok:existing.status==="PENDING",message:existing.status==="PENDING"?(ar?"طلبك لهذا المقرر قيد المراجعة بالفعل.":"Your request is already under review."):(ar?"أنت مسجّل في هذا المقرر بالفعل.":"You are already enrolled in this course.")};
+  if(existing)await prisma.enrollment.update({where:{id:existing.id},data:{status:"PENDING",feeOption,progressPct:0,completedAt:null,enrolledAt:new Date()}});
+  else await prisma.enrollment.create({data:{userId:user.id,courseId,status:"PENDING",feeOption}});
+  revalidatePath("/admin/enrollments"); revalidatePath(lang==="en"?"/en/student":"/student");
+  return {ok:true,message:ar?`تم إرسال طلب التسجيل في «${course.titleAr}». ستظهر حالته في بوابتك بعد مراجعة الإدارة.`:`Your request for “${course.titleEn||course.titleAr}” was sent and is awaiting review.`};
 }

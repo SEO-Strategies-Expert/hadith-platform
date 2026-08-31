@@ -1,34 +1,19 @@
 import { notFound } from "next/navigation";
-import * as cheerio from "cheerio";
 import type { Lang } from "@/lib/site-data";
 import { getPageBySlug } from "@/lib/site-content";
-import { bindPageSections } from "@/lib/site-sections";
 import { StudentLoginForm } from "@/components/site/StudentLoginForm";
 
-const MARKER = "<!--STUDENT_LOGIN_FORM-->";
+const T = {
+  ar: { kicker:"بوابة الطالب", title:"مرحبًا بعودتك", intro:"سجّل دخولك للوصول إلى مقرراتك ومحاضراتك واختباراتك وشهاداتك.", secure:"دخول آمن إلى حسابك الأكاديمي" },
+  en: { kicker:"Student portal", title:"Welcome back", intro:"Sign in to access your courses, lectures, quizzes, and certificates.", secure:"Secure access to your academic account" },
+} as const;
 
-/**
- * صفحة بوابة الطلاب: يبقى نصّها محرَّرًا من اللوحة كبقيّة الصفحات، لكن
- * نموذج الدخول نفسه مكوّن React حقيقي يستدعي المصادقة بدل النموذج الصوري.
- */
 export async function StudentLoginPage({ lang }: { lang: Lang }) {
   const page = await getPageBySlug("student-login");
   if (!page || page.status !== "PUBLISHED") notFound();
-
-  let html = (lang === "ar" ? page.bodyHtmlAr : page.bodyHtmlEn) ?? "";
-  html = await bindPageSections(html, "student-login", lang);
-
-  const $ = cheerio.load(html, null, false);
-  const form = $("form").first();
-  if (form.length > 0) form.replaceWith(MARKER);
-
-  const [before, after] = $.html().split(MARKER);
-
-  return (
-    <div>
-      <div dangerouslySetInnerHTML={{ __html: before ?? "" }} />
-      <StudentLoginForm lang={lang} />
-      <div dangerouslySetInnerHTML={{ __html: after ?? "" }} />
-    </div>
-  );
+  const t=T[lang];
+  return <main className="student-login-modern" style={page.heroImage ? {backgroundImage:`linear-gradient(rgba(7,22,48,.78),rgba(7,22,48,.9)),url(${page.heroImage})`} : undefined}>
+    <div className="student-login-orb student-login-orb-one"/><div className="student-login-orb student-login-orb-two"/>
+    <section className="student-login-card"><div className="student-login-brand"><img src="/assets/img/logo-official.png" alt="" width="82" height="82"/><span>{t.kicker}</span></div><header><h1>{t.title}</h1><p>{t.intro}</p></header><StudentLoginForm lang={lang}/><footer><span>✓</span> {t.secure}</footer></section>
+  </main>;
 }
