@@ -149,7 +149,11 @@ export async function StudentLessonView({ lang, lessonId }: { lang: Lang; lesson
 
   return (
     <main id="main">
-      <section className="page-hero orn-navy">
+      <header className="learning-topbar">
+        <Link href={studentHref(lang, `/course/${courseId}`)}>← {t.backToCourse}</Link>
+        <span>{title(lang, course.titleAr, course.titleEn)}</span>
+      </header>
+      <section className="page-hero orn-navy student-lesson-hero">
         <div className="container">
           <div className="page-hero-copy reveal">
             <p className="page-kicker">
@@ -172,16 +176,11 @@ export async function StudentLessonView({ lang, lessonId }: { lang: Lang; lesson
                 </span>
               ) : null}
             </div>
-            <div className="page-actions" style={{ marginTop: 22 }}>
-              <Link className="btn btn-outline-ink" href={studentHref(lang, `/course/${courseId}`)}>
-                {t.backToCourse}
-              </Link>
-            </div>
           </div>
         </div>
       </section>
 
-      <section className="inner-section white orn-cream">
+      <section className="inner-section white orn-cream student-lesson-material">
         <div className="container">
           {!enrolled && (
             <div className="callout reveal" style={{ marginBottom: 26 }}>
@@ -348,6 +347,7 @@ async function LessonBody({ lang, lesson }: { lang: Lang; lesson: FlatLesson }) 
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
           loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
         />
       </div>

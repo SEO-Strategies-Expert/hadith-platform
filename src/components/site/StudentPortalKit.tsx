@@ -188,7 +188,14 @@ export function resolveVideo(raw: string | null | undefined): VideoSource | null
 function ytEmbed(id: string, from: URL): string {
   const t = from.searchParams.get("start") ?? from.searchParams.get("t");
   const secs = t ? parseYtTime(t) : 0;
-  return `https://www.youtube-nocookie.com/embed/${id}${secs ? `?start=${secs}` : ""}`;
+  const params = new URLSearchParams({
+    rel: "0",
+    modestbranding: "1",
+    iv_load_policy: "3",
+    playsinline: "1",
+  });
+  if (secs) params.set("start", String(secs));
+  return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
 }
 
 function parseYtTime(t: string): number {
