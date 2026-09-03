@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Eye, Pencil, ListTree, Search, X } from "lucide-react";
+import { Eye, Pencil, ListTree, Search, X, Bug, AlertTriangle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { deleteRecord } from "@/lib/crud-actions";
+import { isDebugEnabled } from "@/lib/debug";
 
 /**
  * قائمة المقرّرات.
@@ -104,21 +105,144 @@ export default async function CoursesPage({
       }
     : {};
 
-  const [total, courses] = await Promise.all([
-    prisma.course.count({ where }),
-    prisma.course.findMany({
-      where,
-      orderBy: [{ order: "asc" }, { titleAr: "asc" }],
-      skip,
-      take: COURSES_PER_PAGE,
-      include: {
-        stage: { select: { titleAr: true } },
-        instructor: { select: { nameAr: true } },
-        _count: { select: { enrollments: true } },
-        modules: { select: { _count: { select: { lessons: true } } } },
-      },
-    }),
-  ]);
+  let total = 0;
+  // Type with includes — use any to avoid Prisma GetPayload complexity in catch block
+  let courses: Array<{
+    id: string;
+    titleAr: string;
+    titleEn: string;
+    stage: { titleAr: string } | null;
+    instructor: { nameAr: string } | null;
+    modules: Array<{ _count: { lessons: number } }>;
+    _count: { enrollments: number };
+    published: boolean;
+    visible: boolean;
+    order: number;
+  }> = [];
+  let loadError: { message: string; stack?: string; code?: string } | null = null;
+
+  try {
+    const [c, rows] = await Promise.all([
+      prisma.course.count({ where }),
+      prisma.course.findMany({
+        where,
+        orderBy: [{ order: "asc" }, { titleAr: "asc" }],
+        skip,
+        take: COURSES_PER_PAGE,
+        include: {
+          stage: { select: { titleAr: true } },
+          instructor: { select: { nameAr: true } },
+          _count: { select: { enrollments: true } },
+          modules: { select: { _count: { select: { lessons: true } } } },
+        },
+      }),
+    ]);
+    total = c;
+    courses = rows;
+  } catch (e: unknown) {
+    const err = e as Error & { code?: string; meta?: unknown };
+    loadError = {
+      message: err?.message ?? String(e),
+      stack: err?.stack?.slice(0, 4000),
+      code: err?.code,
+    };
+  }
+
+  const debug = await isDebugEnabled();
+  if (loadError) {
+    const isMissingTable =
+      /does not exist|relation.*does not exist|P2021|P2010|column.*does not exist|Cannot read properties/i.test(
+        loadError.message
+      );
+    return (
+      <div>
+        <PageHeader
+          title="المقرّرات الدراسية"
+          desc="بيانات المقرّر ومحتواه العلمي."
+          action={{ href: "/admin/courses/new", label: "إضافة مقرّر" }}
+        />
+        <Card className="p-6">
+          <div className="flex items-start gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-red-600 text-white">
+              <AlertTriangle size={20} />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-[16px] font-extrabold text-red-700">تعذّر تحميل المقرّرات (500)</h2>
+              <p className="mt-1 text-[13px] leading-6 text-ink-soft">
+                فشل الاستعلام عن جدول <code dir="ltr">courses</code>. السبب الأكثر شيوعًا هو عدم مزامنة هيكل قاعدة
+                البيانات بعد نشر جديد على Vercel/Neon.
+              </p>
+              {!debug ? (
+                <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] leading-6 text-amber-900">
+                  <span className="font-bold">وضع التصحيح متوقّف.</span> فعّله لرؤية رسالة الخطأ الكاملة وتتبّع المكدّس:
+                  <Link
+                    href="/admin/settings"
+                    className="mr-2 inline-flex items-center gap-1 rounded-lg bg-amber-600 px-3 py-1 text-[12px] font-bold text-white hover:bg-amber-700"
+                  >
+                    <Bug size={12} /> الإعدادات ← تفعيل Debug
+                  </Link>
+                  <span className="block mt-1 text-[11.5px]">
+                    أو اذهب مباشرةً إلى <Link href="/admin/system" className="font-bold underline">/admin/system ← مزامنة الهيكل الآن</Link> لإصلاح قاعدة Neon.
+                  </span>
+                </div>
+              ) : (
+                <div className="mt-3 space-y-3">
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                    <div className="text-[12px] font-bold text-red-700">رسالة الخطأ (Debug ON):</div>
+                    <pre
+                      dir="ltr"
+                      className="mt-1 overflow-auto whitespace-pre-wrap break-all rounded bg-white p-3 text-[11.5px] leading-5 text-red-800"
+                    >
+                      {loadError.code ? `code: ${loadError.code}\n` : ""}
+                      {loadError.message}
+                    </pre>
+                    {loadError.stack && (
+                      <pre
+                        dir="ltr"
+                        className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded bg-black/5 p-3 text-[10.5px] leading-4 text-ink-soft"
+                      >
+                        {loadError.stack}
+                      </pre>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      href="/admin/system"
+                      className="rounded-xl bg-navy-900 px-4 py-2 text-[13px] font-bold text-white hover:bg-black"
+                    >
+                      مزامنة الهيكل في /admin/system ←
+                    </Link>
+                    <Link
+                      href="/admin/settings"
+                      className="rounded-xl border border-black/10 bg-white px-4 py-2 text-[13px] font-bold text-navy-700 hover:border-gold/50"
+                    >
+                      إيقاف Debug
+                    </Link>
+                    <a href="/admin/courses" className="rounded-xl border px-4 py-2 text-[13px] font-bold">
+                      إعادة المحاولة
+                    </a>
+                  </div>
+                </div>
+              )}
+              {isMissingTable && (
+                <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-[12px] font-bold text-amber-900">
+                  تشخيص سريع: يبدو أن جدول <code dir="ltr">courses</code> أو أحد أعمدته غير موجود في Neon (
+                  <code dir="ltr">ep-noisy-mode-av88xqhy-pooler.c-11.us-east-1.aws.neon.tech</code>). شغّل
+                  <code dir="ltr"> prisma db push</code> من <Link href="/admin/system" className="underline">/admin/system</Link>.
+                </div>
+              )}
+              {debug && (
+                <div className="mt-3 text-[11.5px] text-ink-soft">
+                  where: <code dir="ltr" className="break-all">{JSON.stringify(where)}</code> · page {page} · q=
+                  <code dir="ltr">{q ?? "—"}</code>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   const totalPages = Math.max(1, Math.ceil(total / COURSES_PER_PAGE));
 

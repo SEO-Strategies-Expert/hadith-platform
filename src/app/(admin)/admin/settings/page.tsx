@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Field, TextArea } from "@/components/admin/ui";
+import { PageHeader, Card, Field, TextArea, Checkbox } from "@/components/admin/ui";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { CALENDLY_URL_SETTING_KEY } from "@/lib/calendly";
 import { saveSettings } from "./actions";
@@ -18,6 +18,7 @@ const EXTRA_KEYS: { key: string; group: string }[] = [
   { key: "certificate.signature1Name", group: "certificate" },
   { key: "certificate.signature2", group: "certificate" },
   { key: "certificate.signature2Name", group: "certificate" },
+  { key: "system.debug", group: "system" },
 ];
 
 const LABELS: Record<string, string> = {
@@ -42,11 +43,14 @@ const LABELS: Record<string, string> = {
   "certificate.signature1Name": "اسم وصفة صاحب التوقيع الأول",
   "certificate.signature2": "التوقيع الإلكتروني الثاني",
   "certificate.signature2Name": "اسم وصفة صاحب التوقيع الثاني",
+  "system.debug": "وضع التصحيح (Debug — إظهار تفاصيل الأخطاء)",
 };
 
 const HINTS: Record<string, string> = {
   [CALENDLY_URL_SETTING_KEY]:
     "الصق رابط نوع الحدث من Calendly، مثل https://calendly.com/hadith-college/interview — واتركه فارغًا لإخفاء أداة الحجز من صفحة المقابلة.",
+  "system.debug":
+    "عند التفعيل تُعرض رسائل الخطأ الكاملة وتتبّع المكدّس في لوحة الإدارة (مفيد لتشخيص خطأ 500 مثل /admin/courses). أطفئه بعد الانتهاء — لا تتركه مفعّلًا في الإنتاج.",
 };
 
 const GROUP_TITLES: Record<string, string> = {
@@ -58,6 +62,7 @@ const GROUP_TITLES: Record<string, string> = {
   header: "روابط الهيدر (البث والجامعة)",
   admissions: "القبول والمقابلات",
   certificate: "تصميم الشهادات والتواقيع",
+  system: "النظام والتشخيص",
 };
 
 function isLtr(key: string) {
@@ -70,10 +75,16 @@ function isLong(key: string) {
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ saved?: string }>;
+  searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
   const { saved } = await searchParams;
-  const settings = await prisma.setting.findMany({ orderBy: [{ group: "asc" }, { key: "asc" }] });
+  let settings: Awaited<ReturnType<typeof prisma.setting.findMany>> = [];
+  let settingsError: string | null = null;
+  try {
+    settings = await prisma.setting.findMany({ orderBy: [{ group: "asc" }, { key: "asc" }] });
+  } catch (e) {
+    settingsError = e instanceof Error ? e.message.split("\n")[0].slice(0, 400) : String(e).slice(0, 400);
+  }
 
   type Row = { key: string; group: string; labelAr: string | null; value: string };
   const rows: Row[] = settings.map((s) => ({
@@ -99,6 +110,15 @@ export default async function SettingsPage({
     <div>
       <PageHeader title="الإعدادات العامة" desc="اسم الكلّية والهوية وبيانات التواصل." />
 
+      {settingsError && (
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] leading-6 text-red-700">
+          <b>تعذّر تحميل الإعدادات من قاعدة البيانات:</b> <code dir="ltr" className="break-all">{settingsError}</code>
+          <span className="block mt-1 text-[12px] text-amber-800">
+            إن كانت قاعدة Neon غير متزامنة، اذهب إلى <a href="/admin/system" className="font-bold underline">/admin/system ← مزامنة الهيكل</a> أولًا، أو فعّل Debug عبر متغير البيئة <code dir="ltr">DEBUG=true</code> في Vercel.
+          </span>
+        </div>
+      )}
+
       {saved && (
         <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] font-bold text-emerald-700">
           تم حفظ الإعدادات بنجاح.
@@ -120,6 +140,21 @@ export default async function SettingsPage({
                   {items.map((s) => {
                     const label = LABELS[s.key] ?? s.labelAr ?? s.key;
                     const value = s.value;
+                    if (s.key === "system.debug") {
+                      const checked = value === "true" || value === "1" || value === "on";
+                      return (
+                        <div key={s.key} className="sm:col-span-2">
+                          <input type="hidden" name="system.debug" value="false" />
+                          <Checkbox label={label} name="system.debug" defaultChecked={checked} />
+                          {HINTS[s.key] && (
+                            <span className="mt-1.5 block text-[11.5px] text-ink-soft">{HINTS[s.key]}</span>
+                          )}
+                          <span className="mt-1 block text-[11px] text-amber-700">
+                            القيمة الحالية: <code dir="ltr">{value || "false"}</code> — فعّلها ثم أعد تحميل صفحة الخطأ لرؤية التفاصيل.
+                          </span>
+                        </div>
+                      );
+                    }
                     return (
                       <div key={s.key} className={isLong(s.key) ? "sm:col-span-2" : ""}>
                         {/^certificate\.(logo|signature\d)$/.test(s.key) ? (
