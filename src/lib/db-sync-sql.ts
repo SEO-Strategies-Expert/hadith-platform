@@ -1412,29 +1412,74 @@ export async function syncViaSQL(): Promise<{ executed: number; skipped: number;
       skipped++;
       continue;
     }
+
+    // حوّل CREATE TABLE إلى IF NOT EXISTS لتفادي duplicate_table ثم عالج الأعمدة الناقصة
+    let execSql = codeOnly;
+    const isCreateTable = /^CREATE TABLE\s+"/i.test(codeOnly);
+    if (isCreateTable) {
+      execSql = codeOnly.replace(/^CREATE TABLE\s+"/, 'CREATE TABLE IF NOT EXISTS "');
+    }
+    // حوّل CREATE TYPE إلى كتلة DO لتفادي duplicate_object
+    if (/^CREATE TYPE\s+"/i.test(codeOnly)) {
+      execSql = `DO $$ BEGIN ${codeOnly.replace(/;$/, "")}; EXCEPTION WHEN duplicate_object THEN NULL; END $$;`;
+    }
+
     try {
-      // استخدم $executeRawUnsafe — مناسب لـ DDL
-      await prisma.$executeRawUnsafe(codeOnly);
+      await prisma.$executeRawUnsafe(execSql);
       executed++;
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      // أخطاء يمكن تجاهلها — الكائن موجود مسبقًا
       const ignorable =
         msg.includes("already exists") ||
         msg.includes("duplicate") ||
-        msg.includes("42P07") || // duplicate_table
-        msg.includes("42710") || // duplicate_object (type)
-        msg.includes("42P06") || // duplicate_schema
-        msg.includes("42701") || // duplicate_column
+        msg.includes("42P07") ||
+        msg.includes("42710") ||
+        msg.includes("42P06") ||
+        msg.includes("42701") ||
         /already exists/i.test(msg);
-
       if (ignorable) {
         skipped++;
-        continue;
+      } else {
+        errors.push(`${execSql.slice(0, 80)}… => ${msg.slice(0, 300)}`);
       }
-      // خطأ حقيقي — سجّله
-      errors.push(`${codeOnly.slice(0, 80)}… => ${msg.slice(0, 300)}`);
-      // لا نتوقف — نتابع باقي العبارات
+    }
+
+    // إن كانت جدولًا، حاول إضافة الأعمدة الناقصة واحدًا تلو الآخر (ADD COLUMN IF NOT EXISTS)
+    // هذا يعالج الحالة التي يكون فيها الجدول موجودًا لكن عمود جديد (مثل courses.slug) ناقص.
+    if (isCreateTable) {
+      const tableMatch = codeOnly.match(/^CREATE TABLE\s+"([^"]+)"/i);
+      const table = tableMatch?.[1];
+      if (table) {
+        const colLines = codeOnly
+          .split("\n")
+          .slice(1, -1) // داخل الأقواس
+          .map((l) => l.trim())
+          .filter((l) => l.startsWith('"') && !l.startsWith("CONSTRAINT"));
+        for (const colLine of colLines) {
+          // colLine مثل: "summaryAr" TEXT, أو "published" BOOLEAN NOT NULL DEFAULT false,
+          const colDef = colLine.replace(/,$/, "").trim();
+          const colNameMatch = colDef.match(/^"([^"]+)"/);
+          if (!colNameMatch) continue;
+          const colName = colNameMatch[1];
+          const colTypeAndConstraints = colDef.slice(colNameMatch[0].length).trim();
+          if (!colTypeAndConstraints) continue;
+          const alterSql = `ALTER TABLE "${table}" ADD COLUMN IF NOT EXISTS "${colName}" ${colTypeAndConstraints};`;
+          try {
+            await prisma.$executeRawUnsafe(alterSql);
+          } catch (e: unknown) {
+            const msg = e instanceof Error ? e.message : String(e);
+            const ignorable =
+              msg.includes("already exists") ||
+              msg.includes("duplicate") ||
+              msg.includes("42701") ||
+              /already exists/i.test(msg);
+            if (!ignorable) {
+              // أخطاء الأعمدة تُسجل لكن لا توقف المزامنة — قد تكون قيود NOT NULL بلا قيمة افتراضية
+              errors.push(`${alterSql.slice(0, 80)}… => ${msg.slice(0, 200)}`);
+            }
+          }
+        }
+      }
     }
   }
 
