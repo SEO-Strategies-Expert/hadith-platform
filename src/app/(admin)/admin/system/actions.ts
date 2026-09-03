@@ -25,53 +25,84 @@ export async function syncDatabase() {
   const actor = await requireAdmin();
   let target: string;
   try {
-    const { exec } = await import("child_process");
-    const { promisify } = await import("util");
-    const { existsSync } = await import("fs");
-    const path = await import("path");
-    const execAsync = promisify(exec);
-
-    // Prisma يحتاج Direct URL للـ DDL على Neon؛ الـ pooler لا يسمح بالـ migrations.
     const dbUrl = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
     if (!dbUrl) throw new Error("DATABASE_URL_MISSING: لم تُضبط متغيرات قاعدة البيانات في البيئة");
 
-    // cPanel/Vercel: نصلح HOME و npm cache لتجنب ENOENT mkdir /home/sbx_user1051
-    // ونستخدم الثنائي المحلي بدل npx لتجنب fetch من registry.
-    const env: Record<string, string | undefined> = {
-      ...process.env,
-      POSTGRES_PRISMA_URL: dbUrl,
-      POSTGRES_URL_NON_POOLING: dbUrl,
-      HOME: "/tmp",
-      TMPDIR: "/tmp",
-      npm_config_cache: "/tmp/.npm",
-      XDG_CACHE_HOME: "/tmp/.cache",
-      PRISMA_CLI_BINARY_TARGETS: process.env.PRISMA_CLI_BINARY_TARGETS,
-    };
+    let output = "";
+    let cliFailed = false;
+    let cliError = "";
 
-    const cwd = process.cwd();
-    const localBin = path.join(cwd, "node_modules/.bin/prisma");
-    const localBuild = path.join(cwd, "node_modules/prisma/build/index.js");
-    let cmd: string;
-    if (existsSync(localBin)) {
-      cmd = `"${localBin}" db push --accept-data-loss --skip-generate`;
-    } else if (existsSync(localBuild)) {
-      cmd = `node "${localBuild}" db push --accept-data-loss --skip-generate`;
-    } else {
-      // fallback — قد يفشل بـ ENOENT لكن نحاول مع HOME مُصلَّح
-      cmd = "npx --yes prisma db push --accept-data-loss --skip-generate";
+    // 1) حاول CLI المحلي أولًا (أسرع ويعالج ALTER COLUMN أيضًا)
+    try {
+      const { exec } = await import("child_process");
+      const { promisify } = await import("util");
+      const { existsSync } = await import("fs");
+      const path = await import("path");
+      const execAsync = promisify(exec);
+      const env: Record<string, string | undefined> = {
+        ...process.env,
+        POSTGRES_PRISMA_URL: dbUrl,
+        POSTGRES_URL_NON_POOLING: dbUrl,
+        HOME: "/tmp",
+        TMPDIR: "/tmp",
+        npm_config_cache: "/tmp/.npm",
+        XDG_CACHE_HOME: "/tmp/.cache",
+      };
+      const cwd = process.cwd();
+      const localBin = path.join(cwd, "node_modules/.bin/prisma");
+      const localBuild = path.join(cwd, "node_modules/prisma/build/index.js");
+      let cmd: string;
+      if (existsSync(localBin)) {
+        cmd = `"${localBin}" db push --accept-data-loss --skip-generate`;
+      } else if (existsSync(localBuild)) {
+        cmd = `node "${localBuild}" db push --accept-data-loss --skip-generate`;
+      } else {
+        cmd = "npx --yes prisma db push --accept-data-loss --skip-generate";
+      }
+      const { stdout, stderr } = await execAsync(cmd, {
+        timeout: 120_000,
+        maxBuffer: 5 * 1024 * 1024,
+        env: env as NodeJS.ProcessEnv,
+        cwd,
+      });
+      output = [stdout, stderr].filter(Boolean).join("\n").slice(0, 4000);
+      if (!output) output = "prisma db push — لا مخرجات، لكن لم يفشل.";
+    } catch (e: unknown) {
+      cliFailed = true;
+      const raw = e instanceof Error ? e.message : String(e);
+      const extra =
+        (e as { stdout?: string; stderr?: string })?.stderr ||
+        (e as { stdout?: string; stderr?: string })?.stdout ||
+        "";
+      cliError = [raw, extra].filter(Boolean).join(" — ").slice(0, 2000);
+      // إذا كان الخطأ بسبب غياب @prisma/engines (Vercel lambda)، نتجاوزه إلى SQL
+      const isEnginesMissing = /Cannot find module '@prisma\/engines'|Cannot find module '.*engines'|MODULE_NOT_FOUND.*engines/i.test(
+        cliError
+      );
+      if (!isEnginesMissing && !/ENOENT.*mkdir/.test(cliError)) {
+        // خطأ حقيقي غير متعلق بالـ engines — أعد رميه
+        throw e;
+      }
+      // وإلا نتابع إلى fallback SQL
+      output = `CLI فشل (${cliError.slice(0, 300)}) — التحويل إلى المزامنة عبر SQL…\n`;
     }
 
-    // --accept-data-loss آمن هنا: push لا يحذف إلا أعمدةً/جداول حُذفت من المخطط،
-    // والمخطط الحالي هو المرجع. --skip-generate يتجنّب إعادة توليد العميل في الإنتاج.
-    const { stdout, stderr } = await execAsync(cmd, {
-      timeout: 120_000,
-      maxBuffer: 5 * 1024 * 1024,
-      env: env as NodeJS.ProcessEnv,
-      cwd,
-    });
-    const output = [stdout, stderr].filter(Boolean).join("\n").slice(0, 4000);
+    // 2) إذا فشل CLI بسبب engines أو كاحتياط، نفّذ SQL المباشر (لا يحتاج engines)
+    if (cliFailed) {
+      const { syncViaSQL } = await import("@/lib/db-sync-sql");
+      const res = await syncViaSQL();
+      output += `\nSQL sync: executed=${res.executed} skipped=${res.skipped}`;
+      if (res.errors.length > 0) {
+        output += `\nأخطاء SQL (تم تجاوز المكرر):\n${res.errors.slice(0, 5).join("\n")}`;
+        if (res.errors.length > 5) output += `\n... و ${res.errors.length - 5} أخرى`;
+      }
+      // إن بقيت أخطاء حقيقية غير "already exists"، نعتبرها فشلًا
+      const realErrors = res.errors.filter((m) => !/already exists|duplicate/i.test(m));
+      if (realErrors.length > 3) {
+        throw new Error(`SQL sync أخطاء حقيقية: ${realErrors.slice(0, 2).join(" | ").slice(0, 600)}`);
+      }
+    }
 
-    // سجّل العملية للتدقيق حتى لو لم توجد جداول التدقيق سابقًا (قد تفشل — نتجاهل).
     try {
       await prisma.systemJob.create({
         data: { kind: "database.sync", status: "completed", payload: { requestedBy: actor.id, output: output.slice(0, 1000) } },
@@ -83,15 +114,14 @@ export async function syncDatabase() {
       /* الجداول نفسها كانت ناقصة — طبيعي قبل أول مزامنة */
     }
 
-    target = `/admin/system?synced=${encodeURIComponent(output.slice(0, 200) || "ok")}`;
+    target = `/admin/system?synced=${encodeURIComponent(output.slice(0, 400) || "ok")}`;
   } catch (e: unknown) {
     const raw = e instanceof Error ? e.message : String(e);
-    // حاول سحب stdout/stderr من كائن الخطأ (exec يضعها هناك)
     const extra =
       (e as { stdout?: string; stderr?: string })?.stderr ||
       (e as { stdout?: string; stderr?: string })?.stdout ||
       "";
-    const msg = [raw, extra].filter(Boolean).join(" — ").slice(0, 600);
+    const msg = [raw, extra].filter(Boolean).join(" — ").slice(0, 800);
     try {
       await prisma.systemJob.create({
         data: { kind: "database.sync", status: "failed", payload: { requestedBy: actor.id, error: msg.slice(0, 1000) } },

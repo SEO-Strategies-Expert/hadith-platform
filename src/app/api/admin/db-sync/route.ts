@@ -21,6 +21,9 @@ export async function POST() {
     return Response.json({ ok: false, error: "DATABASE_URL_MISSING" }, { status: 500 });
   }
 
+  let output = "";
+  let cliFailed = false;
+  let cliError = "";
   try {
     const { exec } = await import("child_process");
     const { promisify } = await import("util");
@@ -47,13 +50,33 @@ export async function POST() {
       npm_config_cache: "/tmp/.npm",
       XDG_CACHE_HOME: "/tmp/.cache",
     };
-    const { stdout, stderr } = await execAsync(cmd, {
-      timeout: 120_000,
-      maxBuffer: 5 * 1024 * 1024,
-      env: env as NodeJS.ProcessEnv,
-      cwd,
-    });
-    const output = [stdout, stderr].filter(Boolean).join("\n").slice(0, 5000);
+    try {
+      const { stdout, stderr } = await execAsync(cmd, {
+        timeout: 120_000,
+        maxBuffer: 5 * 1024 * 1024,
+        env: env as NodeJS.ProcessEnv,
+        cwd,
+      });
+      output = [stdout, stderr].filter(Boolean).join("\n").slice(0, 5000);
+      if (!output) output = "prisma db push — لا مخرجات، لكن لم يفشل.";
+    } catch (e: unknown) {
+      cliFailed = true;
+      const raw = e instanceof Error ? e.message : String(e);
+      const extra =
+        (e as { stdout?: string; stderr?: string })?.stderr ||
+        (e as { stdout?: string; stderr?: string })?.stdout ||
+        "";
+      cliError = [raw, extra].filter(Boolean).join(" — ").slice(0, 2000);
+      const isEnginesMissing = /Cannot find module '@prisma\/engines'|Cannot find module.*engines|MODULE_NOT_FOUND.*engines/i.test(cliError);
+      if (!isEnginesMissing && !/ENOENT.*mkdir/.test(cliError)) throw e;
+      output = `CLI فشل (${cliError.slice(0, 300)}) — التحويل إلى SQL…\n`;
+    }
+    if (cliFailed) {
+      const { syncViaSQL } = await import("@/lib/db-sync-sql");
+      const res = await syncViaSQL();
+      output += `\nSQL sync: executed=${res.executed} skipped=${res.skipped}`;
+      if (res.errors.length > 0) output += `\nأخطاء: ${res.errors.slice(0, 3).join(" | ").slice(0, 500)}`;
+    }
 
     try {
       await prisma.systemJob.create({
@@ -70,7 +93,7 @@ export async function POST() {
       (e as { stdout?: string; stderr?: string })?.stderr ||
       (e as { stdout?: string; stderr?: string })?.stdout ||
       "";
-    const error = [raw, extra].filter(Boolean).join(" — ").slice(0, 2000);
+    const error = [raw, extra, cliError].filter(Boolean).join(" — ").slice(0, 2000);
     try {
       await prisma.systemJob.create({
         data: { kind: "database.sync", status: "failed", payload: { via: "api", error: error.slice(0, 1000) } },
@@ -78,7 +101,7 @@ export async function POST() {
     } catch {
       /* ignore */
     }
-    return Response.json({ ok: false, error, output: extra.slice(0, 3000) }, { status: 500 });
+    return Response.json({ ok: false, error, output: (extra || output).slice(0, 3000) }, { status: 500 });
   }
 }
 
