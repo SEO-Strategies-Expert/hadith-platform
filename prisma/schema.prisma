@@ -184,6 +184,7 @@ model Course {
   certificates         Certificate[]
 
   id       String        @id @default(cuid())
+  slug     String?       @unique // رابط SEO: «دورة-مصطلح-الحديث-التطبيقي» — يُولَّد من العنوان
   titleAr  String
   titleEn  String
   descAr   String?

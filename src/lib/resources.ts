@@ -261,6 +261,7 @@ export const resources: Record<string, ResourceConfig> = {
       { name: "allowSelfEnrollment", label: "السماح بالتسجيل الذاتي", type: "bool", half: true },
       { name: "autoCertificate", label: "إصدار الشهادة تلقائيًا عند الإكمال", type: "bool", half: true },
       { name: "href", label: "رابط الدورة (اختياري)", type: "ltr", half: true },
+      { name: "slug", label: "الرابط المختصر SEO", type: "ltr", half: true, hint: "يُملأ تلقائيًا من الاسم بشرطات (دوره-مصطلح-الحديث) — اتركه فارغًا للتوليد التلقائي." },
       { name: "imageUrl", label: "صورة الدورة", type: "image" },
       // «منشور» يخصّ نظام التعلّم، و«ظاهر» يخصّ بطاقة المقرّر في الموقع — حقلان مختلفان عمدًا.
       { name: "published", label: "منشور (مفتوح للتسجيل والدراسة)", type: "bool" },

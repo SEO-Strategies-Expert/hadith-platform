@@ -20,7 +20,7 @@ export async function PublicCourseView({ lang, courseId }: { lang: Lang; courseI
   const duration = lessons.reduce((sum, lesson) => sum + (lesson.durationMin ?? 0), 0);
   const t = T[lang];
   const description = title(lang, course.descAr, course.descEn) || title(lang, course.summaryAr, course.summaryEn);
-  const admissionHref = `${siteHref(lang,"admissions.html")}?courseId=${encodeURIComponent(course.id)}`;
+  const admissionHref = `${siteHref(lang,"admissions.html")}?course=${encodeURIComponent(course.slug || course.id)}`;
 
   return <main id="main" className="learning-page">
     <section className="learning-hero"><div className="container learning-hero-grid">

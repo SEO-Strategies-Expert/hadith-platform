@@ -104,3 +104,18 @@ export async function deleteEnrollment(id: string) {
   await prisma.enrollment.delete({ where: { id } });
   revalidatePath("/admin/enrollments");
 }
+
+export async function approveEnrollment(id: string) {
+  await requireUser();
+  const current = await prisma.enrollment.findUnique({
+    where: { id },
+    select: { status: true },
+  });
+  if (!current) return;
+  if (current.status === "ACTIVE") return;
+  await prisma.enrollment.update({
+    where: { id },
+    data: { status: "ACTIVE" },
+  });
+  revalidatePath("/admin/enrollments");
+}

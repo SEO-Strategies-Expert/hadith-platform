@@ -1061,6 +1061,27 @@ html[dir="rtl"] .news-list li a>div,html[dir="rtl"] .news-mini>div{grid-column:2
   .nav-collapsed .nav-item{padding:11px 12px}
 }
 
+/* العربيّة على الشاشات الكبيرة: نفس معاملة الإنجليزيّة في en.css —
+   عناصر كثيرة (14+) لن تتّسع في صفّ واحد بجانب الشعار والأزرار أبدًا،
+   فبدل إخفائها خلف زرّ الهامبرغر تُعرض في صفٍّ ثانٍ ملفوف بعرض الحاوية. */
+@media (min-width:1021px){
+  html[lang="ar"] .menubar.nav-collapsed>.container{grid-template-columns:minmax(0,1fr) auto}
+  html[lang="ar"] .menubar.nav-collapsed .mainnav{
+    position:static;grid-column:1 / -1;grid-row:2;display:block;
+    max-height:none;overflow:visible;opacity:1;visibility:visible;
+    background:none;border:0;box-shadow:none;
+  }
+  html[lang="ar"] .menubar.nav-collapsed .mainnav-list{
+    display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;
+    gap:4px;max-width:none;padding:4px;visibility:visible;
+  }
+  html[lang="ar"] .menubar.nav-collapsed .mainnav-list>li{width:auto}
+  html[lang="ar"] .menubar.nav-collapsed .nav-item{justify-content:center;padding:9px 13px}
+  html[lang="ar"] .menubar.nav-collapsed .nav-item em{font-size:13px}
+  html[lang="ar"] .menubar.nav-collapsed .drop{display:none}
+  html[lang="ar"] .menubar.nav-collapsed .nav-toggle{display:none}
+}
+
 @media(max-width:1020px){
   .nav-toggle{display:block}
   .mainnav{

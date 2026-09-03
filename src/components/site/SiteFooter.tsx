@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Lang } from "@/lib/site-data";
 import { getFooterNav, getSocialLinks, getSettingsMap } from "@/lib/site-data";
 import { siteHref } from "@/lib/site-links";
+import { currentUser } from "@/lib/guard";
 
 const T = {
   ar: { legal: "روابط نظامية", rights: "جميع الحقوق محفوظة" },
@@ -15,11 +16,13 @@ const LEGAL = [
 ];
 
 export async function SiteFooter({ lang }: { lang: Lang }) {
-  const [groups, social, settings] = await Promise.all([
+  const [groups, social, settings, viewer] = await Promise.all([
     getFooterNav(),
     getSocialLinks(),
     getSettingsMap(),
+    currentUser(),
   ]);
+  const isStudent = viewer?.role === "STUDENT";
   const t = T[lang];
   const brandName = lang === "ar" ? settings.get("site.shortAr") : settings.get("site.shortEn");
   const tagline = lang === "ar" ? settings.get("site.taglineAr") : settings.get("site.taglineEn");
@@ -72,7 +75,10 @@ export async function SiteFooter({ lang }: { lang: Lang }) {
                 <div className="foot-col" key={group}>
                   <h5>{heading ? (lang === "ar" ? heading.labelAr : heading.labelEn) : group}</h5>
                   {items.map((l) => (
-                    <Link key={l.id} href={siteHref(lang, l.href)}>
+                    <Link
+                      key={l.id}
+                      href={isStudent && l.href === "student-login.html" ? siteHref(lang, "student") : siteHref(lang, l.href)}
+                    >
                       {lang === "ar" ? l.labelAr : l.labelEn}
                     </Link>
                   ))}

@@ -9,6 +9,10 @@ import { importDatabase, type BackupPayload } from "@/lib/db-backup";
  */
 export async function POST(req: Request) {
   const user = await requireAdmin();
+  // تُبنى وجهة التحويل داخل try/catch، ويُنادَى redirect خارجها —
+  // لأن redirect() يرمي NEXT_REDIRECT داخليًّا ولو بقي داخل try لابتلعه الـcatch
+  // وأظهر «فشلت الاستعادة: NEXT_REDIRECT» حتى عند نجاح الاستعادة فعلًا.
+  let target: string;
   try {
     const form = await req.formData();
     const file = form.get("backup");
@@ -32,10 +36,12 @@ export async function POST(req: Request) {
         metadata: { inserted: total, tables: results.length },
       },
     });
-    if (failed.length) redirect(`/admin/system?restoreError=${encodeURIComponent(`أُدرج ${total} صفًّا، وفشل: ${failed.map((f) => f.model).join("، ")}`)}`);
-    redirect(`/admin/system?restored=${total}`);
+    target = failed.length
+      ? `/admin/system?restoreError=${encodeURIComponent(`أُدرج ${total} صفًّا، وفشل: ${failed.map((f) => f.model).join("، ")}`)}`
+      : `/admin/system?restored=${total}`;
   } catch (e) {
     const msg = e instanceof Error ? e.message : "FAILED";
-    redirect(`/admin/system?restoreError=${encodeURIComponent(msg)}`);
+    target = `/admin/system?restoreError=${encodeURIComponent(msg)}`;
   }
+  redirect(target);
 }

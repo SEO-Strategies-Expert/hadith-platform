@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Pencil, Filter } from "lucide-react";
+import { Pencil, Filter, CheckCircle2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { ENROLLMENT_STATUSES, statusLabel, statusTone, feeLabel } from "./fields";
-import { deleteEnrollment } from "./actions";
+import { deleteEnrollment, approveEnrollment } from "./actions";
 
 const SELECT_CLASS =
   "rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-[13px] outline-none transition focus:border-gold focus:ring-4 focus:ring-gold/15";
@@ -129,6 +129,30 @@ export default async function EnrollmentsPage({
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
+                        {e.status === "PENDING" && (
+                          <form action={approveEnrollment.bind(null, e.id)}>
+                            <button
+                              type="submit"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-[12px] font-bold text-white shadow-sm hover:bg-emerald-700"
+                              title="اعتماد التسجيل وتفعيل وصول الطالب للمقرّر"
+                            >
+                              <CheckCircle2 size={14} />
+                              اعتماد
+                            </button>
+                          </form>
+                        )}
+                        {e.status !== "PENDING" && e.status !== "ACTIVE" && (
+                          <form action={approveEnrollment.bind(null, e.id)}>
+                            <button
+                              type="submit"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-600 bg-white px-3 py-1.5 text-[12px] font-bold text-emerald-700 hover:bg-emerald-50"
+                              title="إعادة تفعيل التسجيل"
+                            >
+                              <CheckCircle2 size={14} />
+                              تفعيل
+                            </button>
+                          </form>
+                        )}
                         <Link
                           href={`/admin/enrollments/${e.id}`}
                           className="grid h-9 w-9 place-items-center rounded-lg text-navy-700 hover:bg-black/5"

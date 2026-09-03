@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Eye, Pencil, ListTree } from "lucide-react";
+import { Eye, Pencil, ListTree, Search, X } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
@@ -14,18 +14,113 @@ import { deleteRecord } from "@/lib/crud-actions";
  * شجرة محتواه. أمّا نموذج بيانات المقرّر نفسه فما زال يُقرأ من `resources.ts`
  * ويُحفظ بإجراءات المحرّك العام، فلا يتكرّر التعريف في موضعين.
  */
-export default async function CoursesPage() {
+const COURSES_PER_PAGE = 20;
+
+function buildPageHref(page: number, q: string | undefined) {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (page > 1) params.set("page", String(page));
+  const qs = params.toString();
+  return qs ? `/admin/courses?${qs}` : "/admin/courses";
+}
+
+function Pagination({
+  page,
+  totalPages,
+  q,
+}: {
+  page: number;
+  totalPages: number;
+  q?: string;
+}) {
+  if (totalPages <= 1) return null;
+  const pages: (number | "...")[] = [];
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= page - 2 && i <= page + 2)) {
+      pages.push(i);
+    } else if (pages[pages.length - 1] !== "...") {
+      pages.push("...");
+    }
+  }
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-black/5 px-4 py-3 text-[13px]">
+      <span className="text-ink-soft">
+        صفحة {page} من {totalPages}
+      </span>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Link
+          href={page > 1 ? buildPageHref(page - 1, q) : "#"}
+          aria-disabled={page <= 1}
+          className={`rounded-lg border px-3 py-1.5 font-bold ${page <= 1 ? "pointer-events-none border-black/5 bg-black/[0.02] text-ink-soft/40" : "border-black/10 bg-white text-navy-700 hover:border-gold/50"}`}
+        >
+          السابق
+        </Link>
+        {pages.map((p, idx) =>
+          p === "..." ? (
+            <span key={`ellipsis-${idx}`} className="px-1 text-ink-soft">
+              …
+            </span>
+          ) : (
+            <Link
+              key={p}
+              href={buildPageHref(p as number, q)}
+              className={`min-w-[36px] rounded-lg border px-3 py-1.5 text-center font-bold ${p === page ? "border-gold bg-gold/15 text-navy-900" : "border-black/10 bg-white text-navy-700 hover:border-gold/50"}`}
+            >
+              {p}
+            </Link>
+          )
+        )}
+        <Link
+          href={page < totalPages ? buildPageHref(page + 1, q) : "#"}
+          aria-disabled={page >= totalPages}
+          className={`rounded-lg border px-3 py-1.5 font-bold ${page >= totalPages ? "pointer-events-none border-black/5 bg-black/[0.02] text-ink-soft/40" : "border-black/10 bg-white text-navy-700 hover:border-gold/50"}`}
+        >
+          التالي
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default async function CoursesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ page?: string; q?: string }>;
+}) {
   await requireUser();
 
-  const courses = await prisma.course.findMany({
-    orderBy: [{ order: "asc" }, { titleAr: "asc" }],
-    include: {
-      stage: { select: { titleAr: true } },
-      instructor: { select: { nameAr: true } },
-      _count: { select: { enrollments: true } },
-      modules: { select: { _count: { select: { lessons: true } } } },
-    },
-  });
+  const sp = await searchParams;
+  const rawPage = Number.parseInt(sp?.page ?? "1", 10);
+  const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
+  const q = sp?.q?.trim() ? sp.q.trim() : undefined;
+  const skip = (page - 1) * COURSES_PER_PAGE;
+
+  const where = q
+    ? {
+        OR: [
+          { titleAr: { contains: q, mode: "insensitive" as const } },
+          { titleEn: { contains: q, mode: "insensitive" as const } },
+        ],
+      }
+    : {};
+
+  const [total, courses] = await Promise.all([
+    prisma.course.count({ where }),
+    prisma.course.findMany({
+      where,
+      orderBy: [{ order: "asc" }, { titleAr: "asc" }],
+      skip,
+      take: COURSES_PER_PAGE,
+      include: {
+        stage: { select: { titleAr: true } },
+        instructor: { select: { nameAr: true } },
+        _count: { select: { enrollments: true } },
+        modules: { select: { _count: { select: { lessons: true } } } },
+      },
+    }),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / COURSES_PER_PAGE));
 
   return (
     <div>
@@ -51,12 +146,51 @@ export default async function CoursesPage() {
         ))}
       </div>
 
+      <form method="get" className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="relative flex min-w-[260px] flex-1 max-w-md items-center">
+          <Search size={16} className="pointer-events-none absolute right-3 text-ink-soft" />
+          <input
+            type="text"
+            name="q"
+            defaultValue={q ?? ""}
+            placeholder="بحث باسم المقرّر (عربي / إنجليزي)…"
+            className="w-full rounded-xl border border-black/10 bg-white py-2.5 pr-10 pl-3 text-[13.5px] outline-none placeholder:text-ink-soft/60 focus:border-gold focus:ring-4 focus:ring-gold/15"
+          />
+        </div>
+        <button
+          type="submit"
+          className="rounded-xl border border-black/10 bg-white px-5 py-2.5 text-[13px] font-bold text-navy-800 hover:border-gold/50"
+        >
+          بحث
+        </button>
+        {q && (
+          <Link
+            href="/admin/courses"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-black/10 bg-white px-4 py-2.5 text-[13px] font-bold text-ink-soft hover:bg-black/5"
+          >
+            <X size={14} />
+            مسح
+          </Link>
+        )}
+        {q && (
+          <span className="text-[12.5px] text-ink-soft">
+            {total} نتيجة لـ “{q}”
+          </span>
+        )}
+      </form>
+
       <Card>
-        {courses.length === 0 ? (
-          <EmptyState label="لا توجد مقرّرات بعد. اضغط «إضافة مقرّر»." />
+        {total === 0 ? (
+          <EmptyState label={q ? `لا توجد مقرّرات مطابقة لـ “${q}”.` : "لا توجد مقرّرات بعد. اضغط «إضافة مقرّر»."} />
+        ) : courses.length === 0 ? (
+          <>
+            <EmptyState label="لا توجد نتائج في هذه الصفحة." />
+            <Pagination page={page} totalPages={totalPages} q={q} />
+          </>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-right text-[13.5px]">
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-right text-[13.5px]">
               <thead>
                 <tr className="border-b border-black/5 text-[12px] text-ink-soft">
                   <th className="px-4 py-3 font-bold">المقرّر</th>
@@ -132,6 +266,8 @@ export default async function CoursesPage() {
               </tbody>
             </table>
           </div>
+            <Pagination page={page} totalPages={totalPages} q={q} />
+          </>
         )}
       </Card>
     </div>

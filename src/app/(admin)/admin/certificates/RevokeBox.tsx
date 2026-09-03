@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { Ban, Loader2, RotateCcw } from "lucide-react";
+import Swal from "sweetalert2";
 
 type Action = (prev: string | undefined, formData: FormData) => Promise<string | undefined>;
 
@@ -28,14 +29,29 @@ export function RevokeBox({ action }: { action: Action }) {
     );
   }
 
+  const handleRevokeSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const result = await Swal.fire({
+      title: "تأكيد الإلغاء؟",
+      text: "سيصير التحقّق العلنيّ لهذه الوثيقة «ملغاة». هل أنت متأكّد؟",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "نعم، ألغِ الوثيقة",
+      cancelButtonText: "تراجع",
+      reverseButtons: true,
+      focusCancel: true,
+    });
+    if (!result.isConfirmed) return;
+    const fd = new FormData(form);
+    formAction(fd);
+  };
+
   return (
     <form
-      action={formAction}
-      onSubmit={(e) => {
-        if (!window.confirm("سيصير التحقّق العلنيّ لهذه الوثيقة «ملغاة». هل أنت متأكّد؟")) {
-          e.preventDefault();
-        }
-      }}
+      onSubmit={handleRevokeSubmit}
       className="rounded-xl border border-red-200 bg-red-50 p-4"
     >
       <div className="flex items-center gap-2 text-[13.5px] font-extrabold text-red-700">
@@ -100,14 +116,29 @@ export function RevokeBox({ action }: { action: Action }) {
 export function RestoreBox({ action }: { action: Action }) {
   const [error, formAction, pending] = useActionState(action, undefined);
 
+  const handleRestoreSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const result = await Swal.fire({
+      title: "إعادة الوثيقة؟",
+      text: "ستعود الوثيقة سارية في صفحة التحقّق العلنيّة. هل أنت متأكّد؟",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#1a365d",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "نعم، أعدها سارية",
+      cancelButtonText: "إلغاء",
+      reverseButtons: true,
+      focusCancel: true,
+    });
+    if (!result.isConfirmed) return;
+    const fd = new FormData(form);
+    formAction(fd);
+  };
+
   return (
     <form
-      action={formAction}
-      onSubmit={(e) => {
-        if (!window.confirm("ستعود الوثيقة سارية في صفحة التحقّق العلنيّة. هل أنت متأكّد؟")) {
-          e.preventDefault();
-        }
-      }}
+      onSubmit={handleRestoreSubmit}
     >
       {error && (
         <div className="mb-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-[12.5px] font-semibold text-red-700">

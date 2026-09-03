@@ -5,6 +5,7 @@ import { getPageBySlug } from "@/lib/site-content";
 import { injectDiwanThreads } from "@/lib/diwan-html";
 import { applyHeroOverrides } from "@/lib/page-hero";
 import { bindPageSections, type PageParams } from "@/lib/site-sections";
+import { getCourseBySlugOrId } from "@/lib/course-slug";
 import { currentUser } from "@/lib/guard";
 import { StudentCourseRequestPage } from "@/components/site/StudentCourseRequestPage";
 
@@ -17,10 +18,14 @@ export async function PageRenderer({
   lang: Lang;
   params?: PageParams;
 }) {
+  const viewer = await currentUser();
+  const isStudent = viewer?.role === "STUDENT";
   if (slug === "admissions") {
-    const viewer = await currentUser();
-    if (viewer?.role === "STUDENT") {
-      return <StudentCourseRequestPage lang={lang} selectedCourseId={params?.courseId} />;
+    if (isStudent) {
+      // ?course=<slug> الجديد و?courseId=<id> القديم — كلاهما يُحلّ إلى id النموذج.
+      const raw = params?.course ?? params?.courseId;
+      const resolved = raw ? await getCourseBySlugOrId(raw) : null;
+      return <StudentCourseRequestPage lang={lang} selectedCourseId={resolved?.id ?? raw} />;
     }
   }
   const page = await getPageBySlug(slug);
@@ -41,7 +46,7 @@ export async function PageRenderer({
   // ربط بقيّة الأقسام (أخبار، فعاليات، هيئة علمية، مراحل، إصدارات، مكتبة…)
   // بجداول قاعدة البيانات، وتطبيع الروابط النسبية.
   if (html) {
-    html = await bindPageSections(html, slug, lang, params);
+    html = await bindPageSections(html, slug, lang, params, { isStudent });
   }
 
   if (isPortal) {

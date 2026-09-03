@@ -620,7 +620,7 @@ const bindCourses: Binder = async ($, lang) => {
           {
             // `href` is an optional override; without one, the card still
             // needs to expose the course's public details.
-            href: link(lang, c.href, `course/${c.id}`),
+            href: link(lang, c.href, `course/${c.slug || c.id}`),
             image: mediaUrl(c.imageUrl, fallbackImage(i)),
             title: lang === "ar" ? c.titleAr : c.titleEn,
             desc: lang === "ar" ? c.descAr : c.descEn,
@@ -873,11 +873,28 @@ BINDERS.publications.push(stepsBinder("publications"));
  * ينفّذ رابطي القسم على محتوى الصفحة المخزَّن ثم يطبّع الروابط.
  * يُنفَّذ دائمًا (حتى للصفحات بلا رابطين) لأن التطبيع نفسه مطلوب في كل صفحة.
  */
+/**
+ * الطالب المسجَّل لا يُعرض عليه زرّ «دخول الطالب» — يُستبدل ببوابة الطالب.
+ * تُطبَّق على كل الصفحات (منها courses.html) بعد تطبيع الروابط.
+ */
+function rewriteStudentLinks($: CheerioAPI, lang: Lang): void {
+  const portal = siteHref(lang, "student");
+  const loginLabels = lang === "ar" ? ["دخول الطالب"] : ["Student Login", "Student login"];
+  const portalLabel = lang === "ar" ? "بوابة الطالب" : "Student Portal";
+  $("a[href]").each((_, el) => {
+    const href = $(el).attr("href") ?? "";
+    if (!/^\/(en\/)?student-login\.html([?#]|$)/.test(href)) return;
+    $(el).attr("href", portal);
+    if (loginLabels.includes($(el).text().trim())) $(el).text(portalLabel);
+  });
+}
+
 export async function bindPageSections(
   html: string,
   slug: string,
   lang: Lang,
-  params?: PageParams
+  params?: PageParams,
+  opts?: { isStudent?: boolean }
 ): Promise<string> {
   if (!html) return html;
   const binders = BINDERS[slug] ?? [];
@@ -896,5 +913,6 @@ export async function bindPageSections(
   activateForm($, slug, lang, siteHref(lang, `${slug}.html`), params);
 
   normalizeUrls($, lang);
+  if (opts?.isStudent) rewriteStudentLinks($, lang);
   return $.html();
 }

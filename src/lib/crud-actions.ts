@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
 import { getResource, type FieldDef } from "@/lib/resources";
+import { courseSlugFor } from "@/lib/course-slug";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -69,6 +70,10 @@ export async function createRecord(
   const data = coerce(cfg.fields, formData);
   const err = validate(cfg.fields, data);
   if (err) return err;
+  // slug المقرّر: من الحقل إن كُتب، وإلا توليد من العنوان بشرطات (فريد).
+  if (cfg.model === "course" && !data.slug) {
+    data.slug = await courseSlugFor(String(data.titleAr ?? ""), String(data.titleEn ?? ""));
+  }
   let created: { id: string };
   try {
     created = await (prisma as any)[cfg.model].create({ data });
@@ -96,6 +101,14 @@ export async function updateRecord(
   const data = coerce(cfg.fields, formData);
   const err = validate(cfg.fields, data);
   if (err) return err;
+  // ثبات الروابط أولًا: slug المحفوظ لا يتغيّر عند تحرير العنوان (حتى لا تنكسر
+  // روابط منشورة) — يُعاد توليده فقط إن أُفرغ الحقل عمدًا.
+  if (cfg.model === "course" && !formData.get("slug")) {
+    const current = await prisma.course.findUnique({ where: { id }, select: { titleAr: true, titleEn: true } });
+    const titleAr = String(data.titleAr ?? current?.titleAr ?? "");
+    const titleEn = String(data.titleEn ?? current?.titleEn ?? "");
+    data.slug = await courseSlugFor(titleAr, titleEn, id);
+  }
   try {
     await (prisma as any)[cfg.model].update({ where: { id }, data });
     await prisma.auditLog.create({ data: { actorId: actor.id, action: "update", entity: cfg.model, entityId: id } });
