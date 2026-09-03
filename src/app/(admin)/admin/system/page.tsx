@@ -3,19 +3,43 @@ import { requireAdmin } from "@/lib/guard";
 import { Card, PageHeader, Badge } from "@/components/admin/ui";
 import { getDbInfo, formatBytes } from "@/lib/db-info";
 import { queueBackup } from "./actions";
+import { SyncDatabaseCard } from "./SyncCard";
 
 export default async function SystemPage({
   searchParams,
 }: {
-  searchParams: Promise<{ restored?: string; restoreError?: string; wiped?: string; tables?: string; wipeError?: string }>;
+  searchParams: Promise<{
+    restored?: string;
+    restoreError?: string;
+    wiped?: string;
+    tables?: string;
+    wipeError?: string;
+    synced?: string;
+    syncError?: string;
+    syncOutput?: string;
+  }>;
 }) {
   await requireAdmin();
-  const { restored, restoreError, wiped, tables, wipeError } = await searchParams;
-  const [logs, jobs, db] = await Promise.all([
-    prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 30 }),
-    prisma.systemJob.findMany({ orderBy: { createdAt: "desc" }, take: 20 }),
-    getDbInfo(),
-  ]);
+  const { restored, restoreError, wiped, tables, wipeError, synced, syncError, syncOutput } = await searchParams;
+
+  // هذه الصفحة يجب ألا تنهار حتى لو كان هيكل قاعدة البيانات غير متزامن:
+  // عند نشر أولي تكون الجداول غير موجودة بعد، فتفشل كل استعلامات Prisma.
+  // نغلّفها بـ catch ونعرض زر المزامنة بدل صفحة 500.
+  const db = await getDbInfo();
+  let logs: Awaited<ReturnType<typeof prisma.auditLog.findMany>> = [];
+  let jobs: Awaited<ReturnType<typeof prisma.systemJob.findMany>> = [];
+  let logsError: string | null = null;
+  let jobsError: string | null = null;
+  try {
+    logs = await prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 30 });
+  } catch (e) {
+    logsError = e instanceof Error ? e.message.split("\n")[0].slice(0, 300) : String(e).slice(0, 300);
+  }
+  try {
+    jobs = await prisma.systemJob.findMany({ orderBy: { createdAt: "desc" }, take: 20 });
+  } catch (e) {
+    jobsError = e instanceof Error ? e.message.split("\n")[0].slice(0, 300) : String(e).slice(0, 300);
+  }
   const integrations = [
     ["التخزين", Boolean(process.env.BLOB_READ_WRITE_TOKEN)],
     ["البريد", Boolean(process.env.RESEND_API_KEY || process.env.SMTP_HOST)],
@@ -23,11 +47,25 @@ export default async function SystemPage({
     ["مهام Cron", Boolean(process.env.CRON_SECRET)],
   ] as const;
   const providerTone = db.provider === "Neon" ? "blue" : db.provider === "Local" ? "gold" : "gray";
+  const hasSchemaError = !db.ok || Boolean(logsError) || Boolean(jobsError);
+
   return <div><PageHeader title="الأمان والتشغيل" desc="سجل التدقيق، النسخ الاحتياطي، حالة التكاملات وطوابير المعالجة." />
     {restored && <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] font-bold text-emerald-700">تمت الاستعادة: أُدرج {restored} صفًّا (الموجود مسبقًا لم يُمسّ).</div>}
     {restoreError && <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-[13px] font-bold text-red-700">فشلت الاستعادة: {restoreError}</div>}
     {wiped !== undefined && <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-[13px] font-bold text-amber-800">حُذفت كل البيانات: {wiped} صفًّا تقريبًا من {tables ?? "?"} جدولًا. الجداول فارغة الآن — استعد نسخةً أو أعد البذر.</div>}
     {wipeError && <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-[13px] font-bold text-red-700">فشل الحذف: {wipeError === "CONFIRM_MISMATCH" ? "اكتب اسم قاعدة البيانات حرفيًّا كما يظهر أدناه." : wipeError}</div>}
+    {synced && <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] font-bold text-emerald-700">تمت مزامنة الهيكل بنجاح{synced !== "ok" ? `: ${synced}` : ""} — أعد تحميل الصفحة إن استمر الخطأ.</div>}
+    {syncError && <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-[13px] font-bold text-red-700" dir="ltr">فشلت المزامنة: {decodeURIComponent(syncError)}</div>}
+    {syncOutput && <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-[12px] font-mono text-amber-900 whitespace-pre-wrap break-all" dir="ltr">{decodeURIComponent(syncOutput)}</div>}
+    {hasSchemaError && (
+      <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-[13px] font-bold text-amber-900">
+        تنبيه: هيكل قاعدة البيانات غير متزامن مع <code dir="ltr">schema.prisma</code> — هذا سبب رسالة “This page couldn’t load” في الإنتاج.
+        {db.error && <span className="block mt-1 font-mono text-[12px] text-red-700 break-all" dir="ltr">{db.error}</span>}
+        {logsError && <span className="block mt-1 font-mono text-[12px] break-all" dir="ltr">audit_logs: {logsError}</span>}
+        {jobsError && <span className="block mt-1 font-mono text-[12px] break-all" dir="ltr">system_jobs: {jobsError}</span>}
+        <span className="block mt-2 font-normal text-amber-800">استخدم زر “مزامنة الهيكل الآن” أدناه لإنشاء/تحديث الجداول دون فقدان البيانات.</span>
+      </div>
+    )}
 
     <Card className="mb-6 p-5">
       <div className="flex flex-wrap items-center gap-2">
@@ -69,6 +107,9 @@ export default async function SystemPage({
       )}
     </Card>
 
+    {/* مزامنة الهيكل — علاج الخطأ “This page couldn't load” بعد نشر أولي */}
+    <SyncDatabaseCard hasSchemaError={hasSchemaError} />
+
     <div className="mb-6 grid gap-6 xl:grid-cols-2">
       <Card className="p-5">
         <h2 className="font-extrabold text-navy-900">النسخ الاحتياطي (تنزيل)</h2>
@@ -97,7 +138,7 @@ export default async function SystemPage({
       </form>
     </Card>
     <div className="mb-6 grid gap-3 sm:grid-cols-4">{integrations.map(([name, ready]) => <Card key={name} className="p-4"><b>{name}</b><div className="mt-2"><Badge tone={ready ? "green" : "gold"}>{ready ? "مهيّأ" : "يحتاج إعدادًا"}</Badge></div></Card>)}</div>
-    <div className="grid gap-6 xl:grid-cols-2"><Card className="overflow-hidden"><h2 className="p-5 font-extrabold">آخر عمليات التدقيق</h2><div className="max-h-96 overflow-auto">{logs.map((x) => <div key={x.id} className="border-t p-3 text-xs"><b>{x.action}</b> · {x.entity} {x.entityId && `#${x.entityId.slice(-7)}`}<time className="block text-ink-soft">{x.createdAt.toLocaleString("ar")}</time></div>)}</div></Card>
-    <Card className="overflow-hidden"><h2 className="p-5 font-extrabold">طابور المهام</h2><div className="max-h-96 overflow-auto">{jobs.map((x) => <div key={x.id} className="flex justify-between border-t p-3 text-xs"><span><b>{x.kind}</b><small className="block text-ink-soft">{x.createdAt.toLocaleString("ar")}</small></span><Badge tone={x.status === "completed" ? "green" : x.status === "failed" ? "red" : "blue"}>{x.status}</Badge></div>)}</div></Card></div>
+    <div className="grid gap-6 xl:grid-cols-2"><Card className="overflow-hidden"><h2 className="p-5 font-extrabold">آخر عمليات التدقيق</h2><div className="max-h-96 overflow-auto">{logsError ? <div className="p-4 text-[12px] text-red-600" dir="ltr">{logsError}</div> : logs.length === 0 ? <div className="p-4 text-[12px] text-ink-soft">لا سجلات بعد.</div> : logs.map((x) => <div key={x.id} className="border-t p-3 text-xs"><b>{x.action}</b> · {x.entity} {x.entityId && `#${x.entityId.slice(-7)}`}<time className="block text-ink-soft">{x.createdAt.toLocaleString("ar")}</time></div>)}</div></Card>
+    <Card className="overflow-hidden"><h2 className="p-5 font-extrabold">طابور المهام</h2><div className="max-h-96 overflow-auto">{jobsError ? <div className="p-4 text-[12px] text-red-600" dir="ltr">{jobsError}</div> : jobs.length === 0 ? <div className="p-4 text-[12px] text-ink-soft">لا مهام.</div> : jobs.map((x) => <div key={x.id} className="flex justify-between border-t p-3 text-xs"><span><b>{x.kind}</b><small className="block text-ink-soft">{x.createdAt.toLocaleString("ar")}</small></span><Badge tone={x.status === "completed" ? "green" : x.status === "failed" ? "red" : "blue"}>{x.status}</Badge></div>)}</div></Card></div>
   </div>;
 }
