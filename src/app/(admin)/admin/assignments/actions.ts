@@ -43,6 +43,13 @@ function buildAssignment(formData: FormData) {
   const parsed = assignmentSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0].message };
 
+  let rubric = null;
+  try {
+    const rawRubric = String(formData.get("rubric") ?? "").trim();
+    rubric = rawRubric ? JSON.parse(rawRubric) : null;
+  } catch {
+    return { ok: false as const, error: "صيغة سُلّم التقييم JSON غير صحيحة." };
+  }
   return {
     ok: true as const,
     data: {
@@ -54,6 +61,9 @@ function buildAssignment(formData: FormData) {
       // الفراغ يعني «بلا موعد نهائي» لا تاريخًا صفريًّا.
       dueAt: fromLocalInput(String(formData.get("dueAt") ?? "")),
       maxScore: intWithin(formData.get("maxScore"), 1, 10000, 100),
+      rubric,
+      gradingPeriod: optionalText(formData.get("gradingPeriod")),
+      allowLate: formData.get("allowLate") === "on",
       order: intWithin(formData.get("order"), 0, 9999, 0),
       visible: formData.get("visible") === "on",
     },

@@ -24,6 +24,16 @@ function coerce(fields: FieldDef[], formData: FormData) {
       // `undefined` يجعل Prisma يتجاهل الحقل — وهو الصحيح عند الإنشاء، لكنّه
       // كان يمنع **مسح** تاريخ بعد ضبطه. الحقل القابل للإفراغ يُرسل null صراحةً.
       data[f.name] = raw ? new Date(String(raw)) : f.nullable ? null : undefined;
+    } else if (f.type === "json") {
+      const value = String(raw ?? "").trim();
+      if (!value) data[f.name] = null;
+      else {
+        try {
+          data[f.name] = JSON.parse(value);
+        } catch {
+          data[f.name] = Symbol.for("invalid-json");
+        }
+      }
     } else {
       const v = raw == null ? "" : String(raw).trim();
       data[f.name] = v === "" ? null : v;
@@ -34,6 +44,7 @@ function coerce(fields: FieldDef[], formData: FormData) {
 
 function validate(fields: FieldDef[], data: Record<string, unknown>): string | null {
   for (const f of fields) {
+    if (data[f.name] === Symbol.for("invalid-json")) return `صيغة JSON غير صحيحة في «${f.label}».`;
     if (f.required && (data[f.name] == null || data[f.name] === "")) {
       return `الحقل «${f.label}» مطلوب.`;
     }
@@ -52,7 +63,7 @@ export async function createRecord(
   _prev: string | undefined,
   formData: FormData
 ): Promise<string | undefined> {
-  await requireUser();
+  const actor = await requireUser();
   const cfg = getResource(resourceKey);
   if (!cfg) return "مورد غير معروف.";
   const data = coerce(cfg.fields, formData);
@@ -61,6 +72,7 @@ export async function createRecord(
   let created: { id: string };
   try {
     created = await (prisma as any)[cfg.model].create({ data });
+    await prisma.auditLog.create({ data: { actorId: actor.id, action: "create", entity: cfg.model, entityId: created.id } });
   } catch (e) {
     return friendly(e);
   }
@@ -78,7 +90,7 @@ export async function updateRecord(
   _prev: string | undefined,
   formData: FormData
 ): Promise<string | undefined> {
-  await requireUser();
+  const actor = await requireUser();
   const cfg = getResource(resourceKey);
   if (!cfg) return "مورد غير معروف.";
   const data = coerce(cfg.fields, formData);
@@ -86,6 +98,7 @@ export async function updateRecord(
   if (err) return err;
   try {
     await (prisma as any)[cfg.model].update({ where: { id }, data });
+    await prisma.auditLog.create({ data: { actorId: actor.id, action: "update", entity: cfg.model, entityId: id } });
   } catch (e) {
     return friendly(e);
   }
@@ -94,9 +107,10 @@ export async function updateRecord(
 }
 
 export async function deleteRecord(resourceKey: string, id: string) {
-  await requireUser();
+  const actor = await requireUser();
   const cfg = getResource(resourceKey);
   if (!cfg) return;
   await (prisma as any)[cfg.model].delete({ where: { id } });
+  await prisma.auditLog.create({ data: { actorId: actor.id, action: "delete", entity: cfg.model, entityId: id } });
   revalidatePath(`/admin/${resourceKey}`);
 }

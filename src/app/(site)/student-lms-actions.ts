@@ -40,3 +40,53 @@ export async function toggleLessonDone(lessonId: string, done: boolean, _formDat
     revalidatePath(`${prefix}/lesson/${lessonId}`);
   }
 }
+
+async function canUseLesson(userId: string, lessonId: string) {
+  const lesson = await prisma.lesson.findUnique({ where: { id: lessonId }, select: { module: { select: { courseId: true } } } });
+  return lesson && await isEnrolled(userId, lesson.module.courseId) ? lesson : null;
+}
+
+export async function saveStudentNote(lessonId: string, formData: FormData) {
+  const user = await currentUser();
+  if (!user?.id || !(await canUseLesson(user.id, lessonId))) return;
+  const body = String(formData.get("body") ?? "").trim().slice(0, 10000);
+  if (body) await prisma.studentNote.create({ data: { userId: user.id, lessonId, body } });
+  revalidatePath(`/student/lesson/${lessonId}`);
+  revalidatePath(`/en/student/lesson/${lessonId}`);
+}
+
+export async function deleteStudentNote(noteId: string, lessonId: string) {
+  const user = await currentUser();
+  if (!user?.id) return;
+  await prisma.studentNote.deleteMany({ where: { id: noteId, userId: user.id, lessonId } });
+  revalidatePath(`/student/lesson/${lessonId}`);
+  revalidatePath(`/en/student/lesson/${lessonId}`);
+}
+
+export async function toggleBookmark(lessonId: string) {
+  const user = await currentUser();
+  if (!user?.id || !(await canUseLesson(user.id, lessonId))) return;
+  const existing = await prisma.bookmark.findUnique({ where: { userId_lessonId: { userId: user.id, lessonId } } });
+  if (existing) await prisma.bookmark.delete({ where: { id: existing.id } });
+  else await prisma.bookmark.create({ data: { userId: user.id, lessonId } });
+  revalidatePath(`/student/lesson/${lessonId}`);
+  revalidatePath(`/en/student/lesson/${lessonId}`);
+}
+
+export async function sendCourseMessage(courseId: string, formData: FormData) {
+  const user = await currentUser();
+  if (!user?.id || !(await isEnrolled(user.id, courseId))) return;
+  const body = String(formData.get("body") ?? "").trim().slice(0, 5000);
+  const subject = String(formData.get("subject") ?? "").trim().slice(0, 200) || null;
+  if (body) await prisma.courseMessage.create({ data: { courseId, senderId: user.id, subject, body } });
+  revalidatePath(`/student/course/${courseId}`); revalidatePath(`/en/student/course/${courseId}`); revalidatePath("/admin/communications");
+}
+
+export async function createForumTopic(courseId: string, formData: FormData) {
+  const user = await currentUser();
+  if (!user?.id || !(await isEnrolled(user.id, courseId))) return;
+  const title = String(formData.get("title") ?? "").trim().slice(0, 200);
+  const body = String(formData.get("body") ?? "").trim().slice(0, 10000);
+  if (title && body) await prisma.forumTopic.create({ data: { userId: user.id, courseId, title, body } });
+  revalidatePath(`/student/course/${courseId}`); revalidatePath(`/en/student/course/${courseId}`); revalidatePath("/admin/communications");
+}

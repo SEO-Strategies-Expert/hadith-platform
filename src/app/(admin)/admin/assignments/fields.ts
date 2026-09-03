@@ -47,6 +47,9 @@ export const assignmentFields: FieldDef[] = [
     hint: "اتركه فارغًا لواجبٍ بلا موعد. لا يُمنع التسليم بعده — يُعلَّم متأخّرًا وتقرّر الإدارة.",
   },
   { name: "maxScore", label: "الدرجة القصوى", type: "number", half: true },
+  { name: "gradingPeriod", label: "فترة الدرجات", type: "text", half: true },
+  { name: "rubric", label: "سُلّم التقييم (JSON)", type: "json", hint: "مثال: [{\"criterion\":\"سلامة الاستدلال\",\"points\":40}]" },
+  { name: "allowLate", label: "السماح بالتسليم المتأخر", type: "bool", half: true },
   { name: "order", label: "الترتيب", type: "number", half: true },
   { name: "visible", label: "ظاهر للطلاب", type: "bool", half: true },
 ];

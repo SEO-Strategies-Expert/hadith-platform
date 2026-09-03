@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
+import { fromLocalInput } from "@/components/admin/datetime";
 
 /**
  * إجراءات بنية المقرّر: الوحدات والدروس والمرفقات.
@@ -141,6 +142,13 @@ function buildLesson(formData: FormData) {
       videoUrl: optionalText(parsed.data.videoUrl),
       bodyAr: optionalText(parsed.data.bodyAr),
       bodyEn: optionalText(parsed.data.bodyEn),
+      transcriptAr: optionalText(formData.get("transcriptAr")),
+      transcriptEn: optionalText(formData.get("transcriptEn")),
+      unlockAt: fromLocalInput(String(formData.get("unlockAt") ?? "")),
+      dripDays: Math.max(0, Number(formData.get("dripDays") ?? 0) || 0),
+      prerequisiteLessonId: optionalText(formData.get("prerequisiteLessonId")),
+      thumbnailUrl: optionalText(formData.get("thumbnailUrl")),
+      downloadable: formData.get("downloadable") === "on",
       durationMin: optionalInt(formData.get("durationMin")),
       order: parsed.data.order,
       freePreview: formData.get("freePreview") === "on",

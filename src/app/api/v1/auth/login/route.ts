@@ -1,6 +1,7 @@
 import { loginWithPassword } from "@/lib/api-auth";
 import { ok, fail, body } from "../../_lib";
 import { cors, preflight } from "../../_http";
+import { consumeRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,6 +18,8 @@ export async function POST(req: Request) {
     if (!b.email || !b.password) {
       return cors(req, Response.json({ error: "البريد وكلمة المرور مطلوبان" }, { status: 400 }), "app", "POST, OPTIONS");
     }
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+    if (!(await consumeRateLimit("api-login", `${ip}:${b.email}`, 8))) return cors(req, Response.json({ error: "محاولات كثيرة. حاول لاحقًا" }, { status: 429 }), "app", "POST, OPTIONS");
 
     const pair = await loginWithPassword(b.email, b.password, b.deviceId, b.deviceName);
     // رسالة واحدة لكل حالات الفشل — لا تكشف أيّ البريدين مسجَّل.

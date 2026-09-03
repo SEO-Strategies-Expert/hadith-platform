@@ -5,6 +5,8 @@ import { currentUser } from "@/lib/guard";
 import { getCourseTree, getProgressMap, flattenLessons, isEnrolled, title } from "@/lib/lms";
 import { StudentQuizAssignmentLinks } from "@/components/site/StudentQuizAssignmentLinks";
 import { studentHref, num, clampPct } from "@/components/site/StudentPortalKit";
+import { prisma } from "@/lib/prisma";
+import { createForumTopic, sendCourseMessage } from "@/app/(site)/student-lms-actions";
 
 const T = {
   ar: { course:"مقرر دراسي", back:"العودة إلى مقرراتي", instructor:"يقدمه", progress:"تقدمك", complete:"مكتمل", curriculum:"محتوى المقرر", sections:"أقسام", lessons:"دروس", continue:"متابعة التعلم", start:"ابدأ التعلم", preview:"معاينة", empty:"لم يُضف محتوى لهذا المقرر بعد.", min:"د", about:"عن هذا المقرر", kinds:{VIDEO:"فيديو",PDF:"ملف",TEXT:"قراءة",LIVE:"مباشر",QUIZ:"اختبار"} as Record<string,string> },
@@ -18,14 +20,17 @@ export async function StudentCourseView({ lang, courseId }: { lang: Lang; course
   if (!enrolled || !course || !course.visible) notFound();
   const t = T[lang];
   const lessons = flattenLessons(course);
-  const progress = await getProgressMap(user.id, lessons.map(l => l.id));
+  const [progress, announcements, topics] = await Promise.all([
+    getProgressMap(user.id, lessons.map(l => l.id)),
+    prisma.announcement.findMany({ where: { visible: true, publishAt: { lte: new Date() }, AND: [{ OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }, { OR: [{ courseId }, { courseId: null }] }] }, orderBy: [{ pinned: "desc" }, { publishAt: "desc" }], take: 5 }),
+    prisma.forumTopic.findMany({ where: { courseId }, orderBy: [{ pinned: "desc" }, { updatedAt: "desc" }], include: { _count: { select: { replies: true } } }, take: 8 }),
+  ]);
   const doneCount = lessons.filter(l => progress.get(l.id)).length;
   const pct = lessons.length ? clampPct((doneCount / lessons.length) * 100) : 0;
   const nextLesson = lessons.find(l => !progress.get(l.id)) ?? lessons[0];
   const duration = lessons.reduce((sum, lesson) => sum + (lesson.durationMin ?? 0), 0);
 
   return <main id="main" className="learning-page">
-    <header className="learning-topbar"><Link href={studentHref(lang)}>← {t.back}</Link><span>{title(lang, course.titleAr, course.titleEn)}</span></header>
     <section className="learning-hero">
       <div className="container learning-hero-grid">
         <div className="learning-hero-copy">
@@ -49,6 +54,7 @@ export async function StudentCourseView({ lang, courseId }: { lang: Lang; course
       </div>
     </section>
     <section className="learning-body"><div className="container learning-layout"><div className="learning-main">
+      {announcements.length > 0 && <section className="learning-about"><h2>{lang === "ar" ? "الإعلانات" : "Announcements"}</h2>{announcements.map((item) => <article key={item.id} style={{ padding: "12px 0", borderTop: "1px solid rgba(18,49,89,.1)" }}><b>{title(lang, item.titleAr, item.titleEn)}</b><p>{title(lang, item.bodyAr, item.bodyEn)}</p></article>)}</section>}
       {(title(lang, course.descAr, course.descEn) || title(lang, course.summaryAr, course.summaryEn)) && <section className="learning-about"><h2>{t.about}</h2><p>{title(lang, course.descAr, course.descEn) || title(lang, course.summaryAr, course.summaryEn)}</p></section>}
       <div className="learning-curriculum-head"><h2>{t.curriculum}</h2><span>{num(course.modules.length,lang)} {t.sections} · {num(lessons.length,lang)} {t.lessons}{duration ? ` · ${num(duration,lang)} ${t.min}` : ""}</span></div>
       {!course.modules.length ? <div className="learning-empty">{t.empty}</div> : <div className="learning-curriculum">
@@ -59,6 +65,7 @@ export async function StudentCourseView({ lang, courseId }: { lang: Lang; course
           </Link>; })}</div>
         </details>; })}
       </div>}
+      <section className="learning-about"><h2>{lang === "ar" ? "التواصل والنقاش" : "Messages & discussion"}</h2><div style={{ display: "grid", gap: 18 }}><form action={sendCourseMessage.bind(null, courseId)}><input name="subject" placeholder={lang === "ar" ? "موضوع الرسالة" : "Subject"} style={{ width: "100%", padding: 10, border: "1px solid #ddd", borderRadius: 10 }}/><textarea name="body" required placeholder={lang === "ar" ? "رسالة إلى فريق المقرر" : "Message course staff"} style={{ width: "100%", minHeight: 80, padding: 10, border: "1px solid #ddd", borderRadius: 10, marginTop: 8 }}/><button className="learning-primary" type="submit">{lang === "ar" ? "إرسال الرسالة" : "Send"}</button></form><form action={createForumTopic.bind(null, courseId)}><input name="title" required placeholder={lang === "ar" ? "عنوان النقاش" : "Discussion title"} style={{ width: "100%", padding: 10, border: "1px solid #ddd", borderRadius: 10 }}/><textarea name="body" required placeholder={lang === "ar" ? "ابدأ نقاشًا مع زملائك" : "Start a discussion"} style={{ width: "100%", minHeight: 80, padding: 10, border: "1px solid #ddd", borderRadius: 10, marginTop: 8 }}/><button className="learning-primary" type="submit">{lang === "ar" ? "نشر النقاش" : "Post"}</button></form>{topics.map((topic) => <article key={topic.id} style={{ borderTop: "1px solid #ddd", paddingTop: 12 }}><b>{topic.pinned ? "★ " : ""}{topic.title}</b><p>{topic.body}</p><small>{topic._count.replies} {lang === "ar" ? "ردود" : "replies"}{topic.locked ? " · 🔒" : ""}</small></article>)}</div></section>
     </div></div></section>
     <StudentQuizAssignmentLinks lang={lang} courseId={courseId} />
   </main>;

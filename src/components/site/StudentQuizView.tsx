@@ -120,6 +120,10 @@ export async function StudentQuizView({ lang, quizId }: { lang: Lang; quizId: st
       timeLimitMin: true,
       passScore: true,
       attemptsAllowed: true,
+      retakeCooldownHours: true,
+      questionPoolSize: true,
+      availableAt: true,
+      closesAt: true,
       shuffle: true,
       course: { select: { id: true, titleAr: true, titleEn: true, visible: true } },
     },
@@ -128,13 +132,14 @@ export async function StudentQuizView({ lang, quizId }: { lang: Lang; quizId: st
   // اختبارٌ مخفيّ أو بلا مقرّر: نفشل مغلقين. بلا مقرّر لا يوجد شرط تسجيلٍ
   // يُتحقَّق منه، وفتحُه لكل مسجَّل دخولٍ ثغرةٌ لا ميزة.
   if (!quiz || !quiz.visible || !quiz.courseId || !quiz.course?.visible) notFound();
+  if ((quiz.availableAt && quiz.availableAt > new Date()) || (quiz.closesAt && quiz.closesAt <= new Date())) notFound();
   if (!(await isEnrolled(user.id, quiz.courseId))) notFound();
 
   const [attempts, questionCount] = await Promise.all([
     prisma.quizAttempt.findMany({
       where: { quizId, userId: user.id },
       orderBy: { startedAt: "desc" },
-      select: { id: true, startedAt: true, submittedAt: true, score: true, passed: true },
+      select: { id: true, startedAt: true, submittedAt: true, score: true, passed: true, questionIds: true },
     }),
     prisma.question.count({ where: { quizId } }),
   ]);
@@ -298,14 +303,15 @@ async function OpenAttempt({
 }: {
   lang: Lang;
   quiz: { id: string; shuffle: boolean; timeLimitMin: number | null };
-  attempt: { id: string; startedAt: Date };
+  attempt: { id: string; startedAt: Date; questionIds: unknown };
 }) {
   const t = T[lang];
 
   // انتقاءٌ صريح للحقول: **لا `correct` ولا `explainAr/En` هنا إطلاقًا** — كل ما
   // يُقرأ في هذا الاستعلام يصل المتصفّح في حمولة RSC، فما لا يجوز كشفه لا يُقرأ.
+  const selectedIds = Array.isArray(attempt.questionIds) ? attempt.questionIds.filter((x): x is string => typeof x === "string") : [];
   const questions = await prisma.question.findMany({
-    where: { quizId: quiz.id },
+    where: { quizId: quiz.id, ...(selectedIds.length ? { id: { in: selectedIds } } : {}) },
     orderBy: [{ order: "asc" }, { id: "asc" }],
     select: {
       id: true,

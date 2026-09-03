@@ -6,6 +6,7 @@
  */
 import { prisma } from "@/lib/prisma";
 import type { Lang } from "@/lib/site-data";
+import { issueCertificate } from "@/lib/certificates";
 
 /** الحالات التي تُعتبر «مقرّرًا يدرسه الطالب فعلًا». */
 export const ACTIVE_ENROLLMENT = ["ACTIVE", "COMPLETED"] as const;
@@ -129,6 +130,8 @@ export async function setLessonDone(userId: string, lessonId: string, done: bool
 
 /** يعيد حساب نسبة التقدّم من الدروس المرئيّة فقط (كتابة). */
 export async function recomputeProgress(userId: string, courseId: string): Promise<number> {
+  const course = await prisma.course.findUnique({ where: { id: courseId }, select: { titleAr: true, titleEn: true, completionPercent: true, minimumQuizScore: true, autoCertificate: true } });
+  if (!course) throw new Error("COURSE_NOT_FOUND");
   const lessons = await prisma.lesson.findMany({
     where: { visible: true, module: { courseId, visible: true } },
     select: { id: true },
@@ -143,13 +146,20 @@ export async function recomputeProgress(userId: string, courseId: string): Promi
 
   const pct = total ? Math.round((doneCount / total) * 100) : 0;
 
+  const quizAverage = await prisma.quizAttempt.aggregate({ where: { userId, submittedAt: { not: null }, score: { not: null }, quiz: { courseId } }, _avg: { score: true } });
+  const meetsQuiz = course.minimumQuizScore == null || (quizAverage._avg.score ?? 0) >= course.minimumQuizScore;
+  const completed = pct >= course.completionPercent && meetsQuiz;
   await prisma.enrollment.updateMany({
     where: { userId, courseId },
     data: {
       progressPct: pct,
-      ...(pct === 100 ? { status: "COMPLETED", completedAt: new Date() } : {}),
+      ...(completed ? { status: "COMPLETED", completedAt: new Date() } : {}),
     },
   });
+  if (completed && course.autoCertificate) {
+    const exists = await prisma.certificate.findFirst({ where: { userId, courseId, revoked: false }, select: { id: true } });
+    if (!exists) await issueCertificate({ kind: "CERTIFICATE", userId, courseId, titleAr: `شهادة إتمام ${course.titleAr}`, titleEn: `Certificate of completion: ${course.titleEn}` });
+  }
   return pct;
 }
 

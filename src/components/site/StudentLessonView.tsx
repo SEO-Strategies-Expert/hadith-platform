@@ -12,7 +12,7 @@ import { currentUser } from "@/lib/guard";
 import type { Lang } from "@/lib/site-data";
 import { longDate, mediaUrl } from "@/lib/site-format";
 import { getCourseTree, flattenLessons, getProgressMap, isEnrolled, isLiveNow, title, timeLabel } from "@/lib/lms";
-import { toggleLessonDone } from "@/app/(site)/student-lms-actions";
+import { deleteStudentNote, saveStudentNote, toggleBookmark, toggleLessonDone } from "@/app/(site)/student-lms-actions";
 import { Pill, studentHref, num, resolveVideo } from "@/components/site/StudentPortalKit";
 
 const T = {
@@ -60,6 +60,7 @@ const T = {
       LIVE: "مجلس مباشر",
       QUIZ: "اختبار",
     } as Record<string, string>,
+    notes: "ملاحظاتي", addNote: "حفظ الملاحظة", notePlaceholder: "اكتب ملاحظتك على هذا الدرس…", bookmark: "حفظ كعلامة مرجعية", bookmarked: "إزالة العلامة المرجعية", transcript: "النص المفرّغ",
   },
   en: {
     kicker: "Lesson",
@@ -105,6 +106,7 @@ const T = {
       LIVE: "Live session",
       QUIZ: "Quiz",
     } as Record<string, string>,
+    notes: "My notes", addNote: "Save note", notePlaceholder: "Write a note about this lesson…", bookmark: "Bookmark lesson", bookmarked: "Remove bookmark", transcript: "Transcript",
   },
 } as const;
 
@@ -119,6 +121,9 @@ export async function StudentLessonView({ lang, lessonId }: { lang: Lang; lesson
     select: {
       freePreview: true,
       visible: true,
+      unlockAt: true,
+      dripDays: true,
+      prerequisiteLessonId: true,
       module: { select: { visible: true, courseId: true } },
     },
   });
@@ -126,6 +131,13 @@ export async function StudentLessonView({ lang, lessonId }: { lang: Lang; lesson
 
   const courseId = head.module.courseId;
   const enrolled = user?.id ? await isEnrolled(user.id, courseId) : false;
+
+  if (enrolled && user?.id && user.role === "STUDENT") {
+    const enrollment = await prisma.enrollment.findUnique({ where: { userId_courseId: { userId: user.id, courseId } }, select: { enrolledAt: true } });
+    const dripAt = enrollment ? new Date(enrollment.enrolledAt.getTime() + head.dripDays * 86_400_000) : null;
+    const prerequisiteDone = head.prerequisiteLessonId ? await prisma.lessonProgress.findUnique({ where: { userId_lessonId: { userId: user.id, lessonId: head.prerequisiteLessonId } }, select: { completed: true } }) : null;
+    if ((head.unlockAt && head.unlockAt > new Date()) || (dripAt && dripAt > new Date()) || (head.prerequisiteLessonId && !prerequisiteDone?.completed)) notFound();
+  }
 
   if (!enrolled && !head.freePreview) {
     // زائرٌ غير مسجَّل الدخول يُوجَّه للدخول؛ ومسجَّلٌ غير ملتحقٍ لا يُعلَم بوجود الدرس.
@@ -146,13 +158,14 @@ export async function StudentLessonView({ lang, lessonId }: { lang: Lang; lesson
   // التقدّم للملتحقين فقط؛ المعاينة المجّانيّة قراءةٌ بلا تسجيل.
   const isDone =
     enrolled && user?.id ? (await getProgressMap(user.id, [lessonId])).get(lessonId) === true : false;
+  const [notes, bookmarked] = enrolled && user?.id ? await Promise.all([
+    prisma.studentNote.findMany({ where: { userId: user.id, lessonId }, orderBy: { createdAt: "desc" } }),
+    prisma.bookmark.findUnique({ where: { userId_lessonId: { userId: user.id, lessonId } }, select: { id: true } }),
+  ]) : [[], null];
+  const transcript = lang === "en" ? lesson.transcriptEn || lesson.transcriptAr : lesson.transcriptAr || lesson.transcriptEn;
 
   return (
     <main id="main">
-      <header className="learning-topbar">
-        <Link href={studentHref(lang, `/course/${courseId}`)}>← {t.backToCourse}</Link>
-        <span>{title(lang, course.titleAr, course.titleEn)}</span>
-      </header>
       <section className="page-hero orn-navy student-lesson-hero">
         <div className="container">
           <div className="page-hero-copy reveal">
@@ -190,6 +203,8 @@ export async function StudentLessonView({ lang, lessonId }: { lang: Lang; lesson
           )}
 
           <LessonBody lang={lang} lesson={lesson} />
+
+          {transcript && <details style={{ marginTop: 24 }}><summary style={{ cursor: "pointer", fontWeight: 800, color: "#123159" }}>{t.transcript}</summary><div className="naskh" style={{ whiteSpace: "pre-wrap", marginTop: 12, lineHeight: 1.9 }}>{transcript}</div></details>}
 
           {lesson.attachments.length > 0 && (
             <div style={{ marginTop: 34 }}>
@@ -238,6 +253,7 @@ export async function StudentLessonView({ lang, lessonId }: { lang: Lang; lesson
         <div className="container">
           {/* زرّ الإنجاز نموذجٌ عاديّ — يعمل بلا JavaScript كبقيّة الموقع */}
           {enrolled && (
+            <div style={{ display: "grid", gap: 22 }}>
             <form action={toggleLessonDone.bind(null, lesson.id, !isDone)}>
               <div
                 style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}
@@ -248,6 +264,10 @@ export async function StudentLessonView({ lang, lessonId }: { lang: Lang; lesson
                 {isDone && <Pill>{t.doneBadge} ✓</Pill>}
               </div>
             </form>
+            <form action={toggleBookmark.bind(null, lesson.id)}><button className="btn btn-outline-ink" type="submit">{bookmarked ? t.bookmarked : t.bookmark} {bookmarked ? "★" : "☆"}</button></form>
+            <div className="callout"><h3>{t.notes}</h3><form action={saveStudentNote.bind(null, lesson.id)}><textarea name="body" required maxLength={10000} placeholder={t.notePlaceholder} style={{ width: "100%", minHeight: 100, border: "1px solid rgba(18,49,89,.18)", borderRadius: 12, padding: 12, margin: "12px 0" }} /><button className="btn btn-gold" type="submit">{t.addNote}</button></form>
+            {notes.map((note) => <div key={note.id} style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(18,49,89,.1)", whiteSpace: "pre-wrap" }}>{note.body}<form action={deleteStudentNote.bind(null, note.id, lesson.id)} style={{ display: "inline", marginInlineStart: 12 }}><button type="submit" style={{ color: "#9b2c2c", background: "none", border: 0, cursor: "pointer" }}>×</button></form></div>)}</div>
+            </div>
           )}
 
           <nav

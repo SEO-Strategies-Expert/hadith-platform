@@ -3,6 +3,7 @@
 import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { consumeRateLimit } from "@/lib/rate-limit";
 
 /**
  * وجهة ما بعد الدخول حسب الدور.
@@ -35,6 +36,7 @@ export async function authenticate(
 ): Promise<string | undefined> {
   try {
     const email = formData.get("email");
+    if (!(await consumeRateLimit("admin-login", String(email ?? "unknown")))) return "محاولات كثيرة. انتظر 15 دقيقة ثم حاول مجددًا.";
     await signIn("credentials", {
       email,
       password: formData.get("password"),

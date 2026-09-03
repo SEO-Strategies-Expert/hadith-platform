@@ -161,19 +161,27 @@ model ProgramStage {
 
 model Course {
   // --- تفاصيل المقرّر ونظام التعلّم ---
-  summaryAr    String?
-  summaryEn    String?
-  hours        Int?
-  startsOn     DateTime?
-  published    Boolean       @default(false)
-  instructorId String?
-  instructor   Scholar?      @relation(fields: [instructorId], references: [id], onDelete: SetNull)
-  modules      Module[]
-  enrollments  Enrollment[]
-  sessions     LiveSession[]
-  assignments  Assignment[]
-  quizzes      Quiz[]
-  certificates Certificate[]
+  summaryAr            String?
+  summaryEn            String?
+  hours                Int?
+  startsOn             DateTime?
+  published            Boolean       @default(false)
+  publishAt            DateTime?
+  enrollmentOpensAt    DateTime?
+  enrollmentClosesAt   DateTime?
+  prerequisiteCourseId String?
+  completionPercent    Int           @default(100)
+  minimumQuizScore     Int?
+  autoCertificate      Boolean       @default(false)
+  allowSelfEnrollment  Boolean       @default(true)
+  instructorId         String?
+  instructor           Scholar?      @relation(fields: [instructorId], references: [id], onDelete: SetNull)
+  modules              Module[]
+  enrollments          Enrollment[]
+  sessions             LiveSession[]
+  assignments          Assignment[]
+  quizzes              Quiz[]
+  certificates         Certificate[]
 
   id       String        @id @default(cuid())
   titleAr  String
@@ -520,17 +528,23 @@ model ResearchSubmission {
 
 // ---------------------- الوسائط ----------------------
 model Media {
-  id        String   @id @default(cuid())
-  url       String
-  pathname  String?
-  filename  String
-  altAr     String?
-  altEn     String?
-  width     Int?
-  height    Int?
-  size      Int?
-  mime      String?
-  createdAt DateTime @default(now())
+  id               String   @id @default(cuid())
+  url              String
+  pathname         String?
+  filename         String
+  altAr            String?
+  altEn            String?
+  width            Int?
+  height           Int?
+  size             Int?
+  mime             String?
+  assetType        String   @default("image")
+  private          Boolean  @default(false)
+  thumbnailUrl     String?
+  captionUrl       String?
+  durationSec      Int?
+  processingStatus String   @default("ready")
+  createdAt        DateTime @default(now())
 
   @@map("media")
 }
@@ -598,25 +612,32 @@ model Module {
 
 /// درس مفرد داخل وحدة.
 model Lesson {
-  id          String     @id @default(cuid())
-  moduleId    String
-  module      Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  titleAr     String
-  titleEn     String
-  kind        LessonKind @default(VIDEO)
+  id                   String     @id @default(cuid())
+  moduleId             String
+  module               Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  titleAr              String
+  titleEn              String
+  kind                 LessonKind @default(VIDEO)
   // VIDEO: رابط يوتيوب/فيميو غير مُدرَج، أو رابط استضافة لاحقًا
-  videoUrl    String?
+  videoUrl             String?
   // TEXT: متن الدرس (HTML)
-  bodyAr      String?
-  bodyEn      String?
+  bodyAr               String?
+  bodyEn               String?
   // LIVE/QUIZ: ارتباط اختياري بالكيان المقابل
-  sessionId   String?
-  quizId      String?
-  durationMin Int?
+  sessionId            String?
+  quizId               String?
+  durationMin          Int?
+  unlockAt             DateTime?
+  dripDays             Int        @default(0)
+  prerequisiteLessonId String?
+  transcriptAr         String?
+  transcriptEn         String?
+  downloadable         Boolean    @default(false)
+  thumbnailUrl         String?
   // معاينة مجّانيّة تُفتح لغير المسجَّلين (تسويق المقرّر)
-  freePreview Boolean    @default(false)
-  order       Int        @default(0)
-  visible     Boolean    @default(true)
+  freePreview          Boolean    @default(false)
+  order                Int        @default(0)
+  visible              Boolean    @default(true)
 
   attachments LessonAttachment[]
   progress    LessonProgress[]
@@ -804,17 +825,20 @@ enum AssignmentState {
 }
 
 model Assignment {
-  id       String    @id @default(cuid())
-  courseId String
-  course   Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  titleAr  String
-  titleEn  String
-  descAr   String?
-  descEn   String?
-  dueAt    DateTime?
-  maxScore Int       @default(100)
-  order    Int       @default(0)
-  visible  Boolean   @default(true)
+  id            String    @id @default(cuid())
+  courseId      String
+  course        Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  titleAr       String
+  titleEn       String
+  descAr        String?
+  descEn        String?
+  dueAt         DateTime?
+  maxScore      Int       @default(100)
+  rubric        Json?
+  allowLate     Boolean   @default(true)
+  gradingPeriod String?
+  order         Int       @default(0)
+  visible       Boolean   @default(true)
 
   submissions AssignmentSubmission[]
 
@@ -853,18 +877,22 @@ enum QuestionKind {
 
 /// اختبار أو مراجعة تفاعليّة.
 model Quiz {
-  id              String  @id @default(cuid())
-  courseId        String?
-  course          Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  titleAr         String
-  titleEn         String
-  descAr          String?
-  descEn          String?
-  timeLimitMin    Int? // بلا قيمة = بلا توقيت
-  passScore       Int     @default(60) // نسبة النجاح %
-  attemptsAllowed Int     @default(0) // 0 = بلا حدّ
-  shuffle         Boolean @default(true)
-  visible         Boolean @default(true)
+  id                  String    @id @default(cuid())
+  courseId            String?
+  course              Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  titleAr             String
+  titleEn             String
+  descAr              String?
+  descEn              String?
+  timeLimitMin        Int? // بلا قيمة = بلا توقيت
+  passScore           Int       @default(60) // نسبة النجاح %
+  attemptsAllowed     Int       @default(0) // 0 = بلا حدّ
+  retakeCooldownHours Int       @default(0)
+  questionPoolSize    Int       @default(0)
+  availableAt         DateTime?
+  closesAt            DateTime?
+  shuffle             Boolean   @default(true)
+  visible             Boolean   @default(true)
 
   questions Question[]
   attempts  QuizAttempt[]
@@ -913,6 +941,7 @@ model QuizAttempt {
   submittedAt DateTime?
   // { questionId: [choiceId…] | "نصّ" }
   answers     Json?
+  questionIds Json?
   score       Int?
   passed      Boolean?
 
@@ -1057,6 +1086,190 @@ model ForumReply {
 
   @@index([topicId, createdAt])
   @@map("forum_replies")
+}
+
+// ============================================================================
+// إدارة التعلّم المتقدمة
+// ============================================================================
+
+model AcademicTerm {
+  id              String    @id @default(cuid())
+  key             String    @unique
+  titleAr         String
+  titleEn         String
+  startsAt        DateTime
+  endsAt          DateTime
+  gradingStartsAt DateTime?
+  gradingEndsAt   DateTime?
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+
+  @@index([active, startsAt])
+  @@map("academic_terms")
+}
+
+model Cohort {
+  id        String    @id @default(cuid())
+  nameAr    String
+  nameEn    String
+  courseId  String?
+  stageId   String?
+  termId    String?
+  startsAt  DateTime?
+  endsAt    DateTime?
+  capacity  Int?
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  @@index([courseId, termId])
+  @@map("cohorts")
+}
+
+model CohortMember {
+  id       String   @id @default(cuid())
+  cohortId String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  @@unique([cohortId, userId])
+  @@index([userId])
+  @@map("cohort_members")
+}
+
+model AcademicCalendarEntry {
+  id        String    @id @default(cuid())
+  termId    String?
+  courseId  String?
+  titleAr   String
+  titleEn   String
+  descAr    String?
+  descEn    String?
+  startsAt  DateTime
+  endsAt    DateTime?
+  kind      String    @default("event")
+  visible   Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  @@index([startsAt, visible])
+  @@map("academic_calendar_entries")
+}
+
+model QuestionBankItem {
+  id         String       @id @default(cuid())
+  kind       QuestionKind @default(SINGLE)
+  textAr     String
+  textEn     String?
+  explainAr  String?
+  explainEn  String?
+  choices    Json?
+  tags       Json?
+  difficulty Int          @default(1)
+  points     Int          @default(1)
+  active     Boolean      @default(true)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@index([active, difficulty])
+  @@map("question_bank_items")
+}
+
+model Announcement {
+  id          String    @id @default(cuid())
+  courseId    String?
+  cohortId    String?
+  titleAr     String
+  titleEn     String
+  bodyAr      String
+  bodyEn      String?
+  publishAt   DateTime  @default(now())
+  expiresAt   DateTime?
+  pinned      Boolean   @default(false)
+  visible     Boolean   @default(true)
+  createdById String?
+  createdAt   DateTime  @default(now())
+
+  @@index([courseId, publishAt])
+  @@index([visible, publishAt])
+  @@map("announcements")
+}
+
+model CourseMessage {
+  id          String    @id @default(cuid())
+  courseId    String
+  senderId    String
+  recipientId String?
+  subject     String?
+  body        String
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([courseId, createdAt])
+  @@index([recipientId, readAt])
+  @@map("course_messages")
+}
+
+model StudentNote {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  body        String
+  positionSec Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, lessonId])
+  @@map("student_notes")
+}
+
+model Bookmark {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  positionSec Int?
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, lessonId])
+  @@map("bookmarks")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  ipHash    String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId, createdAt])
+  @@map("audit_logs")
+}
+
+model SystemJob {
+  id         String    @id @default(cuid())
+  kind       String
+  status     String    @default("queued")
+  payload    Json?
+  attempts   Int       @default(0)
+  runAfter   DateTime  @default(now())
+  finishedAt DateTime?
+  error      String?
+  createdAt  DateTime  @default(now())
+
+  @@index([status, runAfter])
+  @@map("system_jobs")
+}
+
+model RateLimitBucket {
+  key         String   @id
+  count       Int      @default(0)
+  windowStart DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([updatedAt])
+  @@map("rate_limit_buckets")
 }
 
 // ==========================================================================

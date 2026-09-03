@@ -20,6 +20,8 @@ export default async function StudentsPage() {
       />
 
       <div className="mb-4 flex flex-wrap gap-2">
+        <Link href="/admin/students/import" className="rounded-lg border border-black/10 bg-white px-3.5 py-2 text-[12.5px] font-bold text-navy-700">استيراد CSV</Link>
+        <Link href="/api/admin/students/export" className="rounded-lg border border-black/10 bg-white px-3.5 py-2 text-[12.5px] font-bold text-navy-700">تصدير CSV</Link>
         <Link
           href="/admin/inbox/admissions"
           className="rounded-lg border border-black/10 bg-white px-3.5 py-2 text-[12.5px] font-bold text-navy-700 hover:border-gold/50"

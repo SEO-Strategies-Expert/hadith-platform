@@ -10,6 +10,7 @@ export type FieldType =
   | "date"
   // موعد بتاريخ وساعة — يُعرض ويُقرأ بتوقيت الكلّية لا بتوقيت الخادم
   | "datetime"
+  | "json"
   | "image";
 
 export interface FieldDef {
@@ -244,11 +245,150 @@ export const resources: Record<string, ResourceConfig> = {
       { name: "descEn", label: "الوصف (إنجليزي)", type: "textarea-ltr" },
       ...bilingual("meta", "بيان مختصر (عدد اللقاءات…)"),
       { name: "startsOn", label: "تاريخ البدء", type: "date", half: true, nullable: true },
+      { name: "publishAt", label: "موعد النشر التلقائي", type: "datetime", half: true, nullable: true },
+      { name: "enrollmentOpensAt", label: "فتح التسجيل", type: "datetime", half: true, nullable: true },
+      { name: "enrollmentClosesAt", label: "إغلاق التسجيل", type: "datetime", half: true, nullable: true },
+      {
+        name: "prerequisiteCourseId",
+        label: "المقرّر السابق المطلوب",
+        type: "select",
+        half: true,
+        nullable: true,
+        relation: { model: "course", labelField: "titleAr", emptyLabel: "— لا يوجد —" },
+      },
+      { name: "completionPercent", label: "نسبة إكمال الدروس المطلوبة %", type: "number", half: true },
+      { name: "minimumQuizScore", label: "أدنى متوسط اختبارات %", type: "number", half: true, nullable: true },
+      { name: "allowSelfEnrollment", label: "السماح بالتسجيل الذاتي", type: "bool", half: true },
+      { name: "autoCertificate", label: "إصدار الشهادة تلقائيًا عند الإكمال", type: "bool", half: true },
       { name: "href", label: "رابط الدورة (اختياري)", type: "ltr", half: true },
       { name: "imageUrl", label: "صورة الدورة", type: "image" },
       // «منشور» يخصّ نظام التعلّم، و«ظاهر» يخصّ بطاقة المقرّر في الموقع — حقلان مختلفان عمدًا.
       { name: "published", label: "منشور (مفتوح للتسجيل والدراسة)", type: "bool" },
       ...commonTail,
+    ],
+  },
+
+  "academic-terms": {
+    key: "academic-terms",
+    model: "academicTerm",
+    titleAr: "الفصول والفترات الدراسية",
+    singularAr: "فصل دراسي",
+    orderBy: { startsAt: "desc" },
+    columns: [
+      { name: "titleAr", label: "الفصل" },
+      { name: "key", label: "الرمز", kind: "badge" },
+      { name: "active", label: "نشط", kind: "bool" },
+    ],
+    fields: [
+      { name: "key", label: "الرمز الفريد", type: "ltr", half: true, required: true },
+      ...bilingual("title", "اسم الفصل", { required: true }),
+      { name: "startsAt", label: "تاريخ البداية", type: "date", half: true, required: true },
+      { name: "endsAt", label: "تاريخ النهاية", type: "date", half: true, required: true },
+      { name: "gradingStartsAt", label: "بداية فترة الدرجات", type: "date", half: true, nullable: true },
+      { name: "gradingEndsAt", label: "نهاية فترة الدرجات", type: "date", half: true, nullable: true },
+      { name: "active", label: "فصل نشط", type: "bool" },
+    ],
+  },
+
+  cohorts: {
+    key: "cohorts",
+    model: "cohort",
+    titleAr: "الشُعب والمجموعات",
+    singularAr: "شعبة",
+    orderBy: { createdAt: "desc" },
+    columns: [
+      { name: "nameAr", label: "الشعبة" },
+      { name: "capacity", label: "السعة" },
+      { name: "active", label: "نشطة", kind: "bool" },
+    ],
+    fields: [
+      ...bilingual("name", "اسم الشعبة", { required: true }),
+      { name: "courseId", label: "المقرّر", type: "select", half: true, nullable: true, relation: { model: "course", labelField: "titleAr", emptyLabel: "— عام —" } },
+      { name: "stageId", label: "المرحلة", type: "select", half: true, nullable: true, relation: { model: "programStage", labelField: "titleAr", emptyLabel: "— كل المراحل —" } },
+      { name: "termId", label: "الفصل الدراسي", type: "select", half: true, nullable: true, relation: { model: "academicTerm", labelField: "titleAr", emptyLabel: "— بلا فصل —" } },
+      { name: "capacity", label: "السعة", type: "number", half: true, nullable: true },
+      { name: "startsAt", label: "البداية", type: "date", half: true, nullable: true },
+      { name: "endsAt", label: "النهاية", type: "date", half: true, nullable: true },
+      { name: "active", label: "نشطة", type: "bool" },
+    ],
+  },
+
+  calendar: {
+    key: "calendar",
+    model: "academicCalendarEntry",
+    titleAr: "التقويم الأكاديمي",
+    singularAr: "موعد",
+    orderBy: { startsAt: "asc" },
+    columns: [
+      { name: "titleAr", label: "الموعد" },
+      { name: "kind", label: "النوع", kind: "badge" },
+      { name: "visible", label: "ظاهر", kind: "bool" },
+    ],
+    fields: [
+      ...bilingual("title", "العنوان", { required: true }),
+      { name: "descAr", label: "التفاصيل (عربي)", type: "textarea" },
+      { name: "descEn", label: "التفاصيل (إنجليزي)", type: "textarea-ltr" },
+      { name: "kind", label: "النوع", type: "select", half: true, options: [
+        { value: "event", label: "فعالية" }, { value: "exam", label: "اختبار" },
+        { value: "deadline", label: "موعد نهائي" }, { value: "holiday", label: "إجازة" },
+      ] },
+      { name: "termId", label: "الفصل", type: "select", half: true, nullable: true, relation: { model: "academicTerm", labelField: "titleAr", emptyLabel: "— عام —" } },
+      { name: "courseId", label: "المقرّر", type: "select", half: true, nullable: true, relation: { model: "course", labelField: "titleAr", emptyLabel: "— كل المقرّرات —" } },
+      { name: "startsAt", label: "البداية", type: "datetime", half: true, required: true },
+      { name: "endsAt", label: "النهاية", type: "datetime", half: true, nullable: true },
+      { name: "visible", label: "ظاهر", type: "bool" },
+    ],
+  },
+
+  announcements: {
+    key: "announcements",
+    model: "announcement",
+    titleAr: "الإعلانات والتذكيرات",
+    singularAr: "إعلان",
+    orderBy: { publishAt: "desc" },
+    columns: [
+      { name: "titleAr", label: "الإعلان" },
+      { name: "pinned", label: "مثبّت", kind: "bool" },
+      { name: "visible", label: "ظاهر", kind: "bool" },
+    ],
+    fields: [
+      ...bilingual("title", "العنوان", { required: true }),
+      { name: "bodyAr", label: "المحتوى (عربي)", type: "textarea", required: true },
+      { name: "bodyEn", label: "المحتوى (إنجليزي)", type: "textarea-ltr" },
+      { name: "courseId", label: "المقرّر", type: "select", half: true, nullable: true, relation: { model: "course", labelField: "titleAr", emptyLabel: "— إعلان عام —" } },
+      { name: "cohortId", label: "الشعبة", type: "select", half: true, nullable: true, relation: { model: "cohort", labelField: "nameAr", emptyLabel: "— كل الشعب —" } },
+      { name: "publishAt", label: "موعد النشر", type: "datetime", half: true, required: true },
+      { name: "expiresAt", label: "انتهاء العرض", type: "datetime", half: true, nullable: true },
+      { name: "pinned", label: "مثبّت", type: "bool", half: true },
+      { name: "visible", label: "ظاهر", type: "bool", half: true },
+    ],
+  },
+
+  "question-bank": {
+    key: "question-bank",
+    model: "questionBankItem",
+    titleAr: "بنك الأسئلة",
+    singularAr: "سؤال",
+    orderBy: { updatedAt: "desc" },
+    columns: [
+      { name: "textAr", label: "السؤال" },
+      { name: "kind", label: "النوع", kind: "badge" },
+      { name: "active", label: "نشط", kind: "bool" },
+    ],
+    fields: [
+      { name: "kind", label: "النوع", type: "select", half: true, options: [
+        { value: "SINGLE", label: "اختيار واحد" }, { value: "MULTI", label: "اختيار متعدد" },
+        { value: "TRUEFALSE", label: "صواب/خطأ" }, { value: "SHORT", label: "إجابة قصيرة" },
+      ] },
+      { name: "difficulty", label: "الصعوبة (1-5)", type: "number", half: true },
+      { name: "textAr", label: "نص السؤال (عربي)", type: "textarea", required: true },
+      { name: "textEn", label: "نص السؤال (إنجليزي)", type: "textarea-ltr" },
+      { name: "explainAr", label: "شرح الإجابة (عربي)", type: "textarea" },
+      { name: "explainEn", label: "شرح الإجابة (إنجليزي)", type: "textarea-ltr" },
+      { name: "choices", label: "الخيارات بصيغة JSON", type: "json", hint: "مثال: [{\"textAr\":\"...\",\"correct\":true}]" },
+      { name: "tags", label: "الوسوم بصيغة JSON", type: "json", hint: "مثال: [\"مصطلح\",\"صحيح\"]" },
+      { name: "points", label: "الدرجة", type: "number", half: true },
+      { name: "active", label: "نشط", type: "bool", half: true },
     ],
   },
 

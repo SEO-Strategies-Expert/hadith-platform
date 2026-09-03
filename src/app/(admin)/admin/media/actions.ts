@@ -14,23 +14,30 @@ export async function uploadMedia(
   await requireUser();
   const file = formData.get("file") as File | null;
   if (!file || file.size === 0) return "اختر ملفًا أولًا.";
-  if (file.size > 8 * 1024 * 1024) return "الحجم الأقصى 8 ميجابايت.";
-  if (!file.type.startsWith("image/")) return "يمكن رفع ملفات الصور فقط.";
+  const supported = file.type.startsWith("image/") || file.type.startsWith("video/") || file.type.startsWith("audio/") || file.type === "application/pdf" || ["text/vtt", "application/x-subrip"].includes(file.type);
+  if (!supported) return "النوع غير مدعوم. ارفع صورة أو فيديو أو صوتًا أو PDF أو ملف ترجمة VTT/SRT.";
+  const max = file.type.startsWith("video/") ? 100 * 1024 * 1024 : 25 * 1024 * 1024;
+  if (file.size > max) return `الحجم الأقصى ${file.type.startsWith("video/") ? 100 : 25} ميجابايت.`;
 
   if (!process.env.BLOB_READ_WRITE_TOKEN)
     return "تخزين الصور غير مُفعّل بعد (BLOB_READ_WRITE_TOKEN مفقود).";
 
   try {
     const stored = await uploadFile(MEDIA_PREFIX, file, file.name);
-    await prisma.media.create({
+    const assetType = file.type.startsWith("video/") ? "video" : file.type.startsWith("audio/") ? "audio" : file.type === "application/pdf" ? "document" : file.type.includes("vtt") || file.name.endsWith(".srt") ? "caption" : "image";
+    const media = await prisma.media.create({
       data: {
         url: stored.url,
         pathname: stored.pathname,
         filename: file.name,
         size: file.size,
         mime: file.type || null,
+        assetType,
+        private: stored.access === "private",
+        processingStatus: assetType === "video" ? "queued" : "ready",
       },
     });
+    if (assetType === "video") await prisma.systemJob.create({ data: { kind: "media.transcode", payload: { mediaId: media.id, pathname: stored.pathname } } });
   } catch (e) {
     console.error("[media] فشل الرفع", e);
     return "تعذّر الرفع. حاول مجددًا.";

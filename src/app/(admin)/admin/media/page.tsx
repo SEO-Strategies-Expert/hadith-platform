@@ -16,7 +16,7 @@ export default async function MediaPage({
 
   return (
     <div>
-      <PageHeader title="مكتبة الوسائط" desc="ارفع الصور، عاينها، ثم استخدم روابطها في صفحات الموقع والمقررات." />
+      <PageHeader title="مكتبة الوسائط" desc="رفع الصور والفيديو والصوت والملفات والترجمات، مع حالة معالجة وحماية التخزين." />
 
       {uploaded && (
         <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] font-bold text-emerald-700">
@@ -26,11 +26,11 @@ export default async function MediaPage({
 
       <div className="mb-5 grid gap-3 sm:grid-cols-2">
         <div className="flex items-center gap-3 rounded-2xl border border-black/5 bg-white p-4 shadow-sm"><span className="grid h-11 w-11 place-items-center rounded-xl bg-gold/15 text-gold-3"><Images size={21}/></span><div><b className="block text-xl text-navy-900">{media.length}</b><span className="text-[12px] text-ink-soft">صورة في المكتبة</span></div></div>
-        <div className="flex items-center gap-3 rounded-2xl border border-black/5 bg-white p-4 shadow-sm"><span className="grid h-11 w-11 place-items-center rounded-xl bg-sky-100 text-sky-700"><HardDrive size={21}/></span><div><b className="block text-xl text-navy-900">8 MB</b><span className="text-[12px] text-ink-soft">الحد الأقصى لكل صورة</span></div></div>
+        <div className="flex items-center gap-3 rounded-2xl border border-black/5 bg-white p-4 shadow-sm"><span className="grid h-11 w-11 place-items-center rounded-xl bg-sky-100 text-sky-700"><HardDrive size={21}/></span><div><b className="block text-xl text-navy-900">100 MB</b><span className="text-[12px] text-ink-soft">الحد الأقصى للفيديو</span></div></div>
       </div>
 
       <Card className="mb-7 max-w-4xl p-6">
-        <ActionForm action={uploadMedia} cancelHref="/admin/media" submitLabel="رفع الصورة إلى المكتبة">
+        <ActionForm action={uploadMedia} cancelHref="/admin/media" submitLabel="رفع الملف إلى المكتبة">
           <MediaDropzone />
         </ActionForm>
       </Card>
@@ -45,7 +45,7 @@ export default async function MediaPage({
               <div key={m.id} className="overflow-hidden rounded-xl border border-black/10 bg-cream-50">
                 <div className="grid aspect-video place-items-center overflow-hidden bg-navy-900">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={m.url} alt={m.filename} className="h-full w-full object-cover" />
+                  {m.assetType === "image" ? <img src={m.url} alt={m.filename} className="h-full w-full object-cover" /> : <span className="text-center text-xs font-bold text-white">{m.assetType}<br/>{m.processingStatus}</span>}
                 </div>
                 <div className="p-2.5">
                   <div className="truncate text-[12px] font-bold text-navy-800" title={m.filename}>

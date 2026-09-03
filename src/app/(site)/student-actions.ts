@@ -6,6 +6,7 @@ import type { Lang } from "@/lib/site-data";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { currentUser } from "@/lib/guard";
+import { consumeRateLimit } from "@/lib/rate-limit";
 
 /** دخول الطالب من بوابة الطلاب — يستخدم نفس مزوّد المصادقة. */
 export async function studentLogin(
@@ -14,6 +15,7 @@ export async function studentLogin(
   formData: FormData
 ): Promise<string | undefined> {
   try {
+    if (!(await consumeRateLimit("student-login", String(formData.get("email") ?? "unknown")))) return lang === "en" ? "Too many attempts. Try again in 15 minutes." : "محاولات كثيرة. حاول بعد 15 دقيقة.";
     await signIn("credentials", {
       email: formData.get("email"),
       password: formData.get("password"),
@@ -43,8 +45,10 @@ export async function requestCourseEnrollment(lang: Lang, _prev: CourseRequestSt
   const feeRaw=String(formData.get("feeOption")??"free");
   const feeOption=["full","reduced","free"].includes(feeRaw)?feeRaw:"free";
   if(!courseId)return {ok:false,message:ar?"اختر المقرر الذي تريد التسجيل فيه.":"Choose a course."};
-  const course=await prisma.course.findFirst({where:{id:courseId,visible:true,published:true},select:{id:true,titleAr:true,titleEn:true}});
+  const now=new Date();
+  const course=await prisma.course.findFirst({where:{id:courseId,visible:true,allowSelfEnrollment:true,OR:[{published:true},{publishAt:{lte:now}}],AND:[{OR:[{enrollmentOpensAt:null},{enrollmentOpensAt:{lte:now}}]},{OR:[{enrollmentClosesAt:null},{enrollmentClosesAt:{gt:now}}]}]},select:{id:true,titleAr:true,titleEn:true,prerequisiteCourseId:true}});
   if(!course)return {ok:false,message:ar?"المقرر غير متاح للتسجيل حاليًا.":"This course is not open for registration."};
+  if(course.prerequisiteCourseId){const prerequisite=await prisma.enrollment.findUnique({where:{userId_courseId:{userId:user.id,courseId:course.prerequisiteCourseId}},select:{status:true}});if(prerequisite?.status!=="COMPLETED")return {ok:false,message:ar?"يجب إكمال المقرر السابق المطلوب أولًا.":"Complete the prerequisite course first."};}
   const existing=await prisma.enrollment.findUnique({where:{userId_courseId:{userId:user.id,courseId}}});
   if(existing && existing.status!=="CANCELLED")return {ok:existing.status==="PENDING",message:existing.status==="PENDING"?(ar?"طلبك لهذا المقرر قيد المراجعة بالفعل.":"Your request is already under review."):(ar?"أنت مسجّل في هذا المقرر بالفعل.":"You are already enrolled in this course.")};
   if(existing)await prisma.enrollment.update({where:{id:existing.id},data:{status:"PENDING",feeOption,progressPct:0,completedAt:null,enrolledAt:new Date()}});

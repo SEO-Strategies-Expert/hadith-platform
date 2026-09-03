@@ -608,7 +608,7 @@ const bindCourses: Binder = async ($, lang) => {
   const grid = $("#courseGrid .card-grid");
   if (grid.length === 0) return;
   const rows = await prisma.course.findMany({
-    where: { visible: true, stageId: null },
+    where: { visible: true, stageId: null, OR: [{ published: true }, { publishAt: { lte: new Date() } }] },
     orderBy: { order: "asc" },
   });
   if (rows.length === 0) return;

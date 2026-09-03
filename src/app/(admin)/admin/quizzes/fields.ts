@@ -56,6 +56,10 @@ export const quizFields: FieldDef[] = [
     half: true,
     hint: "٠ = بلا حدّ.",
   },
+  { name: "retakeCooldownHours", label: "الانتظار بين المحاولات (ساعة)", type: "number", half: true },
+  { name: "questionPoolSize", label: "عدد أسئلة السحب العشوائي", type: "number", half: true, hint: "0 = استخدام كل الأسئلة. عند تحديده تُسحب عينة لكل محاولة." },
+  { name: "availableAt", label: "موعد فتح الاختبار", type: "datetime", half: true, nullable: true },
+  { name: "closesAt", label: "موعد إغلاق الاختبار", type: "datetime", half: true, nullable: true },
   { name: "shuffle", label: "خلط ترتيب الأسئلة لكل محاولة", type: "bool", half: true },
   { name: "visible", label: "ظاهر للطلاب", type: "bool" },
 ];

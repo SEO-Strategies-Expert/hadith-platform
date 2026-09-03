@@ -47,11 +47,13 @@ export async function startQuizAttempt(quizId: string): Promise<void> {
 
   const quiz = await prisma.quiz.findUnique({
     where: { id: quizId },
-    select: { id: true, courseId: true, visible: true, attemptsAllowed: true },
+    select: { id: true, courseId: true, visible: true, attemptsAllowed: true, retakeCooldownHours: true, questionPoolSize: true, availableAt: true, closesAt: true },
   });
   // اختبارٌ مخفيّ أو بلا مقرّر لا يُبدأ: الوصول مشروطٌ بالتسجيل في مقرّرٍ بعينه،
   // فبلا مقرّر لا يوجد شرطٌ يمكن التحقّق منه — ونفشل مغلقين لا مفتوحين.
   if (!quiz || !quiz.visible || !quiz.courseId) return;
+  const now = new Date();
+  if ((quiz.availableAt && quiz.availableAt > now) || (quiz.closesAt && quiz.closesAt <= now)) return;
   if (!(await isEnrolled(user.id, quiz.courseId))) return;
 
   // محاولةٌ مفتوحة قائمة؟ لا نفتح ثانية — وإلّا التفّ الطالب على المهلة بإعادة البدء.
@@ -68,7 +70,15 @@ export async function startQuizAttempt(quizId: string): Promise<void> {
     if (used >= quiz.attemptsAllowed) return;
   }
 
-  await prisma.quizAttempt.create({ data: { quizId, userId: user.id } });
+  const last = await prisma.quizAttempt.findFirst({ where: { quizId, userId: user.id, submittedAt: { not: null } }, orderBy: { submittedAt: "desc" }, select: { submittedAt: true } });
+  if (last?.submittedAt && quiz.retakeCooldownHours > 0 && Date.now() < last.submittedAt.getTime() + quiz.retakeCooldownHours * 3_600_000) return;
+
+  let questionIds: string[] | undefined;
+  if (quiz.questionPoolSize > 0) {
+    const all = await prisma.question.findMany({ where: { quizId }, select: { id: true } });
+    questionIds = all.map((x) => x.id).sort(() => Math.random() - .5).slice(0, quiz.questionPoolSize);
+  }
+  await prisma.quizAttempt.create({ data: { quizId, userId: user.id, questionIds } });
   for (const p of portalPrefixes) revalidatePath(`${p}/quiz/${quizId}`);
 }
 
@@ -96,6 +106,7 @@ export async function submitQuizAttempt(
       userId: true,
       startedAt: true,
       submittedAt: true,
+      questionIds: true,
       quiz: {
         select: { id: true, courseId: true, visible: true, timeLimitMin: true, passScore: true },
       },
@@ -111,8 +122,9 @@ export async function submitQuizAttempt(
   if (!(await isEnrolled(user.id, quiz.courseId))) return;
 
   // الإجابات الصحيحة تُقرأ هنا لأوّل مرّة — على الخادم، بعد التسليم.
+  const selectedIds = Array.isArray(attempt.questionIds) ? attempt.questionIds.filter((x): x is string => typeof x === "string") : [];
   const questions = await prisma.question.findMany({
-    where: { quizId },
+    where: { quizId, ...(selectedIds.length ? { id: { in: selectedIds } } : {}) },
     select: {
       id: true,
       kind: true,

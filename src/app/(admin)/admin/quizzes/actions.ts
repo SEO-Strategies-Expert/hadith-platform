@@ -12,6 +12,7 @@ import {
   type ChoiceDraft,
 } from "@/lib/quiz";
 import { CHOICE_SLOTS } from "./fields";
+import { fromLocalInput } from "@/components/admin/datetime";
 
 /**
  * إجراءات الاختبارات وأسئلتها.
@@ -71,6 +72,10 @@ function buildQuiz(formData: FormData) {
       timeLimitMin: positiveIntOrNull(formData.get("timeLimitMin")),
       passScore: intWithin(formData.get("passScore"), 0, 100, 60),
       attemptsAllowed: intWithin(formData.get("attemptsAllowed"), 0, 99, 0),
+      retakeCooldownHours: intWithin(formData.get("retakeCooldownHours"), 0, 8760, 0),
+      questionPoolSize: intWithin(formData.get("questionPoolSize"), 0, 1000, 0),
+      availableAt: fromLocalInput(String(formData.get("availableAt") ?? "")),
+      closesAt: fromLocalInput(String(formData.get("closesAt") ?? "")),
       shuffle: formData.get("shuffle") === "on",
       visible: formData.get("visible") === "on",
     },

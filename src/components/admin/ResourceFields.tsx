@@ -31,6 +31,8 @@ function renderField(f: FieldDef, record?: any) {
       return <TextArea label={f.label} name={f.name} defaultValue={val ?? undefined} dir="rtl" hint={f.hint} />;
     case "textarea-ltr":
       return <TextArea label={f.label} name={f.name} defaultValue={val ?? undefined} dir="ltr" hint={f.hint} />;
+    case "json":
+      return <TextArea label={f.label} name={f.name} defaultValue={val == null ? undefined : JSON.stringify(val, null, 2)} dir="ltr" hint={f.hint} />;
     case "image":
       return <ImagePickerField label={f.label} name={f.name} defaultValue={val ?? undefined} required={f.required} hint={f.hint} />;
     case "ltr":
