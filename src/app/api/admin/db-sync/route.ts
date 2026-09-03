@@ -24,12 +24,34 @@ export async function POST() {
   try {
     const { exec } = await import("child_process");
     const { promisify } = await import("util");
+    const { existsSync } = await import("fs");
+    const path = await import("path");
     const execAsync = promisify(exec);
-    const env = { ...process.env, POSTGRES_PRISMA_URL: dbUrl, POSTGRES_URL_NON_POOLING: dbUrl };
-    const { stdout, stderr } = await execAsync("npx prisma db push --accept-data-loss --skip-generate", {
+    const cwd = process.cwd();
+    const localBin = path.join(cwd, "node_modules/.bin/prisma");
+    const localBuild = path.join(cwd, "node_modules/prisma/build/index.js");
+    let cmd: string;
+    if (existsSync(localBin)) {
+      cmd = `"${localBin}" db push --accept-data-loss --skip-generate`;
+    } else if (existsSync(localBuild)) {
+      cmd = `node "${localBuild}" db push --accept-data-loss --skip-generate`;
+    } else {
+      cmd = "npx --yes prisma db push --accept-data-loss --skip-generate";
+    }
+    const env: Record<string, string | undefined> = {
+      ...process.env,
+      POSTGRES_PRISMA_URL: dbUrl,
+      POSTGRES_URL_NON_POOLING: dbUrl,
+      HOME: "/tmp",
+      TMPDIR: "/tmp",
+      npm_config_cache: "/tmp/.npm",
+      XDG_CACHE_HOME: "/tmp/.cache",
+    };
+    const { stdout, stderr } = await execAsync(cmd, {
       timeout: 120_000,
       maxBuffer: 5 * 1024 * 1024,
-      env,
+      env: env as NodeJS.ProcessEnv,
+      cwd,
     });
     const output = [stdout, stderr].filter(Boolean).join("\n").slice(0, 5000);
 

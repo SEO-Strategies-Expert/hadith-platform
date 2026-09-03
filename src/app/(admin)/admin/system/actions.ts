@@ -27,22 +27,47 @@ export async function syncDatabase() {
   try {
     const { exec } = await import("child_process");
     const { promisify } = await import("util");
+    const { existsSync } = await import("fs");
+    const path = await import("path");
     const execAsync = promisify(exec);
 
     // Prisma يحتاج Direct URL للـ DDL على Neon؛ الـ pooler لا يسمح بالـ migrations.
     const dbUrl = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
     if (!dbUrl) throw new Error("DATABASE_URL_MISSING: لم تُضبط متغيرات قاعدة البيانات في البيئة");
 
-    // نمرّر البيئة كاملةً — مهمة لـ POSTGRES_* و AUTH_SECRET وغيرها.
-    const env = { ...process.env, POSTGRES_PRISMA_URL: dbUrl, POSTGRES_URL_NON_POOLING: dbUrl };
+    // cPanel/Vercel: نصلح HOME و npm cache لتجنب ENOENT mkdir /home/sbx_user1051
+    // ونستخدم الثنائي المحلي بدل npx لتجنب fetch من registry.
+    const env: Record<string, string | undefined> = {
+      ...process.env,
+      POSTGRES_PRISMA_URL: dbUrl,
+      POSTGRES_URL_NON_POOLING: dbUrl,
+      HOME: "/tmp",
+      TMPDIR: "/tmp",
+      npm_config_cache: "/tmp/.npm",
+      XDG_CACHE_HOME: "/tmp/.cache",
+      PRISMA_CLI_BINARY_TARGETS: process.env.PRISMA_CLI_BINARY_TARGETS,
+    };
+
+    const cwd = process.cwd();
+    const localBin = path.join(cwd, "node_modules/.bin/prisma");
+    const localBuild = path.join(cwd, "node_modules/prisma/build/index.js");
+    let cmd: string;
+    if (existsSync(localBin)) {
+      cmd = `"${localBin}" db push --accept-data-loss --skip-generate`;
+    } else if (existsSync(localBuild)) {
+      cmd = `node "${localBuild}" db push --accept-data-loss --skip-generate`;
+    } else {
+      // fallback — قد يفشل بـ ENOENT لكن نحاول مع HOME مُصلَّح
+      cmd = "npx --yes prisma db push --accept-data-loss --skip-generate";
+    }
 
     // --accept-data-loss آمن هنا: push لا يحذف إلا أعمدةً/جداول حُذفت من المخطط،
     // والمخطط الحالي هو المرجع. --skip-generate يتجنّب إعادة توليد العميل في الإنتاج.
-    const cmd = "npx prisma db push --accept-data-loss --skip-generate";
     const { stdout, stderr } = await execAsync(cmd, {
       timeout: 120_000,
       maxBuffer: 5 * 1024 * 1024,
-      env,
+      env: env as NodeJS.ProcessEnv,
+      cwd,
     });
     const output = [stdout, stderr].filter(Boolean).join("\n").slice(0, 4000);
 
