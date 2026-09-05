@@ -5,6 +5,23 @@ import { getDbInfo, formatBytes, maskDbUrl } from "@/lib/db-info";
 import { queueBackup } from "./actions";
 import { SyncDatabaseCard } from "./SyncCard";
 
+function parseConnectionCredentials(raw: string | undefined) {
+  try {
+    if (!raw) return null;
+    const url = new URL(raw);
+    return {
+      host: url.hostname,
+      port: url.port || "5432",
+      database: decodeURIComponent(url.pathname.replace(/^\//, "")),
+      user: decodeURIComponent(url.username),
+      password: decodeURIComponent(url.password),
+      sslMode: url.searchParams.get("sslmode") || "غير محدد",
+    };
+  } catch {
+    return null;
+  }
+}
+
 export default async function SystemPage({
   searchParams,
 }: {
@@ -77,6 +94,15 @@ export default async function SystemPage({
       required: false,
     },
   ] as const;
+  const primaryConnectionUrl = process.env.POSTGRES_PRISMA_URL;
+  const directConnectionUrl = process.env.POSTGRES_URL_NON_POOLING;
+  const credentials = parseConnectionCredentials(primaryConnectionUrl);
+  const localEnvTemplate = [
+    `POSTGRES_PRISMA_URL=${JSON.stringify(primaryConnectionUrl || "")}`,
+    `POSTGRES_URL_NON_POOLING=${JSON.stringify(directConnectionUrl || primaryConnectionUrl || "")}`,
+    `DATABASE_URL=${JSON.stringify(process.env.DATABASE_URL || primaryConnectionUrl || "")}`,
+    `DIRECT_URL=${JSON.stringify(process.env.DIRECT_URL || directConnectionUrl || primaryConnectionUrl || "")}`,
+  ].join("\n");
 
   return <div><PageHeader title="الأمان والتشغيل" desc="سجل التدقيق، النسخ الاحتياطي، حالة التكاملات وطوابير المعالجة." />
     {restored && <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] font-bold text-emerald-700">تمت الاستعادة: أُدرج {restored} صفًّا (الموجود مسبقًا لم يُمسّ).</div>}
@@ -149,6 +175,37 @@ export default async function SystemPage({
           <code dir="ltr" className="mx-1">POSTGRES_URL_NON_POOLING</code> للبيئات المطلوبة، ثم نفّذ إعادة نشر. تعديل ملفات GitHub وحده لا يغيّر هذه القيم.
         </div>
       )}
+
+      <details className="mt-4 overflow-hidden rounded-xl border-2 border-red-200 bg-red-50/50">
+        <summary className="cursor-pointer select-none px-4 py-3 text-[13px] font-extrabold text-red-800">
+          عرض بيانات الاتصال الكاملة للاستخدام المحلي
+        </summary>
+        <div className="border-t border-red-200 p-4">
+          <p className="mb-3 text-[12px] leading-6 text-red-800">
+            هذه البيانات سرّية وتمنح وصولًا مباشرًا إلى قاعدة البيانات. لا تضعها في GitHub، ولا ترسل لقطة شاشة منها،
+            واحفظها فقط في <code dir="ltr">.env.local</code> المستثنى من Git.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              ["المضيف", credentials?.host || "—"],
+              ["المنفذ", credentials?.port || "—"],
+              ["اسم القاعدة", credentials?.database || "—"],
+              ["اسم المستخدم", credentials?.user || "—"],
+              ["كلمة المرور", credentials?.password || "—"],
+              ["SSL Mode", credentials?.sslMode || "—"],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-xl border border-red-100 bg-white p-3">
+                <div className="text-[11.5px] font-bold text-ink-soft">{label}</div>
+                <code className="mt-1 block break-all text-[12px] font-bold text-navy-900" dir="ltr">{value}</code>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4">
+            <div className="mb-1.5 text-[11.5px] font-bold text-ink-soft">محتوى جاهز لملف .env.local</div>
+            <pre className="max-h-72 overflow-auto whitespace-pre-wrap break-all rounded-xl bg-navy-950 p-4 text-left text-[11px] leading-6 text-cream-100" dir="ltr">{localEnvTemplate}</pre>
+          </div>
+        </div>
+      </details>
     </Card>
 
     <Card className="mb-6 p-5">
