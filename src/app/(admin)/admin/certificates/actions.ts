@@ -146,6 +146,20 @@ export async function revokeCertificate(
   redirect(`/admin/certificates/${id}?revoked=1`);
 }
 
+export async function updateCertificateDesign(
+  id: string,
+  _prev: string | undefined,
+  formData: FormData
+): Promise<string | undefined> {
+  await requireUser();
+  const style = String(formData.get("designStyle") ?? "classic");
+  if (!["classic", "waves", "particles"].includes(style)) return "نمط تصميم غير صالح.";
+  await prisma.certificate.update({ where: { id }, data: { designStyle: style } });
+  revalidatePath(`/admin/certificates/${id}`);
+  revalidatePath("/verify.html");
+  redirect(`/admin/certificates/${id}?design=1`);
+}
+
 /** تراجعٌ عن إلغاءٍ وقع خطأً — يمحو الأثر بالكامل ليعود التحقّق صحيحًا. */
 export async function restoreCertificate(
   id: string,

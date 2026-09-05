@@ -14,6 +14,10 @@ import { longDate, mediaUrl } from "@/lib/site-format";
 import { getCourseTree, flattenLessons, getProgressMap, isEnrolled, isLiveNow, title, timeLabel } from "@/lib/lms";
 import { deleteStudentNote, saveStudentNote, toggleBookmark, toggleLessonDone } from "@/app/(site)/student-lms-actions";
 import { Pill, studentHref, num, resolveVideo } from "@/components/site/StudentPortalKit";
+import { CollapsiblePanel } from "@/components/site/CollapsibleSidebar";
+import { BookOpen, ClipboardCheck, FileText, Radio, Video } from "lucide-react";
+import { CertificatePreviewModal } from "@/components/site/CertificatePreviewModal";
+import { CourseCompletionCelebration } from "@/components/site/CourseCompletionCelebration";
 
 const T = {
   ar: {
@@ -51,6 +55,7 @@ const T = {
     quizNote: "هذا الدرس اختبارٌ تقويميّ. سيتاح أداؤه من هذه الصفحة عند فتحه.",
     quizPass: "درجة النجاح",
     quizTime: "زمن الاختبار",
+    startQuiz: "ابدأ الاختبار",
     noQuiz: "لم يُربَط بهذا الدرس اختبارٌ بعد.",
     noText: "لم يُكتب متن هذا الدرس بعد.",
     kinds: {
@@ -97,6 +102,7 @@ const T = {
     quizNote: "This lesson is an assessment. It will be available from this page once opened.",
     quizPass: "Pass score",
     quizTime: "Time limit",
+    startQuiz: "Start the quiz",
     noQuiz: "No quiz is linked to this lesson yet.",
     noText: "The text of this lesson has not been written yet.",
     kinds: {
@@ -156,16 +162,61 @@ export async function StudentLessonView({ lang, lessonId }: { lang: Lang; lesson
   const next = index < lessons.length - 1 ? lessons[index + 1] : null;
 
   // التقدّم للملتحقين فقط؛ المعاينة المجّانيّة قراءةٌ بلا تسجيل.
-  const isDone =
-    enrolled && user?.id ? (await getProgressMap(user.id, [lessonId])).get(lessonId) === true : false;
+  const progressMap = enrolled && user?.id ? await getProgressMap(user.id, lessons.map((item) => item.id)) : new Map<string, boolean>();
+  const isDone = progressMap.get(lessonId) === true;
+  const completedLessons = lessons.filter((item) => progressMap.get(item.id) === true).length;
+  const completionPercent = lessons.length ? Math.round((completedLessons / lessons.length) * 100) : 0;
+  const certificate = enrolled && user?.id && completionPercent === 100 ? await prisma.certificate.findFirst({
+    where: { userId: user.id, courseId, kind: "CERTIFICATE", revoked: false },
+    orderBy: { issuedAt: "desc" },
+    select: { titleAr: true, titleEn: true, serial: true, issuedAt: true, pdfUrl: true, designStyle: true },
+  }) : null;
   const [notes, bookmarked] = enrolled && user?.id ? await Promise.all([
     prisma.studentNote.findMany({ where: { userId: user.id, lessonId }, orderBy: { createdAt: "desc" } }),
     prisma.bookmark.findUnique({ where: { userId_lessonId: { userId: user.id, lessonId } }, select: { id: true } }),
   ]) : [[], null];
   const transcript = lang === "en" ? lesson.transcriptEn || lesson.transcriptAr : lesson.transcriptAr || lesson.transcriptEn;
+  const lessonNavigation = (
+    <nav className="student-lesson-navigation" aria-label={lang === "ar" ? "التنقل بين الدروس" : "Lesson navigation"}>
+      {prev ? (
+        <Link className="student-lesson-nav-link student-lesson-nav-prev" href={studentHref(lang, `/lesson/${prev.id}`)}>
+          <span className="student-lesson-nav-arrow" aria-hidden="true">{lang === "ar" ? "→" : "←"}</span>
+          <span><small>{t.prev}</small><b>{title(lang, prev.titleAr, prev.titleEn)}</b></span>
+        </Link>
+      ) : <span className="student-lesson-nav-empty" />}
+      {next ? (
+        <Link className="student-lesson-nav-link student-lesson-nav-next" href={studentHref(lang, `/lesson/${next.id}`)}>
+          <span><small>{t.next}</small><b>{title(lang, next.titleAr, next.titleEn)}</b></span>
+          <span className="student-lesson-nav-arrow" aria-hidden="true">{lang === "ar" ? "←" : "→"}</span>
+        </Link>
+      ) : <span className="student-lesson-nav-empty" />}
+    </nav>
+  );
+
+  const lessonTypeIcon = (kind: string) => kind === "VIDEO" ? <Video size={14} /> : kind === "PDF" ? <FileText size={14} /> : kind === "QUIZ" ? <ClipboardCheck size={14} /> : kind === "LIVE" ? <Radio size={14} /> : <BookOpen size={14} />;
+  const collapsedLessonIcons = <>{lessons.map((item) => <Link key={item.id} href={studentHref(lang, `/lesson/${item.id}`)} className={item.id === lessonId ? "is-active" : undefined} title={title(lang, item.titleAr, item.titleEn)}>{lessonTypeIcon(item.kind)}</Link>)}</>;
 
   return (
-    <main id="main">
+    <main id="main" className="student-lesson-shell">
+      <aside className="student-lesson-sidebar" aria-label={lang === "ar" ? "دروس المقرر" : "Course lessons"}>
+        <CollapsiblePanel horizontal title={`${lang === "ar" ? "دروس المقرر" : "Course lessons"} · ${num(completionPercent, lang)}٪`} subtitle={`${num(completedLessons, lang)} / ${num(lessons.length, lang)} ${lang === "ar" ? "دروس منجزة" : "lessons complete"}`} icon={<BookOpen size={15} />} collapsedContent={collapsedLessonIcons}>
+        <div className="student-lesson-progress"><i style={{ width: `${completionPercent}%` }} /></div>
+        <div className="student-lesson-sidebar-list">
+          {course.modules.map((module) => (
+            <section key={module.id}>
+              <h2>{title(lang, module.titleAr, module.titleEn)}</h2>
+              {module.lessons.map((item) => {
+                const active = item.id === lessonId;
+                const done = progressMap.get(item.id) === true;
+                return <Link key={item.id} href={studentHref(lang, `/lesson/${item.id}`)} className={`student-lesson-sidebar-item${active ? " is-active" : ""}${done ? " is-done" : ""}`} aria-current={active ? "page" : undefined}><span className="student-lesson-check">{done ? "✓" : "○"}</span><span className="student-lesson-type-icon" title={t.kinds[item.kind] ?? item.kind}>{lessonTypeIcon(item.kind)}</span><span className="student-lesson-title">{title(lang, item.titleAr, item.titleEn)}</span>{active && <b>●</b>}</Link>;
+              })}
+            </section>
+          ))}
+        </div>
+        </CollapsiblePanel>
+      </aside>
+      <div className={`student-lesson-content student-lesson-content-${lang}`}>
+      {certificate && completionPercent === 100 && isDone && <CourseCompletionCelebration title={title(lang, certificate.titleAr, certificate.titleEn)} certificateUrl={studentHref(lang, "/certificates")} pdfUrl={certificate.pdfUrl} labels={{ heading: lang === "ar" ? "مبارك! أتممت المقرر" : "Congratulations! Course completed", body: lang === "ar" ? "أنجزت جميع دروس هذا المقرر بنجاح، وشهادتك جاهزة." : "You completed every lesson successfully. Your certificate is ready.", view: lang === "ar" ? "عرض الشهادة" : "View certificate", download: lang === "ar" ? "تنزيل الشهادة" : "Download certificate", print: lang === "ar" ? "حفظ كـ PDF" : "Save as PDF", close: lang === "ar" ? "متابعة" : "Continue" }} />}
       <section className="page-hero orn-navy student-lesson-hero">
         <div className="container">
           <div className="page-hero-copy reveal">
@@ -201,6 +252,8 @@ export async function StudentLessonView({ lang, lessonId }: { lang: Lang; lesson
               <p>{t.previewNote}</p>
             </div>
           )}
+
+          {lessonNavigation}
 
           <LessonBody lang={lang} lesson={lesson} />
 
@@ -254,6 +307,7 @@ export async function StudentLessonView({ lang, lessonId }: { lang: Lang; lesson
           {/* زرّ الإنجاز نموذجٌ عاديّ — يعمل بلا JavaScript كبقيّة الموقع */}
           {enrolled && (
             <div style={{ display: "grid", gap: 22 }}>
+            {certificate && <div className="student-lesson-certificate-actions"><div><b>{lang === "ar" ? "أتممت جميع دروس المقرر" : "You completed all course lessons"}</b><small>{lang === "ar" ? "شهادتك متاحة الآن" : "Your certificate is ready"}</small></div><div className="page-actions"><CertificatePreviewModal data={{ title: title(lang, certificate.titleAr, certificate.titleEn), holder: user?.name ?? "", related: title(lang, course.titleAr, course.titleEn), serial: certificate.serial, issuedAt: longDate(certificate.issuedAt, lang, { arabicDigits: lang === "ar" }), kind: lang === "ar" ? "شهادة إتمام" : "Certificate of completion", style: certificate.designStyle || "classic", pdfUrl: certificate.pdfUrl, labels: { preview: lang === "ar" ? "معاينة الشهادة" : "Preview certificate", close: lang === "ar" ? "إغلاق" : "Close", download: lang === "ar" ? "تنزيل الشهادة" : "Download certificate", print: lang === "ar" ? "حفظ كـ PDF" : "Save as PDF", holder: lang === "ar" ? "صاحب الوثيقة" : "Holder", related: lang === "ar" ? "المقرر" : "Course", serial: lang === "ar" ? "رقم التوثيق" : "Serial", issuedAt: lang === "ar" ? "تاريخ الإصدار" : "Issued" } }} />{certificate.pdfUrl && <a className="btn btn-outline-ink" href={certificate.pdfUrl} download target="_blank" rel="noopener noreferrer">{lang === "ar" ? "تنزيل الشهادة" : "Download certificate"}</a>}</div></div>}
             <form action={toggleLessonDone.bind(null, lesson.id, !isDone)}>
               <div
                 style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}
@@ -270,32 +324,10 @@ export async function StudentLessonView({ lang, lessonId }: { lang: Lang; lesson
             </div>
           )}
 
-          <nav
-            style={{
-              display: "flex",
-              gap: 14,
-              flexWrap: "wrap",
-              justifyContent: "space-between",
-              marginTop: 26,
-            }}
-          >
-            {prev ? (
-              <Link className="btn btn-outline-ink" href={studentHref(lang, `/lesson/${prev.id}`)}>
-                {lang === "ar" ? "→" : "←"} {t.prev}
-              </Link>
-            ) : (
-              <span />
-            )}
-            {next ? (
-              <Link className="btn btn-gold" href={studentHref(lang, `/lesson/${next.id}`)}>
-                {t.next} {lang === "ar" ? "←" : "→"}
-              </Link>
-            ) : (
-              <span />
-            )}
-          </nav>
+          {lessonNavigation}
         </div>
       </section>
+      </div>
     </main>
   );
 }
@@ -480,6 +512,7 @@ async function QuizLessonCard({ lang, lesson }: { lang: Lang; lesson: FlatLesson
     ? await prisma.quiz.findFirst({
         where: { id: lesson.quizId, visible: true },
         select: {
+          id: true,
           titleAr: true,
           titleEn: true,
           descAr: true,
@@ -508,6 +541,17 @@ async function QuizLessonCard({ lang, lesson }: { lang: Lang; lesson: FlatLesson
       </div>
       <h3>{quiz ? title(lang, quiz.titleAr, quiz.titleEn) : t.quizTitle}</h3>
       <p>{quiz ? title(lang, quiz.descAr, quiz.descEn) || t.quizNote : t.noQuiz}</p>
+      {quiz && (
+        <div style={{ marginTop: 16 }}>
+          <Link
+            className="btn btn-gold"
+            href={studentHref(lang, `/quiz/${quiz.id}`)}
+            style={{ padding: "8px 22px", fontSize: 13.5 }}
+          >
+            {t.startQuiz}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

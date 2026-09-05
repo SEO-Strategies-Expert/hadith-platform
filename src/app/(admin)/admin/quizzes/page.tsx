@@ -13,16 +13,26 @@ import { deleteQuiz } from "./actions";
  * بلا مقرّر (فلا يصله طالب لأنّ الوصول مشروطٌ بالتسجيل في المقرّر). إظهارهما
  * في القائمة أنفع من اكتشافهما بعد فتح الاختبار للطلاب.
  */
-export default async function QuizzesPage() {
+export default async function QuizzesPage({ searchParams }: { searchParams?: Promise<{ page?: string }> }) {
   await requireUser();
+  const sp = await searchParams;
+  const pageSize = 10;
+  const rawPage = Number.parseInt(sp?.page ?? "1", 10);
+  const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
 
-  const quizzes = await prisma.quiz.findMany({
+  const [total, quizzes] = await Promise.all([
+    prisma.quiz.count(),
+    prisma.quiz.findMany({
     orderBy: [{ titleAr: "asc" }],
+    skip: (page - 1) * pageSize,
+    take: pageSize,
     include: {
       course: { select: { titleAr: true } },
       _count: { select: { questions: true, attempts: true } },
     },
-  });
+    }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <div>
@@ -124,6 +134,7 @@ export default async function QuizzesPage() {
             </table>
           </div>
         )}
+        {totalPages > 1 && <div className="flex items-center justify-between border-t border-black/5 px-4 py-3 text-[13px]"><span className="text-ink-soft">صفحة {page} من {totalPages}</span><div className="flex gap-2"><Link href={page > 1 ? `/admin/quizzes?page=${page - 1}` : "#"} className={`rounded-lg border px-3 py-1.5 font-bold ${page <= 1 ? "pointer-events-none opacity-40" : "border-black/10 bg-white text-navy-700"}`}>السابق</Link><Link href={page < totalPages ? `/admin/quizzes?page=${page + 1}` : "#"} className={`rounded-lg border px-3 py-1.5 font-bold ${page >= totalPages ? "pointer-events-none opacity-40" : "border-black/10 bg-white text-navy-700"}`}>التالي</Link></div></div>}
       </Card>
     </div>
   );

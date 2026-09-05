@@ -22,8 +22,9 @@ async function destinationFor(email: unknown): Promise<string> {
       where: { email: email.trim().toLowerCase() },
       select: { role: true },
     });
-    if (user?.role === "STUDENT") return "/student";
-    if (user?.role === "INSTRUCTOR") return "/instructor";
+    const role = String(user?.role ?? "").toUpperCase();
+    if (role === "STUDENT") return "/student";
+    if (role === "INSTRUCTOR") return "/instructor";
   } catch {
     // تعذّر الوصول للقاعدة: الوجهة الافتراضيّة، والحارس يصحّحها لاحقًا.
   }

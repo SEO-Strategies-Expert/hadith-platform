@@ -3,8 +3,8 @@ import type { Lang } from "@/lib/site-data";
 import { getHeaderNav, getSocialLinks, getSettingsMap } from "@/lib/site-data";
 import { siteHref, counterpartPath } from "@/lib/site-links";
 import { auth } from "@/auth";
-import { studentLogout } from "@/app/(site)/student-actions";
 import { LocaleSwitch } from "@/components/site/LocaleSwitch";
+import { StudentAccountMenu } from "@/components/site/StudentAccountMenu";
 
 const T = {
   ar: {
@@ -60,7 +60,6 @@ export async function SiteHeader({
   ]);
   const t = T[lang];
   const isStudent = session?.user?.role === "STUDENT";
-  const logout = studentLogout.bind(null, lang);
   const brandName = lang === "ar" ? settings.get("site.shortAr") : settings.get("site.shortEn");
   // السقوط إلى الاسم المختصر ثم إلى نصّ ثابت: الاسم يدخل في قالب نصّي لـaria-label،
   // وقيمة غائبة كانت تُطبع حرفيًّا «undefined» فيقرأها قارئ الشاشة.
@@ -229,22 +228,12 @@ export async function SiteHeader({
               <span className={lang === "ar" ? "thuluth gold-text" : undefined}>{t.accreditation}</span>
             </Link>
             {isStudent ? (
-              <details className="student-account-menu">
-                <summary className="btn btn-gold btn-student">
-                  <span className="btn-student-ic"><svg aria-hidden="true"><use href="#i-student" /></svg></span>
-                  <span className="btn-student-label">{session.user.name || t.account}</span><span className="student-account-arrow">⌄</span>
-                </summary>
-                <div className="student-account-drop">
-                  <div className="student-account-head"><b>{session.user.name}</b><small>{session.user.email}</small></div>
-                  <Link href={`${siteHref(lang, "student")}#student-profile`}><span>◉</span>{t.profile}</Link>
-                  <Link href={`${siteHref(lang, "student")}#my-courses`}><span>▤</span>{t.myCourses}</Link>
-                  <Link href={`${siteHref(lang, "student")}#my-sessions`}><span>◷</span>{t.mySessions}</Link>
-                  <Link href={`${siteHref(lang, "student")}#my-certificates`}><span>◇</span>{t.myCertificates}</Link>
-                  <Link href={`${siteHref(lang, "student")}#my-payments`}><span>▣</span>{t.myPayments}</Link>
-                  <Link href={siteHref(lang, "library.html")}><span>▥</span>{t.library}</Link>
-                  <form action={logout}><button type="submit"><span>↪</span>{t.logout}</button></form>
-                </div>
-              </details>
+              <StudentAccountMenu
+                lang={lang}
+                name={session.user.name}
+                email={session.user.email}
+                labels={{ account: t.account, profile: t.profile, courses: t.myCourses, sessions: t.mySessions, certificates: t.myCertificates, payments: t.myPayments, library: t.library, logout: t.logout }}
+              />
             ) : (
               <Link className="btn btn-gold btn-student" href={siteHref(lang, "student-login.html")}>
                 <span className="btn-student-ic">

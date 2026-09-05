@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { currentUser } from "@/lib/guard";
-import { isEnrolled, setLessonDone } from "@/lib/lms";
+import { isEnrolled, recomputeProgress, setLessonDone } from "@/lib/lms";
+import { issueCertificate } from "@/lib/certificates";
+import { redirect } from "next/navigation";
 
 /**
  * تعليم الدرس منجَزًا/غير منجَز من زرّ داخل نموذج (يعمل بلا JavaScript).
@@ -39,6 +41,36 @@ export async function toggleLessonDone(lessonId: string, done: boolean, _formDat
     revalidatePath(`${prefix}/course/${courseId}`);
     revalidatePath(`${prefix}/lesson/${lessonId}`);
   }
+}
+
+/**
+ * يصدر شهادة المقرر عند طلب الطالب لها بعد الإكمال.
+ * هذا مسار احتياطي مقصود للمقررات التي لم يكن فيها الإصدار التلقائي مفعّلًا؛
+ * ولا يكرر الشهادة إن كانت موجودة بالفعل.
+ */
+export async function claimCourseCertificate(courseId: string, lang: "ar" | "en", _formData?: FormData) {
+  const user = await currentUser();
+  if (!user?.id || !(await isEnrolled(user.id, courseId))) return;
+
+  await recomputeProgress(user.id, courseId);
+  const [enrollment, course, existing] = await Promise.all([
+    prisma.enrollment.findUnique({ where: { userId_courseId: { userId: user.id, courseId } }, select: { status: true } }),
+    prisma.course.findUnique({ where: { id: courseId }, select: { titleAr: true, titleEn: true } }),
+    prisma.certificate.findFirst({ where: { userId: user.id, courseId, revoked: false }, select: { id: true } }),
+  ]);
+  if (!course || enrollment?.status !== "COMPLETED") return;
+
+  if (!existing) await issueCertificate({
+    kind: "CERTIFICATE",
+    userId: user.id,
+    courseId,
+    titleAr: `شهادة إتمام ${course.titleAr}`,
+    titleEn: `Certificate of completion: ${course.titleEn}`,
+  });
+
+  revalidatePath("/student/certificates");
+  revalidatePath("/en/student/certificates");
+  redirect(lang === "en" ? "/en/student/certificates" : "/student/certificates");
 }
 
 async function canUseLesson(userId: string, lessonId: string) {

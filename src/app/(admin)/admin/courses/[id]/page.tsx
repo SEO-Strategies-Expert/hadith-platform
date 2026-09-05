@@ -14,7 +14,10 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
   await requireUser();
   const { id } = await params;
 
-  const course = await prisma.course.findUnique({ where: { id } });
+  const course = await prisma.course.findUnique({
+    where: { id },
+    include: { instructors: { select: { id: true } } },
+  });
   if (!course) notFound();
 
   const cfg = getResource("courses")!;
@@ -35,7 +38,17 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
 
       <Card className="max-w-3xl p-6">
         <ActionForm action={updateRecord.bind(null, "courses", id)} cancelHref="/admin/courses">
-          <ResourceFields fields={fields} record={course} />
+          <ResourceFields
+            fields={fields}
+            record={{
+              ...course,
+              instructorIds: course.instructors.length
+                ? course.instructors.map((i) => i.id)
+                : course.instructorId
+                  ? [course.instructorId]
+                  : [],
+            }}
+          />
         </ActionForm>
       </Card>
     </div>

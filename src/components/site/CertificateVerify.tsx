@@ -211,7 +211,7 @@ export async function CertificateVerify({ lang, code }: { lang: Lang; code?: str
               </div>
             ) : (
               <div
-                className="form-panel reveal"
+                className={`form-panel reveal certificate-public-card certificate-style-${cert.designStyle || "classic"}`}
                 style={{
                   maxWidth: 900,
                   margin: "0 auto",
@@ -220,6 +220,7 @@ export async function CertificateVerify({ lang, code }: { lang: Lang; code?: str
                   borderWidth: 2,
                 }}
               >
+                <span className="certificate-decor certificate-decor-one" /><span className="certificate-decor certificate-decor-two" /><span className="certificate-wave certificate-wave-one" /><span className="certificate-wave certificate-wave-two" />
                 <div
                   style={{
                     display: "flex",

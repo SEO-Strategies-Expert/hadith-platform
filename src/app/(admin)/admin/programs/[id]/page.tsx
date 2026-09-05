@@ -11,15 +11,22 @@ export default async function EditStagePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const stage = await prisma.programStage.findUnique({ where: { id } });
+  const stage = await prisma.programStage.findUnique({
+    where: { id },
+    include: { courses: { select: { id: true } } },
+  });
   if (!stage) notFound();
+  const courses = await prisma.course.findMany({
+    orderBy: [{ order: "asc" }, { titleAr: "asc" }],
+    select: { id: true, titleAr: true, titleEn: true },
+  });
 
   return (
     <div>
       <PageHeader title="تعديل مرحلة" desc={stage.titleAr} />
       <Card className="max-w-3xl p-6">
         <ActionForm action={updateStage.bind(null, id)} cancelHref="/admin/programs">
-          <StageFields s={stage} />
+          <StageFields s={stage} courses={courses} selectedCourseIds={stage.courses.map((course) => course.id)} />
         </ActionForm>
       </Card>
     </div>

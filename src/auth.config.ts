@@ -9,7 +9,7 @@ export const authConfig = {
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        token.role = (user as { role?: string }).role;
+        token.role = String((user as { role?: string }).role ?? "").toUpperCase();
         token.uid = user.id;
       }
       return token;

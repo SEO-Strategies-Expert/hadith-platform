@@ -21,9 +21,15 @@ export default async function SiteLayout({
   const currentSlug = toSlug(rest || undefined);
 
   const skipLabel = lang === "ar" ? "انتقل إلى المحتوى" : "Skip to content";
-  // بوابة الطالب بلا إطار أصلًا، وكذلك الصفحة المفتوحة داخل التطبيق.
+  // بوابة الطالب كاملةً (الرئيسية وكل الصفحات الفرعية) وصفحة تسجيل الدخول
+  // والتطبيق المضمّن بلا إطار الموقع العام.
   const inApp = h.get("x-app-shell") === "1";
-  const isPortal = currentSlug === "student-login" || inApp;
+  const isStudentDashboard =
+    pathname === "/student" ||
+    pathname.startsWith("/student/") ||
+    pathname === "/en/student" ||
+    pathname.startsWith("/en/student/");
+  const isPortal = currentSlug === "student-login" || isStudentDashboard || inApp;
 
   return (
     <html lang={lang} dir={lang === "ar" ? "rtl" : "ltr"}>

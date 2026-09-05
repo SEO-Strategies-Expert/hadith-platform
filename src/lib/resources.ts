@@ -7,6 +7,7 @@ export type FieldType =
   | "number"
   | "bool"
   | "select"
+  | "multiselect"
   | "date"
   // موعد بتاريخ وساعة — يُعرض ويُقرأ بتوقيت الكلّية لا بتوقيت الخادم
   | "datetime"
@@ -231,9 +232,9 @@ export const resources: Record<string, ResourceConfig> = {
         relation: { model: "programStage", labelField: "titleAr", emptyLabel: "— بلا مرحلة —" },
       },
       {
-        name: "instructorId",
-        label: "المحاضر",
-        type: "select",
+        name: "instructorIds",
+        label: "المحاضرون",
+        type: "multiselect",
         half: true,
         relation: { model: "scholar", labelField: "nameAr", emptyLabel: "— بلا محاضر —" },
       },

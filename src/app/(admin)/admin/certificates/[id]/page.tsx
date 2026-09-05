@@ -10,6 +10,7 @@ import { kindLabel, kindTone } from "../fields";
 import { revokeCertificate, restoreCertificate } from "../actions";
 import { CopyVerifyLink } from "../CopyVerifyLink";
 import { RevokeBox, RestoreBox } from "../RevokeBox";
+import { CertificateStyleForm } from "../CertificateStyleForm";
 
 function Row({ label, value, ltr }: { label: string; value: string; ltr?: boolean }) {
   return (
@@ -27,7 +28,7 @@ export default async function CertificatePage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ issued?: string; revoked?: string; restored?: string }>;
+  searchParams: Promise<{ issued?: string; revoked?: string; restored?: string; design?: string }>;
 }) {
   await requireUser();
   const { id } = await params;
@@ -45,6 +46,7 @@ export default async function CertificatePage({
       issuedAt: true,
       revoked: true,
       revokeNote: true,
+      designStyle: true,
       isnadAr: true,
       isnadEn: true,
       grantedByAr: true,
@@ -87,6 +89,7 @@ export default async function CertificatePage({
           أُعيدت الوثيقة سارية، ومُحي أثر الإلغاء.
         </div>
       )}
+      {flags.design === "1" && <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-[13px] font-semibold text-emerald-800">تم حفظ نمط تصميم الشهادة.</div>}
 
       {cert.revoked && (
         <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5">
@@ -104,7 +107,8 @@ export default async function CertificatePage({
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="grid gap-5">
           <Card className="overflow-hidden p-2">
-            <div className="relative min-h-[430px] border-[6px] border-double border-gold bg-cream-50 px-8 py-9 text-center sm:px-14">
+            <div className={`certificate-preview certificate-style-${cert.designStyle || "classic"} relative min-h-[430px] border-[6px] border-double border-gold bg-cream-50 px-8 py-9 text-center sm:px-14`}>
+              <span className="certificate-decor certificate-decor-one" /><span className="certificate-decor certificate-decor-two" /><span className="certificate-wave certificate-wave-one" /><span className="certificate-wave certificate-wave-two" />
               <div className="absolute inset-3 border border-gold/30" />
               <div className="relative">
                 <img src={design["certificate.logo"] || "/assets/img/logo-official.png"} alt="" className="mx-auto mb-4 h-20 w-20 object-contain" />
@@ -119,6 +123,11 @@ export default async function CertificatePage({
                 <div className="mt-8 flex justify-between gap-4 text-[11px] text-ink-soft"><span>{formatDateTime(cert.issuedAt)}</span><span dir="ltr">{cert.serial}</span></div>
               </div>
             </div>
+          </Card>
+          <Card className="p-5">
+            <h2 className="mb-1 text-[14px] font-extrabold text-navy-900">نمط تصميم الشهادة</h2>
+            <p className="mb-3 text-[11.5px] leading-6 text-ink-soft">اختر مظهرًا من ثلاثة قوالب. يظهر النمط في المعاينة وصفحة التحقّق العامة.</p>
+            <CertificateStyleForm id={cert.id} value={cert.designStyle || "classic"} />
           </Card>
           <Card className="p-6">
             <div className="mb-4 flex flex-wrap items-center gap-2">

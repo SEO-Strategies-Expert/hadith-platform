@@ -69,7 +69,7 @@ export const questionFields: FieldDef[] = [
   { name: "kind", label: "نوع السؤال", type: "select", half: true, options: QUESTION_KINDS },
   { name: "points", label: "درجة السؤال", type: "number", half: true },
   { name: "textAr", label: "نصّ السؤال (عربي)", type: "textarea", required: true },
-  { name: "textEn", label: "نصّ السؤال (إنجليزي)", type: "textarea-ltr", required: true },
+  { name: "textEn", label: "نصّ السؤال (إنجليزي — اختياري)", type: "textarea-ltr" },
   { name: "explainAr", label: "شرح الإجابة بعد التسليم (عربي)", type: "textarea" },
   { name: "explainEn", label: "شرح الإجابة بعد التسليم (إنجليزي)", type: "textarea-ltr" },
   { name: "order", label: "الترتيب", type: "number", half: true },

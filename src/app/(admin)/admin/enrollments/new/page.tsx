@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
 import { PageHeader, Card, Select, EmptyState } from "@/components/admin/ui";
 import { ActionForm } from "@/components/admin/ActionForm";
+import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { ENROLLMENT_STATUSES, FEE_OPTIONS } from "../fields";
 import { createEnrollment } from "../actions";
 
@@ -64,7 +65,7 @@ export default async function NewEnrollmentPage() {
                 />
               </div>
               <div className="sm:col-span-2">
-                <Select
+                <SearchableSelect
                   label="المقرّر"
                   name="courseId"
                   options={[
@@ -74,6 +75,7 @@ export default async function NewEnrollmentPage() {
                       label: c.published ? c.titleAr : `${c.titleAr} (مسوّدة)`,
                     })),
                   ]}
+                  required
                 />
               </div>
               <Select

@@ -139,8 +139,10 @@ export async function deleteQuiz(id: string) {
 // ---------------------------------------------------------------------------
 
 const questionSchema = z.object({
-  textAr: z.string().trim().min(1, "نصّ السؤال بالعربية مطلوب"),
-  textEn: z.string().trim().min(1, "نصّ السؤال بالإنجليزية مطلوب"),
+  textAr: z.string().trim().optional(),
+  // English is an optional translation. At least one language is required;
+  // whichever language is supplied is copied to the other field for fallback.
+  textEn: z.string().trim().optional(),
   explainAr: z.string().optional(),
   explainEn: z.string().optional(),
 });
@@ -154,9 +156,13 @@ function readKind(formData: FormData): QuizQuestionKind {
 function readChoices(formData: FormData): ChoiceDraft[] {
   const rows: ChoiceDraft[] = [];
   for (let i = 0; i < CHOICE_SLOTS; i++) {
+    const textAr = String(formData.get(`choice_${i}_ar`) ?? "").trim();
+    const textEn = String(formData.get(`choice_${i}_en`) ?? "").trim();
     rows.push({
-      textAr: String(formData.get(`choice_${i}_ar`) ?? "").trim(),
-      textEn: String(formData.get(`choice_${i}_en`) ?? "").trim(),
+      // A choice may be entered in either language; keep it instead of
+      // dropping it merely because the other translation is blank.
+      textAr: textAr || textEn,
+      textEn: textEn || textAr,
       correct: formData.get(`choice_${i}_correct`) === "on",
     });
   }
@@ -166,6 +172,10 @@ function readChoices(formData: FormData): ChoiceDraft[] {
 function buildQuestion(formData: FormData) {
   const parsed = questionSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0].message };
+
+  const textAr = parsed.data.textAr ?? "";
+  const textEn = parsed.data.textEn ?? "";
+  if (!textAr && !textEn) return { ok: false as const, error: "اكتب نص السؤال بالعربية أو الإنجليزية." };
 
   const kind = readKind(formData);
   const rows = readChoices(formData);
@@ -183,8 +193,8 @@ function buildQuestion(formData: FormData) {
     choices: kind === "SHORT" ? [] : filled,
     data: {
       kind,
-      textAr: parsed.data.textAr,
-      textEn: parsed.data.textEn,
+      textAr: textAr || textEn,
+      textEn: textEn || textAr,
       explainAr: optionalText(parsed.data.explainAr),
       explainEn: optionalText(parsed.data.explainEn),
       points: intWithin(formData.get("points"), 0, 1000, 1),

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
 import { DeleteButton } from "@/components/admin/DeleteButton";
+import { SearchableSelect } from "@/components/admin/SearchableSelect";
 import { ENROLLMENT_STATUSES, statusLabel, statusTone, feeLabel } from "./fields";
 import { deleteEnrollment, approveEnrollment } from "./actions";
 
@@ -62,12 +63,15 @@ export default async function EnrollmentsPage({
 
       <form method="get" className="mb-5 flex flex-wrap items-center gap-2.5">
         <Filter size={16} className="text-ink-soft" />
-        <select name="courseId" defaultValue={courseId ?? ""} className={SELECT_CLASS}>
-          <option value="">كل المقرّرات</option>
-          {courses.map((c) => (
-            <option key={c.id} value={c.id}>{c.titleAr}</option>
-          ))}
-        </select>
+        <div className="min-w-[230px] flex-1">
+          <SearchableSelect
+            label="المقرّر"
+            name="courseId"
+            defaultValue={courseId ?? ""}
+            placeholder="ابحث في المقرّرات…"
+            options={[{ value: "", label: "كل المقرّرات" }, ...courses.map((c) => ({ value: c.id, label: c.titleAr }))]}
+          />
+        </div>
         <select name="status" defaultValue={status ?? ""} className={SELECT_CLASS}>
           <option value="">كل الحالات</option>
           {ENROLLMENT_STATUSES.map((s) => (
@@ -138,6 +142,18 @@ export default async function EnrollmentsPage({
                             >
                               <CheckCircle2 size={14} />
                               اعتماد
+                            </button>
+                          </form>
+                        )}
+                        {e.status === "ACTIVE" && (
+                          <form action={approveEnrollment.bind(null, e.id)}>
+                            <button
+                              type="submit"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-600 bg-white px-3 py-1.5 text-[12px] font-bold text-amber-700 hover:bg-amber-50"
+                              title="إلغاء اعتماد التسجيل وإعادته إلى قائمة الانتظار"
+                            >
+                              <CheckCircle2 size={14} />
+                              إلغاء الاعتماد
                             </button>
                           </form>
                         )}

@@ -5,13 +5,11 @@ import { prisma } from "@/lib/prisma";
 import { currentUser } from "@/lib/guard";
 import type { Lang } from "@/lib/site-data";
 import { studentLogout } from "@/app/(site)/student-actions";
-import { StudentCourses, StudentSessions } from "@/components/site/StudentCourses";
-import { StudentCertificates } from "@/components/site/StudentCertificates";
-import { StudentPayments } from "@/components/site/StudentPayments";
+import { studentHref } from "@/components/site/StudentPortalKit";
 
 const T={
- ar:{portal:"بوابة الطالب",welcome:"مرحبًا",subtitle:"كل ما تحتاجه للدراسة في مكان واحد",courses:"المقررات",sessions:"المجالس",certificates:"الشهادات",payments:"المدفوعات",profile:"الملف الشخصي",logout:"خروج",card:"البطاقة الجامعية",active:"طالب فعّال",inactive:"غير مفعّل",studentNo:"الرقم الجامعي",program:"البرنامج",country:"الدولة",email:"البريد",application:"طلب الالتحاق",noApplication:"لا يوجد طلب مرتبط",accepted:"مقبول"},
- en:{portal:"Student portal",welcome:"Welcome",subtitle:"Everything you need to study, in one place",courses:"Courses",sessions:"Sessions",certificates:"Certificates",payments:"Payments",profile:"Profile",logout:"Sign out",card:"Student ID",active:"Active student",inactive:"Inactive",studentNo:"Student no.",program:"Programme",country:"Country",email:"Email",application:"Application",noApplication:"No linked application",accepted:"Accepted"}
+ ar:{portal:"بوابة الطالب",welcome:"مرحبًا",subtitle:"كل ما تحتاجه للدراسة في مكان واحد",courses:"المقررات",sessions:"المجالس القادمة",certificates:"الشهادات والإجازات",payments:"المدفوعات",profile:"الملف الشخصي",logout:"خروج",card:"البطاقة الجامعية",active:"طالب فعّال",inactive:"غير مفعّل",studentNo:"الرقم الجامعي",program:"البرنامج",country:"الدولة",email:"البريد",application:"طلب الالتحاق",noApplication:"لا يوجد طلب مرتبط",accepted:"مقبول",navigate:"تنقّل سريع",overview:"نظرة عامة"},
+ en:{portal:"Student portal",welcome:"Welcome",subtitle:"Everything you need to study, in one place",courses:"Courses",sessions:"Upcoming sessions",certificates:"Certificates & licences",payments:"Payments",profile:"Profile",logout:"Sign out",card:"Student ID",active:"Active student",inactive:"Inactive",studentNo:"Student no.",program:"Programme",country:"Country",email:"Email",application:"Application",noApplication:"No linked application",accepted:"Accepted",navigate:"Quick navigation",overview:"Overview"}
 } as const;
 
 export async function StudentDashboard({lang}:{lang:Lang}){
@@ -26,8 +24,8 @@ export async function StudentDashboard({lang}:{lang:Lang}){
  ]);
  if(!profile) redirect(lang==="en"?"/en/student-login.html":"/student-login.html");
  const nav=[
-  {href:"#my-courses",label:t.courses,count:courses,Icon:BookOpen},{href:"#my-sessions",label:t.sessions,count:sessions,Icon:CalendarDays},
-  {href:"#my-certificates",label:t.certificates,count:certificates,Icon:ScrollText},{href:"#my-payments",label:t.payments,count:payments,Icon:CreditCard},
+  {href:`${studentHref(lang)}/courses`,label:t.courses,count:courses,Icon:BookOpen},{href:`${studentHref(lang)}/sessions`,label:t.sessions,count:sessions,Icon:CalendarDays},
+  {href:`${studentHref(lang)}/certificates`,label:t.certificates,count:certificates,Icon:ScrollText},{href:`${studentHref(lang)}/payments`,label:t.payments,count:payments,Icon:CreditCard},
  ];
  return <main id="main" className="student-dashboard-modern">
   <section className="student-dash-top" id="student-profile"><div className="container">
@@ -39,6 +37,11 @@ export async function StudentDashboard({lang}:{lang:Lang}){
     </div>
    </div>
   </div></section>
-  <StudentCourses lang={lang} userId={user.id}/><StudentSessions lang={lang} userId={user.id}/><StudentCertificates lang={lang} userId={user.id}/><StudentPayments lang={lang}/>
+  <div className="student-dashboard-content">
+   <section className="student-dashboard-welcome-card container">
+    <div><span>{t.overview}</span><h2>{t.subtitle}</h2><p>{lang === "ar" ? "استخدم القائمة الجانبية للوصول إلى مقرّراتك ومجالسك وشهاداتك ومدفوعاتك." : "Use the sidebar to access your courses, sessions, certificates, and payments."}</p></div>
+    <div className="student-dashboard-welcome-mark">✦</div>
+   </section>
+  </div>
  </main>;
 }

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { currentUser } from "@/lib/guard";
-import { isEnrolled } from "@/lib/lms";
+import { isEnrolled, recomputeProgress } from "@/lib/lms";
 import type { Lang } from "@/lib/site-data";
 import {
   gradeQuiz,
@@ -168,6 +168,9 @@ export async function submitQuizAttempt(
       passed: grade.passed,
     },
   });
+
+  // قد يكون نجاح هذا الاختبار آخر شرط لإكمال المقرر وإصدار شهادته.
+  await recomputeProgress(user.id, quiz.courseId);
 
   for (const p of portalPrefixes) {
     revalidatePath(`${p}/quiz/${quizId}`);

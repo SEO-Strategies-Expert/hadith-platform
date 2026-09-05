@@ -73,7 +73,7 @@ export async function requireInstructor(): Promise<InstructorUser> {
 /** مقرّرات المحاضر وحده — التصفية بـ`instructorId` داخل الاستعلام. */
 export async function getInstructorCourses(scholarId: string) {
   return prisma.course.findMany({
-    where: { instructorId: scholarId },
+    where: { OR: [{ instructorId: scholarId }, { instructors: { some: { id: scholarId } } }] },
     orderBy: [{ order: "asc" }, { titleAr: "asc" }],
     include: {
       stage: { select: { titleAr: true } },
@@ -90,7 +90,7 @@ export async function getInstructorCourses(scholarId: string) {
  */
 export async function getInstructorCourse(scholarId: string, courseId: string) {
   return prisma.course.findFirst({
-    where: { id: courseId, instructorId: scholarId },
+    where: { id: courseId, OR: [{ instructorId: scholarId }, { instructors: { some: { id: scholarId } } }] },
     include: {
       stage: { select: { titleAr: true } },
       modules: {
@@ -109,7 +109,7 @@ export async function getInstructorCourse(scholarId: string, courseId: string) {
 /** طلاب مقرّرٍ للمحاضر — شرط الملكيّة مضمَّن في `course` داخل `where`. */
 export async function getCourseStudents(scholarId: string, courseId: string) {
   return prisma.enrollment.findMany({
-    where: { courseId, course: { instructorId: scholarId } },
+    where: { courseId, course: { OR: [{ instructorId: scholarId }, { instructors: { some: { id: scholarId } } }] } },
     orderBy: [{ status: "asc" }, { enrolledAt: "desc" }],
     include: { user: { select: { id: true, name: true, email: true, studentNo: true } } },
   });
@@ -192,7 +192,7 @@ export async function getNextSession(scholarId: string) {
  */
 export async function getInstructorStudents(scholarId: string) {
   return prisma.enrollment.findMany({
-    where: { course: { instructorId: scholarId } },
+    where: { course: { OR: [{ instructorId: scholarId }, { instructors: { some: { id: scholarId } } }] } },
     orderBy: [{ enrolledAt: "desc" }],
     include: {
       user: { select: { id: true, name: true, email: true, studentNo: true, country: true } },
@@ -207,16 +207,16 @@ export async function getInstructorStudents(scholarId: string) {
 
 export async function getInstructorOverview(scholarId: string) {
   const [coursesCount, studentRows, pendingGrading, nextSession] = await Promise.all([
-    prisma.course.count({ where: { instructorId: scholarId } }),
+    prisma.course.count({ where: { OR: [{ instructorId: scholarId }, { instructors: { some: { id: scholarId } } }] } }),
     // `distinct` لأنّ الطالب الواحد قد يسجّل في أكثر من مقرّرٍ للمحاضر نفسه،
     // فيُحسب مرّةً لا مرّتين.
     prisma.enrollment.findMany({
-      where: { course: { instructorId: scholarId } },
+      where: { course: { OR: [{ instructorId: scholarId }, { instructors: { some: { id: scholarId } } }] } },
       select: { userId: true },
       distinct: ["userId"],
     }),
     prisma.assignmentSubmission.count({
-      where: { state: "SUBMITTED", assignment: { course: { instructorId: scholarId } } },
+      where: { state: "SUBMITTED", assignment: { course: { OR: [{ instructorId: scholarId }, { instructors: { some: { id: scholarId } } }] } } },
     }),
     getNextSession(scholarId),
   ]);

@@ -6,6 +6,7 @@ import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { deleteRecord } from "@/lib/crud-actions";
 import { isDebugEnabled } from "@/lib/debug";
+import { SearchableSelect } from "@/components/admin/SearchableSelect";
 
 /**
  * قائمة المقرّرات.
@@ -17,9 +18,11 @@ import { isDebugEnabled } from "@/lib/debug";
  */
 const COURSES_PER_PAGE = 20;
 
-function buildPageHref(page: number, q: string | undefined) {
+type CourseFilters = { q?: string; stageId?: string; instructorId?: string; students?: string; status?: string };
+
+function buildPageHref(page: number, filters: CourseFilters) {
   const params = new URLSearchParams();
-  if (q) params.set("q", q);
+  Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
   if (page > 1) params.set("page", String(page));
   const qs = params.toString();
   return qs ? `/admin/courses?${qs}` : "/admin/courses";
@@ -28,11 +31,11 @@ function buildPageHref(page: number, q: string | undefined) {
 function Pagination({
   page,
   totalPages,
-  q,
+  filters,
 }: {
   page: number;
   totalPages: number;
-  q?: string;
+  filters: CourseFilters;
 }) {
   if (totalPages <= 1) return null;
   const pages: (number | "...")[] = [];
@@ -50,7 +53,7 @@ function Pagination({
       </span>
       <div className="flex flex-wrap items-center gap-1.5">
         <Link
-          href={page > 1 ? buildPageHref(page - 1, q) : "#"}
+          href={page > 1 ? buildPageHref(page - 1, filters) : "#"}
           aria-disabled={page <= 1}
           className={`rounded-lg border px-3 py-1.5 font-bold ${page <= 1 ? "pointer-events-none border-black/5 bg-black/[0.02] text-ink-soft/40" : "border-black/10 bg-white text-navy-700 hover:border-gold/50"}`}
         >
@@ -64,7 +67,7 @@ function Pagination({
           ) : (
             <Link
               key={p}
-              href={buildPageHref(p as number, q)}
+              href={buildPageHref(p as number, filters)}
               className={`min-w-[36px] rounded-lg border px-3 py-1.5 text-center font-bold ${p === page ? "border-gold bg-gold/15 text-navy-900" : "border-black/10 bg-white text-navy-700 hover:border-gold/50"}`}
             >
               {p}
@@ -72,7 +75,7 @@ function Pagination({
           )
         )}
         <Link
-          href={page < totalPages ? buildPageHref(page + 1, q) : "#"}
+          href={page < totalPages ? buildPageHref(page + 1, filters) : "#"}
           aria-disabled={page >= totalPages}
           className={`rounded-lg border px-3 py-1.5 font-bold ${page >= totalPages ? "pointer-events-none border-black/5 bg-black/[0.02] text-ink-soft/40" : "border-black/10 bg-white text-navy-700 hover:border-gold/50"}`}
         >
@@ -86,7 +89,7 @@ function Pagination({
 export default async function CoursesPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ page?: string; q?: string }>;
+  searchParams?: Promise<{ page?: string; q?: string; stageId?: string; instructorId?: string; students?: string; status?: string }>;
 }) {
   await requireUser();
 
@@ -94,6 +97,10 @@ export default async function CoursesPage({
   const rawPage = Number.parseInt(sp?.page ?? "1", 10);
   const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
   const q = sp?.q?.trim() ? sp.q.trim() : undefined;
+  const stageId = sp?.stageId?.trim() || undefined;
+  const instructorId = sp?.instructorId?.trim() || undefined;
+  const students = sp?.students?.trim() || undefined;
+  const status = sp?.status?.trim() || undefined;
   const skip = (page - 1) * COURSES_PER_PAGE;
 
   const where = q
@@ -104,6 +111,17 @@ export default async function CoursesPage({
         ],
       }
     : {};
+  const relationWhere = {
+    ...(stageId ? { stageId } : {}),
+    ...(instructorId ? { OR: [{ instructorId }, { instructors: { some: { id: instructorId } } }] } : {}),
+    ...(status === "published" ? { published: true } : {}),
+    ...(status === "draft" ? { published: false } : {}),
+    ...(status === "visible" ? { visible: true } : {}),
+    ...(status === "hidden" ? { visible: false } : {}),
+  };
+  // Use AND so the title search and instructor relation (both may contain OR)
+  // never overwrite one another when combined.
+  const courseWhere = { AND: [where, relationWhere] };
 
   let total = 0;
   // Type with includes — use any to avoid Prisma GetPayload complexity in catch block
@@ -113,6 +131,7 @@ export default async function CoursesPage({
     titleEn: string;
     stage: { titleAr: string } | null;
     instructor: { nameAr: string } | null;
+    instructors: Array<{ nameAr: string }>;
     modules: Array<{ _count: { lessons: number } }>;
     _count: { enrollments: number };
     published: boolean;
@@ -120,25 +139,31 @@ export default async function CoursesPage({
     order: number;
   }> = [];
   let loadError: { message: string; stack?: string; code?: string } | null = null;
+  let stages: Array<{ id: string; titleAr: string }> = [];
+  let instructors: Array<{ id: string; nameAr: string }> = [];
 
   try {
-    const [c, rows] = await Promise.all([
-      prisma.course.count({ where }),
+    const [rows, stageRows, instructorRows] = await Promise.all([
       prisma.course.findMany({
-        where,
+        where: courseWhere,
         orderBy: [{ order: "asc" }, { titleAr: "asc" }],
-        skip,
-        take: COURSES_PER_PAGE,
         include: {
           stage: { select: { titleAr: true } },
           instructor: { select: { nameAr: true } },
+          instructors: { select: { nameAr: true }, orderBy: { nameAr: "asc" } },
           _count: { select: { enrollments: true } },
           modules: { select: { _count: { select: { lessons: true } } } },
         },
       }),
+      prisma.programStage.findMany({ orderBy: { order: "asc" }, select: { id: true, titleAr: true } }),
+      prisma.scholar.findMany({ orderBy: { order: "asc" }, select: { id: true, nameAr: true } }),
     ]);
-    total = c;
-    courses = rows;
+    const inRange = (count: number) => students === "0" ? count === 0 : students === "1-10" ? count >= 1 && count <= 10 : students === "11-50" ? count >= 11 && count <= 50 : students === "51+" ? count >= 51 : true;
+    const filteredRows = students ? rows.filter((row) => inRange(row._count.enrollments)) : rows;
+    total = filteredRows.length;
+    courses = filteredRows.slice(skip, skip + COURSES_PER_PAGE);
+    stages = stageRows;
+    instructors = instructorRows;
   } catch (e: unknown) {
     const err = e as Error & { code?: string; meta?: unknown };
     loadError = {
@@ -270,7 +295,7 @@ export default async function CoursesPage({
         ))}
       </div>
 
-      <form method="get" className="mb-4 flex flex-wrap items-center gap-2">
+      <form method="get" className="mb-4 flex flex-wrap items-end gap-2 rounded-2xl border border-black/5 bg-white p-4 shadow-sm">
         <div className="relative flex min-w-[260px] flex-1 max-w-md items-center">
           <Search size={16} className="pointer-events-none absolute right-3 text-ink-soft" />
           <input
@@ -287,7 +312,25 @@ export default async function CoursesPage({
         >
           بحث
         </button>
-        {q && (
+        <div className="min-w-[190px] flex-1">
+          <SearchableSelect label="المرحلة" name="stageId" defaultValue={stageId ?? ""} options={[{ value: "", label: "كل المراحل" }, ...stages.map((s) => ({ value: s.id, label: s.titleAr }))]} />
+        </div>
+        <div className="min-w-[190px] flex-1">
+          <SearchableSelect label="المحاضر" name="instructorId" defaultValue={instructorId ?? ""} options={[{ value: "", label: "كل المحاضرين" }, ...instructors.map((i) => ({ value: i.id, label: i.nameAr }))]} />
+        </div>
+        <label className="min-w-[150px] flex-1">
+          <span className="mb-1.5 block text-[12px] font-bold text-navy-900">عدد الطلاب</span>
+          <select name="students" defaultValue={students ?? ""} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2.5 text-[13px] outline-none focus:border-gold focus:ring-4 focus:ring-gold/15">
+            <option value="">كل الأعداد</option><option value="0">بلا طلاب</option><option value="1-10">١–١٠ طلاب</option><option value="11-50">١١–٥٠ طالبًا</option><option value="51+">٥١ طالبًا فأكثر</option>
+          </select>
+        </label>
+        <label className="min-w-[150px] flex-1">
+          <span className="mb-1.5 block text-[12px] font-bold text-navy-900">الحالة</span>
+          <select name="status" defaultValue={status ?? ""} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2.5 text-[13px] outline-none focus:border-gold focus:ring-4 focus:ring-gold/15">
+            <option value="">كل الحالات</option><option value="published">منشور</option><option value="draft">مسوّدة</option><option value="visible">ظاهر</option><option value="hidden">مخفي</option>
+          </select>
+        </label>
+        {(q || stageId || instructorId || students || status) && (
           <Link
             href="/admin/courses"
             className="inline-flex items-center gap-1.5 rounded-xl border border-black/10 bg-white px-4 py-2.5 text-[13px] font-bold text-ink-soft hover:bg-black/5"
@@ -296,9 +339,9 @@ export default async function CoursesPage({
             مسح
           </Link>
         )}
-        {q && (
+        {(q || stageId || instructorId || students || status) && (
           <span className="text-[12.5px] text-ink-soft">
-            {total} نتيجة لـ “{q}”
+            {total} نتيجة مطابقة للفلاتر
           </span>
         )}
       </form>
@@ -309,7 +352,7 @@ export default async function CoursesPage({
         ) : courses.length === 0 ? (
           <>
             <EmptyState label="لا توجد نتائج في هذه الصفحة." />
-            <Pagination page={page} totalPages={totalPages} q={q} />
+            <Pagination page={page} totalPages={totalPages} filters={{ q, stageId, instructorId, students, status }} />
           </>
         ) : (
           <>
@@ -336,7 +379,9 @@ export default async function CoursesPage({
                         <div className="text-[12px] text-ink-soft" dir="ltr">{c.titleEn}</div>
                       </td>
                       <td className="px-4 py-3 text-navy-800">{c.stage?.titleAr ?? "—"}</td>
-                      <td className="px-4 py-3 text-navy-800">{c.instructor?.nameAr ?? "—"}</td>
+                      <td className="px-4 py-3 text-navy-800">
+                        {c.instructors.length ? c.instructors.map((i) => i.nameAr).join("، ") : c.instructor?.nameAr ?? "—"}
+                      </td>
                       <td className="px-4 py-3 text-ink-soft">
                         {c.modules.length === 0 ? (
                           <Badge tone="red">لا محتوى</Badge>
@@ -390,7 +435,7 @@ export default async function CoursesPage({
               </tbody>
             </table>
           </div>
-            <Pagination page={page} totalPages={totalPages} q={q} />
+            <Pagination page={page} totalPages={totalPages} filters={{ q, stageId, instructorId, students, status }} />
           </>
         )}
       </Card>

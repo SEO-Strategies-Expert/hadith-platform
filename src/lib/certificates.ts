@@ -220,6 +220,7 @@ export interface PublicCertificate {
   isnadEn: string | null;
   grantedByAr: string | null;
   grantedByEn: string | null;
+  designStyle: string;
 }
 
 export type VerifyResult =
@@ -252,6 +253,7 @@ export async function verifyCertificate(rawCode: string | null | undefined): Pro
       isnadEn: true,
       grantedByAr: true,
       grantedByEn: true,
+      designStyle: true,
       user: { select: { name: true } },
       course: { select: { titleAr: true, titleEn: true } },
       stage: { select: { titleAr: true, titleEn: true } },
@@ -275,6 +277,7 @@ export async function verifyCertificate(rawCode: string | null | undefined): Pro
     isnadEn: row.isnadEn,
     grantedByAr: row.grantedByAr,
     grantedByEn: row.grantedByEn,
+    designStyle: row.designStyle,
   };
 
   return row.revoked ? { status: "revoked", certificate } : { status: "valid", certificate };
@@ -299,10 +302,12 @@ export async function getStudentCertificates(userId: string) {
       issuedAt: true,
       revoked: true,
       pdfUrl: true,
+      designStyle: true,
       isnadAr: true,
       isnadEn: true,
       grantedByAr: true,
       grantedByEn: true,
+      user: { select: { name: true } },
       course: { select: { titleAr: true, titleEn: true } },
       stage: { select: { titleAr: true, titleEn: true } },
     },

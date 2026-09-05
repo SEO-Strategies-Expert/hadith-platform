@@ -21,13 +21,6 @@ const schema = z.object({
   order: z.coerce.number().int().default(0),
 });
 
-function lines(v: FormDataEntryValue | null): string[] {
-  return String(v || "")
-    .split("\n")
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
-
 function build(formData: FormData) {
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ok: false as const, error: parsed.error.issues[0].message };
@@ -35,7 +28,6 @@ function build(formData: FormData) {
     ok: true as const,
     data: {
       ...parsed.data,
-      items: { ar: lines(formData.get("itemsAr")), en: lines(formData.get("itemsEn")) },
       visible: formData.get("visible") === "on",
     },
   };
@@ -45,8 +37,29 @@ export async function createStage(_p: string | undefined, formData: FormData) {
   await requireUser();
   const r = build(formData);
   if (!r.ok) return r.error;
+  const courseIds = formData.getAll("courseIds").map(String).filter(Boolean);
   try {
-    await prisma.programStage.create({ data: r.data });
+    const selectedCourses = await prisma.course.findMany({
+      where: { id: { in: courseIds } },
+      select: { id: true, titleAr: true, titleEn: true },
+    });
+    await prisma.$transaction(async (tx) => {
+      const stage = await tx.programStage.create({
+        data: {
+          ...r.data,
+          items: {
+            ar: selectedCourses.map((course) => course.titleAr),
+            en: selectedCourses.map((course) => course.titleEn),
+          },
+        },
+      });
+      if (selectedCourses.length) {
+        await tx.course.updateMany({
+          where: { id: { in: selectedCourses.map((course) => course.id) } },
+          data: { stageId: stage.id },
+        });
+      }
+    });
   } catch {
     return "تعذّر الحفظ — قد يكون المفتاح مكرّرًا.";
   }
@@ -58,14 +71,37 @@ export async function updateStage(id: string, _p: string | undefined, formData: 
   await requireUser();
   const r = build(formData);
   if (!r.ok) return r.error;
-  await prisma.programStage.update({ where: { id }, data: r.data });
+  const courseIds = formData.getAll("courseIds").map(String).filter(Boolean);
+  const selectedCourses = await prisma.course.findMany({
+    where: { id: { in: courseIds } },
+    select: { id: true, titleAr: true, titleEn: true },
+  });
+  await prisma.$transaction([
+    prisma.course.updateMany({ where: { stageId: id }, data: { stageId: null } }),
+    prisma.course.updateMany({
+      where: { id: { in: selectedCourses.map((course) => course.id) } },
+      data: { stageId: id },
+    }),
+    prisma.programStage.update({
+      where: { id },
+      data: {
+        ...r.data,
+        items: {
+          ar: selectedCourses.map((course) => course.titleAr),
+          en: selectedCourses.map((course) => course.titleEn),
+        },
+      },
+    }),
+  ]);
   revalidatePath("/admin/programs");
   redirect("/admin/programs");
 }
 
 export async function deleteStage(id: string) {
   await requireUser();
-  await prisma.course.deleteMany({ where: { stageId: id } });
-  await prisma.programStage.delete({ where: { id } });
+  await prisma.$transaction([
+    prisma.course.updateMany({ where: { stageId: id }, data: { stageId: null } }),
+    prisma.programStage.delete({ where: { id } }),
+  ]);
   revalidatePath("/admin/programs");
 }

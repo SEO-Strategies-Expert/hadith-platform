@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { BookOpen, LayoutDashboard, LogOut } from "lucide-react";
+import { BookOpen, House, LayoutDashboard, LogOut } from "lucide-react";
 import { currentUser } from "@/lib/guard";
 import type { Lang } from "@/lib/site-data";
 import { studentLogout } from "@/app/(site)/student-actions";
 import { studentHref } from "@/components/site/StudentPortalKit";
+import { siteHref } from "@/lib/site-links";
 
 const T = {
-  ar: { portal: "بوابة الطالب", dashboard: "لوحة الطالب", courses: "مقرراتي", admin: "إدارة المقررات", logout: "خروج" },
-  en: { portal: "Student portal", dashboard: "Dashboard", courses: "My courses", admin: "Manage courses", logout: "Sign out" },
+  ar: { portal: "بوابة الطالب", dashboard: "لوحة الطالب", courses: "مقرراتي", mainSite: "الموقع الرئيسي", admin: "إدارة المقررات", logout: "خروج" },
+  en: { portal: "Student portal", dashboard: "Dashboard", courses: "My courses", mainSite: "Main site", admin: "Manage courses", logout: "Sign out" },
 } as const;
 
 export async function StudentPortalHeader({ lang }: { lang: Lang }) {
@@ -25,9 +26,12 @@ export async function StudentPortalHeader({ lang }: { lang: Lang }) {
         </Link>
         <nav aria-label={t.portal}>
           <Link href={studentHref(lang)}><LayoutDashboard size={17} /> {t.dashboard}</Link>
-          <Link href={`${studentHref(lang)}#my-courses`}><BookOpen size={17} /> {t.courses}</Link>
+          <Link href={`${studentHref(lang)}/courses`}><BookOpen size={17} /> {t.courses}</Link>
           {staff && <Link href="/admin/courses">{t.admin}</Link>}
         </nav>
+        <Link className="student-portal-main-site" href={siteHref(lang, "index.html")}>
+          <House size={16} /> <span>{t.mainSite}</span>
+        </Link>
         <form action={studentLogout.bind(null, lang)}>
           <button type="submit"><LogOut size={16} /><span>{t.logout}</span></button>
         </form>

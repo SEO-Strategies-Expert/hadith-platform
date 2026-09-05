@@ -13,6 +13,10 @@ function coerce(fields: FieldDef[], formData: FormData) {
   const data: Record<string, unknown> = {};
   for (const f of fields) {
     const raw = formData.get(f.name);
+    if (f.type === "multiselect") {
+      data[f.name] = formData.getAll(f.name).map(String).filter(Boolean);
+      continue;
+    }
     if (f.type === "bool") {
       data[f.name] = raw === "on";
     } else if (f.type === "number") {
@@ -68,6 +72,13 @@ export async function createRecord(
   const cfg = getResource(resourceKey);
   if (!cfg) return "مورد غير معروف.";
   const data = coerce(cfg.fields, formData);
+  if (cfg.model === "course") {
+    const instructorIds = Array.isArray(data.instructorIds) ? data.instructorIds as string[] : [];
+    delete data.instructorIds;
+    data.instructors = { connect: instructorIds.map((id) => ({ id })) };
+    // Keep the legacy primary instructor populated for older public/API views.
+    data.instructorId = instructorIds[0] ?? null;
+  }
   const err = validate(cfg.fields, data);
   if (err) return err;
   // slug المقرّر: من الحقل إن كُتب، وإلا توليد من العنوان بشرطات (فريد).
@@ -99,6 +110,12 @@ export async function updateRecord(
   const cfg = getResource(resourceKey);
   if (!cfg) return "مورد غير معروف.";
   const data = coerce(cfg.fields, formData);
+  if (cfg.model === "course") {
+    const instructorIds = Array.isArray(data.instructorIds) ? data.instructorIds as string[] : [];
+    delete data.instructorIds;
+    data.instructors = { set: instructorIds.map((id) => ({ id })) };
+    data.instructorId = instructorIds[0] ?? null;
+  }
   const err = validate(cfg.fields, data);
   if (err) return err;
   // ثبات الروابط أولًا: slug المحفوظ لا يتغيّر عند تحرير العنوان (حتى لا تنكسر

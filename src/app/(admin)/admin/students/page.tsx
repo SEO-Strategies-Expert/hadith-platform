@@ -5,11 +5,33 @@ import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { deleteStudent } from "./actions";
 
-export default async function StudentsPage() {
-  const students = await prisma.user.findMany({
-    where: { role: "STUDENT" },
-    orderBy: { createdAt: "desc" },
-  });
+export default async function StudentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ name?: string; studentNo?: string; program?: string }>;
+}) {
+  const params = await searchParams;
+  const name = params.name?.trim() ?? "";
+  const studentNo = params.studentNo?.trim() ?? "";
+  const program = params.program?.trim() ?? "";
+  const [students, programRows] = await Promise.all([
+    prisma.user.findMany({
+      where: {
+        role: "STUDENT",
+        ...(name ? { name: { contains: name, mode: "insensitive" } } : {}),
+        ...(studentNo ? { studentNo: { contains: studentNo, mode: "insensitive" } } : {}),
+        ...(program ? { program } : {}),
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.user.findMany({
+      where: { role: "STUDENT", program: { not: null } },
+      select: { program: true },
+      distinct: ["program"],
+      orderBy: { program: "asc" },
+    }),
+  ]);
+  const programs = programRows.map((row) => row.program).filter((value): value is string => Boolean(value));
 
   return (
     <div>
@@ -29,6 +51,26 @@ export default async function StudentsPage() {
           طلبات الالتحاق ←
         </Link>
       </div>
+
+      <form method="get" className="mb-5 flex flex-wrap items-end gap-2.5 rounded-2xl border border-black/5 bg-white p-4 shadow-sm">
+        <label className="min-w-[220px] flex-1">
+          <span className="mb-1.5 block text-[12px] font-bold text-navy-900">اسم الطالب</span>
+          <input name="name" defaultValue={name} placeholder="ابحث بالاسم…" className="w-full rounded-xl border border-black/10 px-3 py-2.5 text-[13px] outline-none focus:border-gold focus:ring-4 focus:ring-gold/15" />
+        </label>
+        <label className="min-w-[180px] flex-1">
+          <span className="mb-1.5 block text-[12px] font-bold text-navy-900">الرقم الجامعي</span>
+          <input name="studentNo" defaultValue={studentNo} placeholder="مثال: ST-001…" dir="ltr" className="w-full rounded-xl border border-black/10 px-3 py-2.5 text-[13px] outline-none focus:border-gold focus:ring-4 focus:ring-gold/15" />
+        </label>
+        <label className="min-w-[200px] flex-1">
+          <span className="mb-1.5 block text-[12px] font-bold text-navy-900">البرنامج</span>
+          <select name="program" defaultValue={program} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2.5 text-[13px] outline-none focus:border-gold focus:ring-4 focus:ring-gold/15">
+            <option value="">كل البرامج</option>
+            {programs.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
+        <button type="submit" className="rounded-xl bg-gradient-to-l from-gold-1 to-gold-3 px-5 py-2.5 text-[13px] font-extrabold text-navy-950 shadow-sm hover:brightness-105">بحث</button>
+        {(name || studentNo || program) && <Link href="/admin/students" className="rounded-xl border border-black/10 px-4 py-2.5 text-[13px] font-bold text-ink-soft hover:bg-black/5">مسح</Link>}
+      </form>
 
       <Card>
         {students.length === 0 ? (

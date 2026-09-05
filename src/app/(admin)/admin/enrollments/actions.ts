@@ -112,10 +112,11 @@ export async function approveEnrollment(id: string) {
     select: { status: true },
   });
   if (!current) return;
-  if (current.status === "ACTIVE") return;
+  // The approval control is intentionally a toggle: clicking an approved
+  // enrollment withdraws approval and puts it back in the pending queue.
   await prisma.enrollment.update({
     where: { id },
-    data: { status: "ACTIVE" },
+    data: { status: current.status === "ACTIVE" ? "PENDING" : "ACTIVE" },
   });
   revalidatePath("/admin/enrollments");
 }

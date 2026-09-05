@@ -14,6 +14,7 @@ import { longDate } from "@/lib/site-format";
 import { siteHref } from "@/lib/site-links";
 import { getStudentCertificates, formatVerifyCode, verifyPath } from "@/lib/certificates";
 import { Pill } from "@/components/site/StudentPortalKit";
+import { CertificatePreviewModal } from "@/components/site/CertificatePreviewModal";
 
 const T = {
   ar: {
@@ -31,7 +32,10 @@ const T = {
     code: "رمز التحقّق",
     issuedAt: "تاريخ الإصدار",
     verify: "صفحة التحقّق",
-    download: "تحميل الوثيقة",
+    preview: "معاينة الشهادة",
+    close: "إغلاق",
+    download: "تنزيل الشهادة",
+    print: "حفظ كـ PDF",
     revokedNote: "هذه الوثيقة ملغاة ولم تعد معتمدة. لمعرفة السبب راسِل الكلّية.",
   },
   en: {
@@ -50,7 +54,10 @@ const T = {
     code: "Verification code",
     issuedAt: "Date of issue",
     verify: "Verification page",
-    download: "Download document",
+    preview: "Preview certificate",
+    close: "Close",
+    download: "Download certificate",
+    print: "Save as PDF",
     revokedNote:
       "This document has been revoked and is no longer recognised. Write to the College to learn why.",
   },
@@ -64,7 +71,7 @@ export async function StudentCertificates({ lang, userId }: { lang: Lang; userId
     (lang === "ar" ? ar : en) ?? (lang === "ar" ? en : ar) ?? "";
 
   return (
-    <section className="inner-section white orn-cream" id="my-certificates">
+    <section className="inner-section white orn-cream student-certificates-section" id="my-certificates">
       <div className="container">
         <header className="section-cap reveal">
           <h2 className="thuluth">{t.heading}</h2>
@@ -130,6 +137,7 @@ export async function StudentCertificates({ lang, userId }: { lang: Lang; userId
                   )}
 
                   <div className="page-actions" style={{ marginTop: 18 }}>
+                    <CertificatePreviewModal data={{ title: pick(c.titleAr, c.titleEn), holder: c.user?.name ?? "", related, serial: c.serial, issuedAt: longDate(c.issuedAt, lang, { arabicDigits: lang === "ar" }), kind: c.kind === "IJAZA" ? t.kindIjaza : t.kindCertificate, style: c.designStyle || "classic", pdfUrl: c.pdfUrl, labels: { preview: t.preview, close: t.close, download: t.download, print: t.print, holder: lang === "ar" ? "صاحب الوثيقة" : "Holder", related: lang === "ar" ? "الوثيقة مرتبطة بالمقرر" : "Related course", serial: t.serial, issuedAt: t.issuedAt } }} />
                     <Link className="btn btn-gold" href={href}>
                       {t.verify}
                     </Link>

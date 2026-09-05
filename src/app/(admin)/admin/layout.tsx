@@ -9,12 +9,13 @@ export default async function AdminLayout({
 }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
+  const normalizedRole = String(session.user.role ?? "").toUpperCase();
   // حسابات الطلاب لا تدخل اللوحة (الوسيط يحوّلها، وهذا حاجزٌ ثانٍ).
-  if (session.user.role === "STUDENT") redirect("/student");
+  if (normalizedRole === "STUDENT") redirect("/student");
   // عضو هيئة التدريس لوحته وحدها. التكرار مع proxy.ts مقصود:
   // الحارس الأوسط ليس حدَّ أمانٍ وحيدًا.
-  if (session.user.role === "INSTRUCTOR") redirect("/instructor");
-  const role = session.user.role;
+  if (normalizedRole === "INSTRUCTOR") redirect("/instructor");
+  const role = normalizedRole as "ADMIN" | "EDITOR";
 
   async function doSignOut() {
     "use server";

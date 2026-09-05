@@ -33,10 +33,16 @@ async function loadAssignments() {
  * قائمة الواجبات مع عدّاد «بانتظار التصحيح» — وهو الرقم الذي يبحث عنه المصحِّح
  * فعلًا حين يفتح الشاشة، فأبرزناه بدل إخفائه داخل شاشة كل واجب.
  */
-export default async function AssignmentsPage() {
+export default async function AssignmentsPage({ searchParams }: { searchParams?: Promise<{ page?: string }> }) {
   await requireUser();
 
-  const assignments = await loadAssignments();
+  const sp = await searchParams;
+  const pageSize = 10;
+  const rawPage = Number.parseInt(sp?.page ?? "1", 10);
+  const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
+  const [allAssignments] = await Promise.all([loadAssignments()]);
+  const totalPages = Math.max(1, Math.ceil(allAssignments.length / pageSize));
+  const assignments = allAssignments.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div>
@@ -124,6 +130,7 @@ export default async function AssignmentsPage() {
             </table>
           </div>
         )}
+        {totalPages > 1 && <div className="flex items-center justify-between border-t border-black/5 px-4 py-3 text-[13px]"><span className="text-ink-soft">صفحة {page} من {totalPages}</span><div className="flex gap-2"><Link href={page > 1 ? `/admin/assignments?page=${page - 1}` : "#"} className={`rounded-lg border px-3 py-1.5 font-bold ${page <= 1 ? "pointer-events-none opacity-40" : "border-black/10 bg-white text-navy-700"}`}>السابق</Link><Link href={page < totalPages ? `/admin/assignments?page=${page + 1}` : "#"} className={`rounded-lg border px-3 py-1.5 font-bold ${page >= totalPages ? "pointer-events-none opacity-40" : "border-black/10 bg-white text-navy-700"}`}>التالي</Link></div></div>}
       </Card>
     </div>
   );

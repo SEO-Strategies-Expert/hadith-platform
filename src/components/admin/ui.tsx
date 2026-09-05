@@ -130,11 +130,13 @@ export function Select({
   name,
   options,
   defaultValue,
+  multiple = false,
 }: {
   label: string;
   name: string;
   options: { value: string; label: string }[];
-  defaultValue?: string;
+  defaultValue?: string | string[];
+  multiple?: boolean;
 }) {
   return (
     <label className="block">
@@ -142,6 +144,8 @@ export function Select({
       <select
         name={name}
         defaultValue={defaultValue}
+        multiple={multiple}
+        size={multiple ? 5 : undefined}
         className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-[14px] outline-none transition focus:border-gold focus:ring-4 focus:ring-gold/15"
       >
         {options.map((o) => (

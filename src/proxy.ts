@@ -8,7 +8,8 @@ const { auth } = NextAuth(authConfig);
 // 3) تمرير المسار/اللغة الحاليَين كترويسة داخلية ليقرأها تخطيط (site).
 export default auth((req) => {
   const { pathname } = req.nextUrl;
-  const role = req.auth?.user?.role;
+  // Normalize legacy/lowercase role values before applying route guards.
+  const role = String(req.auth?.user?.role ?? "").toUpperCase();
   const isEnglish = pathname === "/en" || pathname.startsWith("/en/");
 
   if (pathname.startsWith("/admin")) {
@@ -57,9 +58,9 @@ export default auth((req) => {
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-pathname", pathname);
   requestHeaders.set("x-lang", isEnglish ? "en" : "ar");
-  // بوابة الطالب وتطبيق الجوال يستخدمان إطارهما التعليمي المدمج؛ نخفي عنهما
-  // هيدر الموقع العام وشريطه وفوتره حتى يبقى المحتوى الدراسي في الواجهة.
-  if (isStudentArea || req.nextUrl.searchParams.get("app") === "1") {
+  // التطبيق المضمّن فقط يخفي إطار الموقع العام. صفحات بوابة الطالب العادية
+  // تحتاج الهيدر الرئيسي للموقع إلى جانب هيدر البوابة.
+  if (req.nextUrl.searchParams.get("app") === "1") {
     requestHeaders.set("x-app-shell", "1");
   }
 

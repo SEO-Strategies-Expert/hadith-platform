@@ -9,7 +9,8 @@ import type { Lang } from "@/lib/site-data";
 import { longDate } from "@/lib/site-format";
 import { siteHref } from "@/lib/site-links";
 import { getStudentCourses, getUpcomingSessions, isLiveNow, title, timeLabel } from "@/lib/lms";
-import { ProgressBar, Pill, studentHref, num } from "@/components/site/StudentPortalKit";
+import { Pill, num } from "@/components/site/StudentPortalKit";
+import { StudentCourseGrid } from "@/components/site/StudentCourseGrid";
 
 const T = {
   ar: {
@@ -36,6 +37,7 @@ const T = {
     ended: "انتهى",
     generalSession: "مجلس عامّ",
     minutes: "دقيقة",
+    search: "ابحث في المقررات أو المحاضرين", status: "الحالة", all: "الكل", active: "نشط", allStages: "كل المراحل", noResults: "لا توجد مقررات مطابقة", pagination: "صفحات المقررات",
   },
   en: {
     myCourses: "My courses",
@@ -61,6 +63,7 @@ const T = {
     ended: "Ended",
     generalSession: "General session",
     minutes: "min",
+    search: "Search courses or instructors", status: "Status", all: "All", active: "Active", allStages: "All stages", noResults: "No matching courses", pagination: "Course pages",
   },
 } as const;
 
@@ -98,43 +101,7 @@ export async function StudentCourses({ lang, userId }: { lang: Lang; userId: str
             </div>
           </div>
         ) : (
-          <div className="card-grid">
-            {enrollments.map((e) => {
-              const c = e.course;
-              const active = e.status === "ACTIVE" || e.status === "COMPLETED";
-              return (
-                <article className="info-card reveal" key={e.id}>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
-                    {c.stage && <Pill tone="navy">{title(lang, c.stage.titleAr, c.stage.titleEn)}</Pill>}
-                    {e.status === "PENDING" && <Pill tone="muted">{t.pending}</Pill>}
-                    {e.status === "COMPLETED" && <Pill>{t.completed}</Pill>}
-                    {e.status === "CANCELLED" && <Pill tone="muted">{t.cancelled}</Pill>}
-                  </div>
-
-                  <h3>{title(lang, c.titleAr, c.titleEn)}</h3>
-                  {c.instructor && (
-                    <p style={{ margin: "0 0 4px", fontWeight: 700 }}>
-                      {t.instructor}: {title(lang, c.instructor.nameAr, c.instructor.nameEn)}
-                    </p>
-                  )}
-                  {title(lang, c.summaryAr ?? c.descAr, c.summaryEn ?? c.descEn) && (
-                    <p>{title(lang, c.summaryAr ?? c.descAr, c.summaryEn ?? c.descEn)}</p>
-                  )}
-
-                  <ProgressBar pct={e.progressPct} lang={lang} label={t.progress} />
-
-                  {/* المقرّر لا يُفتح إلّا لتسجيلٍ مُفعَّل — نفس شرط `isEnrolled` */}
-                  {active && (
-                    <div className="page-actions" style={{ marginTop: 18 }}>
-                      <Link className="btn btn-gold" href={studentHref(lang, `/course/${c.id}`)}>
-                        {t.resume}
-                      </Link>
-                    </div>
-                  )}
-                </article>
-              );
-            })}
-          </div>
+          <StudentCourseGrid lang={lang} enrollments={enrollments} labels={{...t}} />
         )}
       </div>
     </section>
@@ -149,7 +116,7 @@ export async function StudentSessions({ lang, userId }: { lang: Lang; userId: st
   const now = Date.now();
 
   return (
-    <section className="inner-section white orn-cream" id="my-sessions">
+    <section className="inner-section white orn-cream student-sessions-section" id="my-sessions">
       <div className="container">
         <header className="section-cap reveal">
           <h2 className="thuluth">{t.sessions}</h2>

@@ -165,6 +165,18 @@ CREATE TABLE "courses" (
 );
 
 -- CreateTable
+CREATE TABLE "_CourseInstructors" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL,
+    CONSTRAINT "_CourseInstructors_AB_pkey" PRIMARY KEY ("A", "B"),
+    CONSTRAINT "_CourseInstructors_A_fkey" FOREIGN KEY ("A") REFERENCES "courses"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "_CourseInstructors_B_fkey" FOREIGN KEY ("B") REFERENCES "scholars"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateIndex
+CREATE INDEX "_CourseInstructors_B_index" ON "_CourseInstructors"("B");
+
+-- CreateTable
 CREATE TABLE "news_items" (
     "id" TEXT NOT NULL,
     "slug" TEXT,
@@ -767,6 +779,7 @@ CREATE TABLE "certificates" (
     "issuedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "issuedById" TEXT,
     "pdfUrl" TEXT,
+    "designStyle" TEXT NOT NULL DEFAULT 'classic',
     "revoked" BOOLEAN NOT NULL DEFAULT false,
     "revokeNote" TEXT,
 

@@ -27,6 +27,16 @@ function renderField(f: FieldDef, record?: any) {
       );
     case "select":
       return <Select label={f.label} name={f.name} options={f.options ?? []} defaultValue={val ?? undefined} />;
+    case "multiselect":
+      return (
+        <Select
+          label={f.label}
+          name={f.name}
+          options={f.options ?? []}
+          defaultValue={Array.isArray(val) ? val : []}
+          multiple
+        />
+      );
     case "textarea":
       return <TextArea label={f.label} name={f.name} defaultValue={val ?? undefined} dir="rtl" hint={f.hint} />;
     case "textarea-ltr":

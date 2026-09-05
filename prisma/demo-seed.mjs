@@ -31,7 +31,7 @@ if (UNDO) {
   const rec = JSON.parse(readFileSync(RECORD, "utf8"));
   // الترتيب مهمّ: الأبناء قبل الآباء.
   const order = [
-    "quizAttempt", "choice", "question", "quiz",
+    "quizAttempt", "choice", "question", "quiz", "announcement", "questionBankItem",
     "assignmentSubmission", "assignment",
     "attendance", "liveSession",
     "lessonProgress", "lessonAttachment", "lesson", "module",
@@ -285,6 +285,32 @@ const asg = await prisma.assignment.create({
 });
 track("assignment", asg.id);
 
+// --- بيانات لوحة الإدارة: بنك الأسئلة والإعلانات ---------------------------
+// تُستخدم عناوين ثابتة حتى لا تتكرر السجلات عند إعادة تشغيل الزرع.
+const bankRows = [
+  { kind: "SINGLE", textAr: "ما الشرط الأول لقبول الحديث الصحيح؟", textEn: "What is the first condition of an authentic hadith?", explainAr: "اتصال السند من أوله إلى منتهاه.", choices: [{ textAr: "اتصال السند", correct: true }, { textAr: "كثرة الطرق", correct: false }], difficulty: 1 },
+  { kind: "TRUEFALSE", textAr: "الحديث الحسن لذاته يرقى إلى الصحيح لغيره بتعدد طرقه.", textEn: "A hasan hadith can become sahih li-ghayrihi through multiple chains.", explainAr: "تعدد الطرق يعضد الحديث الحسن فيرتقي.", choices: [{ textAr: "صواب", correct: true }, { textAr: "خطأ", correct: false }], difficulty: 2 },
+  { kind: "MULTI", textAr: "أيّها من كتب التخريج المشهورة؟", textEn: "Which are well-known hadith takhrij books?", explainAr: "منها نصب الراية والتلخيص الحبير.", choices: [{ textAr: "نصب الراية", correct: true }, { textAr: "التلخيص الحبير", correct: true }, { textAr: "كتاب في النحو", correct: false }], difficulty: 2 },
+];
+for (const row of bankRows) {
+  const existing = await prisma.questionBankItem.findFirst({ where: { textAr: row.textAr } });
+  if (existing) continue;
+  const item = await prisma.questionBankItem.create({ data: { ...row, points: 1, tags: ["demo", "hadith"], choices: row.choices } });
+  track("questionBankItem", item.id);
+}
+
+const announcementRows = [
+  { titleAr: "فتح التسجيل في الفصل الجديد", titleEn: "Registration is open for the new term", bodyAr: "بدأ استقبال طلبات التسجيل في المقرّرات، ويمكن متابعة حالة الطلب من بوابة الطالب.", bodyEn: "Applications are now open. Follow your application from the student portal.", pinned: true },
+  { titleAr: "موعد المجلس العلمي الأسبوعي", titleEn: "Weekly scholarly session", bodyAr: "ينعقد المجلس العلمي مساء الثلاثاء لمناقشة مسائل في علل الحديث.", bodyEn: "The weekly scholarly session meets Tuesday evening to discuss hidden defects in hadith.", pinned: false },
+  { titleAr: "إرشادات تسليم الواجبات", titleEn: "Assignment submission guidelines", bodyAr: "يرجى رفع الواجب بصيغة PDF قبل الموعد النهائي وكتابة الرقم الجامعي في الغلاف.", bodyEn: "Upload assignments as PDF before the deadline and include your student number.", pinned: false },
+];
+for (const row of announcementRows) {
+  const existing = await prisma.announcement.findFirst({ where: { titleAr: row.titleAr } });
+  if (existing) continue;
+  const item = await prisma.announcement.create({ data: { ...row, courseId: firstCourse.id, createdById: sheikhUser.id, publishAt: new Date(now - 2 * 86_400_000), visible: true } });
+  track("announcement", item.id);
+}
+
 // --- اختبار بثلاثة أسئلة ------------------------------------------------------
 const quiz = await prisma.quiz.create({
   data: {
@@ -368,7 +394,7 @@ for (const n of [
 writeFileSync(RECORD, JSON.stringify(made, null, 1), "utf8");
 
 const counts = {};
-for (const k of ["module", "lesson", "liveSession", "assignment", "quiz", "question", "certificate", "payment", "notification", "enrollment"])
+for (const k of ["module", "lesson", "liveSession", "assignment", "quiz", "question", "questionBankItem", "announcement", "certificate", "payment", "notification", "enrollment"])
   counts[k] = await prisma[k].count();
 console.log("تمّ الزرع. الأعداد الآن:");
 console.log(JSON.stringify(counts, null, 1));

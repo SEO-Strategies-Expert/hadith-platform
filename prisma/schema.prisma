@@ -110,8 +110,9 @@ model NavLink {
 model Scholar {
   accounts User[]
 
-  courses  Course[]
-  sessions LiveSession[]
+  courses           Course[]
+  courseAssignments Course[]      @relation("CourseInstructors")
+  sessions          LiveSession[]
 
   id            String  @id @default(cuid())
   nameAr        String
@@ -176,6 +177,7 @@ model Course {
   allowSelfEnrollment  Boolean       @default(true)
   instructorId         String?
   instructor           Scholar?      @relation(fields: [instructorId], references: [id], onDelete: SetNull)
+  instructors          Scholar[]     @relation("CourseInstructors")
   modules              Module[]
   enrollments          Enrollment[]
   sessions             LiveSession[]
@@ -986,6 +988,7 @@ model Certificate {
   issuedById String?
   issuedBy   User?    @relation("CertificateIssuer", fields: [issuedById], references: [id], onDelete: SetNull)
   pdfUrl     String?
+  designStyle String  @default("classic") // classic | waves | particles
   revoked    Boolean  @default(false)
   revokeNote String?
 

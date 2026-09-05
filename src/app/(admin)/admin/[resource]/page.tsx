@@ -21,16 +21,26 @@ function cell(kind: string | undefined, value: any) {
 
 export default async function ResourceListPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ resource: string }>;
+  searchParams?: Promise<{ page?: string }>;
 }) {
   const { resource } = await params;
   const cfg = getResource(resource);
   if (!cfg) notFound();
 
+  const paged = resource === "question-bank" || resource === "announcements";
+  const pageSize = 10;
+  const sp = await searchParams;
+  const rawPage = Number.parseInt(sp?.page ?? "1", 10);
+  const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
+  const total = paged ? await (prisma as any)[cfg.model].count() : 0;
   const rows: any[] = await (prisma as any)[cfg.model].findMany({
     orderBy: cfg.orderBy ?? { order: "asc" },
+    ...(paged ? { skip: (page - 1) * pageSize, take: pageSize } : {}),
   });
+  const totalPages = paged ? Math.max(1, Math.ceil(total / pageSize)) : 1;
 
   return (
     <div>
@@ -92,6 +102,15 @@ export default async function ResourceListPage({
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+        {paged && totalPages > 1 && (
+          <div className="flex items-center justify-between border-t border-black/5 px-4 py-3 text-[13px]">
+            <span className="text-ink-soft">صفحة {page} من {totalPages}</span>
+            <div className="flex gap-2">
+              <Link href={page > 1 ? `/admin/${resource}?page=${page - 1}` : "#"} className={`rounded-lg border px-3 py-1.5 font-bold ${page <= 1 ? "pointer-events-none opacity-40" : "border-black/10 bg-white text-navy-700"}`}>السابق</Link>
+              <Link href={page < totalPages ? `/admin/${resource}?page=${page + 1}` : "#"} className={`rounded-lg border px-3 py-1.5 font-bold ${page >= totalPages ? "pointer-events-none opacity-40" : "border-black/10 bg-white text-navy-700"}`}>التالي</Link>
+            </div>
           </div>
         )}
       </Card>
