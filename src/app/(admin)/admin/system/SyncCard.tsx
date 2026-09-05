@@ -6,7 +6,15 @@ import Swal from "sweetalert2";
 import { Card, Badge } from "@/components/admin/ui";
 import { syncDatabase } from "./actions";
 
-export function SyncDatabaseCard({ hasSchemaError }: { hasSchemaError: boolean }) {
+export function SyncDatabaseCard({
+  hasSchemaError,
+  databaseHost,
+  provider,
+}: {
+  hasSchemaError: boolean;
+  databaseHost: string | null;
+  provider: "Neon" | "Local" | "Other" | "Unknown";
+}) {
   const [pending, startTransition] = useTransition();
 
   const handleSync = async () => {
@@ -74,9 +82,9 @@ export function SyncDatabaseCard({ hasSchemaError }: { hasSchemaError: boolean }
               {hasSchemaError ? <Badge tone="red">مطلوبة</Badge> : <Badge tone="green">متزامنة</Badge>}
             </div>
             <p className="mt-1 max-w-2xl text-[13px] leading-6 text-ink-soft">
-              يطابق جداول Neon في{" "}
+              يطابق جداول قاعدة البيانات المتصلة في{" "}
               <code dir="ltr" className="rounded bg-black/5 px-1.5 py-0.5 text-[11px]">
-                ep-noisy-mode-av88xqhy-pooler.c-11.us-east-1.aws.neon.tech
+                {databaseHost || "DATABASE_HOST_NOT_AVAILABLE"}
               </code>{" "}
               مع <code dir="ltr">prisma/schema.prisma</code> دون حذف البيانات.
               استخدمه عند ظهور خطأ{" "}
@@ -109,9 +117,9 @@ export function SyncDatabaseCard({ hasSchemaError }: { hasSchemaError: boolean }
 
       {hasSchemaError && (
         <div className="mt-4 rounded-xl border border-amber-200 bg-white px-4 py-3 text-[12px] leading-6 text-amber-900">
-          <b>لماذا هذا الخطأ على الإنتاج فقط؟</b> محليًا لديك قاعدة <code dir="ltr">hadith</code> على{" "}
-          <code dir="ltr">localhost</code> ومزامنة يدويًا بـ <code dir="ltr">prisma db push</code>، بينما قاعدة cPanel
-          المنفصلة على Neon لم تُحدَّث بعد — فتظل جداولها قديمة ويفشل كل استعلام. هذا الزر يحدّثها دون الحاجة لـ SSH.
+          <b>لماذا يظهر هذا الخطأ في بيئة دون أخرى؟</b> كل بيئة نشر تملك متغيرات اتصال مستقلة. الاتصال الحالي هو{" "}
+          <code dir="ltr">{provider}</code> على <code dir="ltr">{databaseHost || "unknown"}</code>؛ إن كان مختلفًا عن
+          قاعدة التطوير فقد تكون جداولُه غير محدثة. هذا الزر يزامن القاعدة التي يعرضها قسم معلومات الاتصال أعلاه.
         </div>
       )}
     </Card>

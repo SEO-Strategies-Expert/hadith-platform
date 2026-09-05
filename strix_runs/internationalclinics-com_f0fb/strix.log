@@ -1,0 +1,91 @@
+2026-09-04 00:09:36.010 INFO    internationalclinics-com_f0fb - strix.core.runner: Starting Strix scan internationalclinics-com_f0fb (image=ghcr.io/usestrix/strix-sandbox:1.3.0, max_turns=500, interactive=True, run_dir=/home/sam/Desktop/hadith-site/hadith-platform/strix_runs/internationalclinics-com_f0fb)
+2026-09-04 00:09:36.011 INFO    internationalclinics-com_f0fb - strix.core.runner: LLM model resolved: openai/Qwen3.6-35B-A3B-NVFP4
+2026-09-04 00:09:36.011 INFO    internationalclinics-com_f0fb - strix.core.runner: Bringing up sandbox session for scan internationalclinics-com_f0fb
+2026-09-04 00:09:36.011 DEBUG   internationalclinics-com_f0fb - strix.runtime.backends: Selected sandbox backend: docker
+2026-09-04 00:09:36.011 INFO    internationalclinics-com_f0fb - strix.runtime.session_manager: Creating sandbox session for scan internationalclinics-com_f0fb (backend=docker, image=ghcr.io/usestrix/strix-sandbox:1.3.0)
+2026-09-04 00:09:36.251 DEBUG   internationalclinics-com_f0fb - strix.runtime.docker_client: Creating sandbox container: image=ghcr.io/usestrix/strix-sandbox:1.3.0 caps=['NET_ADMIN', 'NET_RAW'] exposed_ports=[48080]
+2026-09-04 00:09:36.350 INFO    internationalclinics-com_f0fb - strix.runtime.docker_client: Sandbox container created: id=4c330ca278d0 image=ghcr.io/usestrix/strix-sandbox:1.3.0
+2026-09-04 00:09:36.812 DEBUG   internationalclinics-com_f0fb - strix.runtime.session_manager: Caido host endpoint resolved: http://127.0.0.1:32772
+2026-09-04 00:09:36.812 INFO    internationalclinics-com_f0fb - strix.runtime.session_manager: Sandbox session for scan internationalclinics-com_f0fb ready and cached
+2026-09-04 00:09:36.813 INFO    internationalclinics-com_f0fb - strix.core.runner: Sandbox ready for scan internationalclinics-com_f0fb
+2026-09-04 00:09:36.817 DEBUG   internationalclinics-com_f0fb - strix.skills: Loaded skill: scan_modes/quick -> quick
+2026-09-04 00:09:36.819 DEBUG   internationalclinics-com_f0fb - strix.skills: Loaded skill: tooling/agent_browser -> agent_browser
+2026-09-04 00:09:36.826 DEBUG   internationalclinics-com_f0fb - strix.skills: Loaded skill: tooling/python -> python
+2026-09-04 00:09:36.831 DEBUG   internationalclinics-com_f0fb - strix.skills: Loaded skill: analysis/counterevidence -> counterevidence
+2026-09-04 00:09:36.833 DEBUG   internationalclinics-com_f0fb - strix.skills: Loaded skill: analysis/severity_calibration -> severity_calibration
+2026-09-04 00:09:36.839 DEBUG   internationalclinics-com_f0fb - strix.skills: Loaded skill: coordination/root_agent -> root_agent
+2026-09-04 00:09:36.840 DEBUG   internationalclinics-com_f0fb - strix.skills: load_skills: 6 skill(s) resolved
+2026-09-04 00:09:36.871 DEBUG   internationalclinics-com_f0fb - strix.agents.prompt: render_system_prompt: scan_mode=quick root=True whitebox=False skills=6 prompt_len=102898
+2026-09-04 00:09:36.872 INFO    internationalclinics-com_f0fb - strix.agents.factory: Built root agent 'Root Agent' (skills=0, tools=41, scan_mode=quick, whitebox=False)
+2026-09-04 00:09:36.872 INFO    internationalclinics-com_f0fb - strix.core.agents: agent.register 286db85a (Root Agent) parent=-
+2026-09-04 00:09:36.882 INFO    internationalclinics-com_f0fb - strix.runtime.caido_bootstrap: Bootstrapping Caido client (host=http://127.0.0.1:32772, container=http://127.0.0.1:48080)
+2026-09-04 00:09:36.895 DEBUG   internationalclinics-com_f0fb - openai.agents: Tracing is disabled. Not creating trace
+2026-09-04 00:09:36.898 DEBUG   internationalclinics-com_f0fb - openai.agents: Setting current trace: no-op
+2026-09-04 00:09:36.898 DEBUG   internationalclinics-com_f0fb - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 00:09:36.907 DEBUG   internationalclinics-com_f0fb - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 00:09:36.908 DEBUG   internationalclinics-com_f0fb - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-09-04 00:09:36.908 DEBUG   internationalclinics-com_f0fb - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 00:09:36.910 DEBUG   internationalclinics-com_f0fb - openai.agents: No conversation_id available for request
+2026-09-04 00:09:36.911 DEBUG   internationalclinics-com_f0fb - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 00:09:36.913 DEBUG   internationalclinics-com_f0fb - openai.agents: Calling LLM
+2026-09-04 00:09:37.192 INFO    internationalclinics-com_f0fb - strix.runtime.caido_bootstrap: Caido project selected: 5f0f7c53-a3f3-41e4-9a51-1dde99dc76bd
+2026-09-04 00:09:37.971 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 00:09:37.995 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 00:09:37.997 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 00:09:38.009 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 00:09:38.014 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 00:09:38.016 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 00:09:39.415 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 00:09:39.418 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 00:09:39.432 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 00:09:39.438 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 00:09:39.440 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 00:09:39.443 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 00:11:05.109 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /?token=koyACf7ODSVSQtWeQk9w6hydtTKbQCVrkMVR_2bYnXI HTTP/1.1" 200 -
+2026-09-04 00:11:05.135 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /assets/index-qwPOPAGC.css HTTP/1.1" 200 -
+2026-09-04 00:11:05.137 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /assets/index-Bpn8GiSb.js HTTP/1.1" 200 -
+2026-09-04 00:11:05.255 DEBUG   - - strix.telemetry.posthog: posthog event sent: viewer_opened
+2026-09-04 00:11:05.277 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /logo.png HTTP/1.1" 200 -
+2026-09-04 00:11:05.448 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/auth/status HTTP/1.1" 200 -
+2026-09-04 00:11:05.449 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/capabilities HTTP/1.1" 200 -
+2026-09-04 00:11:05.452 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/runs HTTP/1.1" 200 -
+2026-09-04 00:11:05.453 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 00:11:05.463 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /logo.png HTTP/1.1" 200 -
+2026-09-04 00:11:05.483 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 00:11:05.486 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/report HTTP/1.1" 200 -
+2026-09-04 00:11:05.488 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 00:11:06.001 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 00:11:06.010 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 00:11:06.011 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 00:11:06.527 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 00:11:06.537 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 00:11:06.539 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 00:11:07.051 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 00:11:07.063 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 00:11:07.065 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 00:11:07.577 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 00:11:07.590 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 00:11:07.592 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 00:11:08.103 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 00:11:08.114 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 00:11:08.115 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 00:11:08.629 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 00:11:08.641 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 00:11:08.643 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 00:11:09.158 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 00:11:09.170 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 00:11:09.171 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 00:11:09.685 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 00:11:09.697 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 00:11:09.698 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 00:11:10.210 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 00:11:10.222 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 00:11:10.225 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 00:11:10.737 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 00:11:10.748 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 00:11:10.750 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 00:13:59.924 INFO    internationalclinics-com_f0fb - strix.core.runner: Scan internationalclinics-com_f0fb interrupted by the user
+2026-09-04 00:13:59.924 INFO    internationalclinics-com_f0fb - strix.core.agents: agent.status 286db85a=running
+2026-09-04 00:13:59.927 INFO    internationalclinics-com_f0fb - strix.core.runner: Tearing down sandbox session for scan internationalclinics-com_f0fb
+2026-09-04 00:14:00.147 INFO    internationalclinics-com_f0fb - strix.runtime.session_manager: Cleaned up sandbox session for scan internationalclinics-com_f0fb
+2026-09-04 00:14:00.147 INFO    internationalclinics-com_f0fb - strix.core.runner: Strix scan internationalclinics-com_f0fb done

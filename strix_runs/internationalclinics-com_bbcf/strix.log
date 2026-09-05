@@ -1,0 +1,48 @@
+2026-09-04 01:29:26.104 INFO    internationalclinics-com_bbcf - strix.core.runner: Starting Strix scan internationalclinics-com_bbcf (image=ghcr.io/usestrix/strix-sandbox:1.3.0, max_turns=500, interactive=True, run_dir=/home/sam/Desktop/hadith-site/hadith-platform/strix_runs/internationalclinics-com_bbcf)
+2026-09-04 01:29:26.105 INFO    internationalclinics-com_bbcf - strix.core.runner: LLM model resolved: openai/Qwen3.6-35B-A3B-NVFP4
+2026-09-04 01:29:26.105 INFO    internationalclinics-com_bbcf - strix.core.runner: Bringing up sandbox session for scan internationalclinics-com_bbcf
+2026-09-04 01:29:26.105 DEBUG   internationalclinics-com_bbcf - strix.runtime.backends: Selected sandbox backend: docker
+2026-09-04 01:29:26.106 INFO    internationalclinics-com_bbcf - strix.runtime.session_manager: Creating sandbox session for scan internationalclinics-com_bbcf (backend=docker, image=ghcr.io/usestrix/strix-sandbox:1.3.0)
+2026-09-04 01:29:26.291 DEBUG   internationalclinics-com_bbcf - strix.runtime.docker_client: Creating sandbox container: image=ghcr.io/usestrix/strix-sandbox:1.3.0 caps=['NET_ADMIN', 'NET_RAW'] exposed_ports=[48080]
+2026-09-04 01:29:26.367 INFO    internationalclinics-com_bbcf - strix.runtime.docker_client: Sandbox container created: id=9c216ba2c41b image=ghcr.io/usestrix/strix-sandbox:1.3.0
+2026-09-04 01:29:26.793 DEBUG   internationalclinics-com_bbcf - strix.runtime.session_manager: Caido host endpoint resolved: http://127.0.0.1:32774
+2026-09-04 01:29:26.793 INFO    internationalclinics-com_bbcf - strix.runtime.session_manager: Sandbox session for scan internationalclinics-com_bbcf ready and cached
+2026-09-04 01:29:26.793 INFO    internationalclinics-com_bbcf - strix.core.runner: Sandbox ready for scan internationalclinics-com_bbcf
+2026-09-04 01:29:26.796 DEBUG   internationalclinics-com_bbcf - strix.skills: Loaded skill: scan_modes/quick -> quick
+2026-09-04 01:29:26.799 DEBUG   internationalclinics-com_bbcf - strix.skills: Loaded skill: tooling/agent_browser -> agent_browser
+2026-09-04 01:29:26.800 DEBUG   internationalclinics-com_bbcf - strix.skills: Loaded skill: tooling/python -> python
+2026-09-04 01:29:26.805 DEBUG   internationalclinics-com_bbcf - strix.skills: Loaded skill: analysis/counterevidence -> counterevidence
+2026-09-04 01:29:26.809 DEBUG   internationalclinics-com_bbcf - strix.skills: Loaded skill: analysis/severity_calibration -> severity_calibration
+2026-09-04 01:29:26.810 DEBUG   internationalclinics-com_bbcf - strix.skills: Loaded skill: coordination/root_agent -> root_agent
+2026-09-04 01:29:26.810 DEBUG   internationalclinics-com_bbcf - strix.skills: load_skills: 6 skill(s) resolved
+2026-09-04 01:29:26.835 DEBUG   internationalclinics-com_bbcf - strix.agents.prompt: render_system_prompt: scan_mode=quick root=True whitebox=False skills=6 prompt_len=102898
+2026-09-04 01:29:26.835 INFO    internationalclinics-com_bbcf - strix.agents.factory: Built root agent 'Root Agent' (skills=0, tools=41, scan_mode=quick, whitebox=False)
+2026-09-04 01:29:26.836 INFO    internationalclinics-com_bbcf - strix.core.agents: agent.register 8fcf0647 (Root Agent) parent=-
+2026-09-04 01:29:26.844 INFO    internationalclinics-com_bbcf - strix.runtime.caido_bootstrap: Bootstrapping Caido client (host=http://127.0.0.1:32774, container=http://127.0.0.1:48080)
+2026-09-04 01:29:26.855 DEBUG   internationalclinics-com_bbcf - openai.agents: Tracing is disabled. Not creating trace
+2026-09-04 01:29:26.857 DEBUG   internationalclinics-com_bbcf - openai.agents: Setting current trace: no-op
+2026-09-04 01:29:26.857 DEBUG   internationalclinics-com_bbcf - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:29:26.865 DEBUG   internationalclinics-com_bbcf - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:29:26.865 DEBUG   internationalclinics-com_bbcf - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-09-04 01:29:26.865 DEBUG   internationalclinics-com_bbcf - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:29:26.867 DEBUG   internationalclinics-com_bbcf - openai.agents: No conversation_id available for request
+2026-09-04 01:29:26.867 DEBUG   internationalclinics-com_bbcf - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:29:26.869 DEBUG   internationalclinics-com_bbcf - openai.agents: Calling LLM
+2026-09-04 01:29:27.051 INFO    internationalclinics-com_bbcf - strix.runtime.caido_bootstrap: Caido project selected: 8b9b9423-e79d-4459-8331-eb00fb9141a3
+2026-09-04 01:29:28.720 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 01:29:28.722 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 01:29:28.728 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 01:29:28.730 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 01:29:28.745 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 01:29:28.753 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 01:29:30.803 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 01:29:30.805 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 01:29:30.807 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 01:29:30.811 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 01:29:30.813 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 01:29:30.822 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 01:30:41.196 INFO    internationalclinics-com_bbcf - strix.core.runner: Scan internationalclinics-com_bbcf interrupted by the user
+2026-09-04 01:30:41.196 INFO    internationalclinics-com_bbcf - strix.core.agents: agent.status 8fcf0647=running
+2026-09-04 01:30:41.200 INFO    internationalclinics-com_bbcf - strix.core.runner: Tearing down sandbox session for scan internationalclinics-com_bbcf
+2026-09-04 01:30:41.459 INFO    internationalclinics-com_bbcf - strix.runtime.session_manager: Cleaned up sandbox session for scan internationalclinics-com_bbcf
+2026-09-04 01:30:41.460 INFO    internationalclinics-com_bbcf - strix.core.runner: Strix scan internationalclinics-com_bbcf done

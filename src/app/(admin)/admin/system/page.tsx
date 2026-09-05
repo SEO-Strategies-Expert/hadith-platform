@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/guard";
 import { Card, PageHeader, Badge } from "@/components/admin/ui";
-import { getDbInfo, formatBytes } from "@/lib/db-info";
+import { getDbInfo, formatBytes, maskDbUrl } from "@/lib/db-info";
 import { queueBackup } from "./actions";
 import { SyncDatabaseCard } from "./SyncCard";
 
@@ -48,6 +48,35 @@ export default async function SystemPage({
   ] as const;
   const providerTone = db.provider === "Neon" ? "blue" : db.provider === "Local" ? "gold" : "gray";
   const hasSchemaError = !db.ok || Boolean(logsError) || Boolean(jobsError);
+  const isVercel = Boolean(process.env.VERCEL);
+  const runtimeName = isVercel ? "Vercel" : "تشغيل محلي";
+  const deploymentEnv = process.env.VERCEL_ENV || (process.env.NODE_ENV === "production" ? "production" : "development");
+  const dbEnvironmentVariables = [
+    {
+      name: "POSTGRES_PRISMA_URL",
+      value: process.env.POSTGRES_PRISMA_URL,
+      usage: "اتصال Prisma المستخدم فعليًا بواسطة التطبيق",
+      required: true,
+    },
+    {
+      name: "POSTGRES_URL_NON_POOLING",
+      value: process.env.POSTGRES_URL_NON_POOLING,
+      usage: "الاتصال المباشر للترحيلات ومزامنة الهيكل",
+      required: true,
+    },
+    {
+      name: "DATABASE_URL",
+      value: process.env.DATABASE_URL,
+      usage: "اسم متوافق مع أدوات الاستضافة — غير مستخدم مباشرة في schema الحالية",
+      required: false,
+    },
+    {
+      name: "DIRECT_URL",
+      value: process.env.DIRECT_URL,
+      usage: "اسم متوافق للاتصال المباشر — غير مستخدم مباشرة في schema الحالية",
+      required: false,
+    },
+  ] as const;
 
   return <div><PageHeader title="الأمان والتشغيل" desc="سجل التدقيق، النسخ الاحتياطي، حالة التكاملات وطوابير المعالجة." />
     {restored && <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] font-bold text-emerald-700">تمت الاستعادة: أُدرج {restored} صفًّا (الموجود مسبقًا لم يُمسّ).</div>}
@@ -66,6 +95,61 @@ export default async function SystemPage({
         <span className="block mt-2 font-normal text-amber-800">استخدم زر “مزامنة الهيكل الآن” أدناه لإنشاء/تحديث الجداول دون فقدان البيانات.</span>
       </div>
     )}
+
+    <Card className="mb-6 p-5">
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className="font-extrabold text-navy-900">بيئة التشغيل ومتغيرات الاتصال</h2>
+        <Badge tone={isVercel ? "blue" : "gold"}>{runtimeName}</Badge>
+        <Badge tone="gray">{deploymentEnv}</Badge>
+      </div>
+      <p className="mt-2 text-[13px] leading-6 text-ink-soft">
+        {isVercel
+          ? "القيم المعروضة أدناه قادمة من Vercel Project Settings → Environment Variables، وليست من ملفات GitHub أو .env المحلية."
+          : "القيم المعروضة أدناه قادمة من بيئة التشغيل المحلية؛ يعطي Next.js ملف .env.local أولوية على .env."}
+      </p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl bg-black/[.03] p-3">
+          <div className="text-[11.5px] font-bold text-ink-soft">المتغير الذي يستخدمه Prisma</div>
+          <code className="mt-1 block text-[12px] font-bold text-navy-900" dir="ltr">POSTGRES_PRISMA_URL</code>
+        </div>
+        <div className="rounded-xl bg-black/[.03] p-3">
+          <div className="text-[11.5px] font-bold text-ink-soft">متغير الاتصال المباشر</div>
+          <code className="mt-1 block text-[12px] font-bold text-navy-900" dir="ltr">POSTGRES_URL_NON_POOLING</code>
+        </div>
+        <div className="rounded-xl bg-black/[.03] p-3">
+          <div className="text-[11.5px] font-bold text-ink-soft">منطقة Vercel</div>
+          <div className="mt-1 text-[13px] font-bold text-navy-900" dir="ltr">{process.env.VERCEL_REGION || "—"}</div>
+        </div>
+        <div className="rounded-xl bg-black/[.03] p-3">
+          <div className="text-[11.5px] font-bold text-ink-soft">آخر نشر</div>
+          <div className="mt-1 break-all text-[12px] font-bold text-navy-900" dir="ltr">{process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) || "—"}</div>
+        </div>
+      </div>
+      <div className="mt-4 overflow-auto rounded-xl border border-black/5">
+        <table className="w-full min-w-[720px] text-[12px]">
+          <thead className="bg-black/[.03] text-right text-ink-soft">
+            <tr><th className="p-3">المتغير</th><th className="p-3">الحالة</th><th className="p-3">الاستخدام</th><th className="p-3">القيمة الآمنة</th></tr>
+          </thead>
+          <tbody>
+            {dbEnvironmentVariables.map((item) => (
+              <tr key={item.name} className="border-t border-black/5">
+                <td className="p-3 font-mono font-bold" dir="ltr">{item.name}</td>
+                <td className="p-3"><Badge tone={item.value ? "green" : item.required ? "red" : "gray"}>{item.value ? "مهيّأ" : item.required ? "مفقود" : "اختياري"}</Badge></td>
+                <td className="p-3 text-ink-soft">{item.usage}</td>
+                <td className="max-w-[360px] break-all p-3 font-mono text-[11px]" dir="ltr">{maskDbUrl(item.value)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {isVercel && (
+        <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-[12.5px] leading-6 text-sky-900">
+          لتعديل الاتصال: افتح <b dir="ltr">Vercel → Project → Settings → Environment Variables</b>، حدّث
+          <code dir="ltr" className="mx-1">POSTGRES_PRISMA_URL</code> و
+          <code dir="ltr" className="mx-1">POSTGRES_URL_NON_POOLING</code> للبيئات المطلوبة، ثم نفّذ إعادة نشر. تعديل ملفات GitHub وحده لا يغيّر هذه القيم.
+        </div>
+      )}
+    </Card>
 
     <Card className="mb-6 p-5">
       <div className="flex flex-wrap items-center gap-2">
@@ -108,7 +192,7 @@ export default async function SystemPage({
     </Card>
 
     {/* مزامنة الهيكل — علاج الخطأ “This page couldn't load” بعد نشر أولي */}
-    <SyncDatabaseCard hasSchemaError={hasSchemaError} />
+    <SyncDatabaseCard hasSchemaError={hasSchemaError} databaseHost={db.host} provider={db.provider} />
 
     <div className="mb-6 grid gap-6 xl:grid-cols-2">
       <Card className="p-5">

@@ -1,0 +1,245 @@
+2026-09-04 01:16:50.187 INFO    internationalclinics-com_6d82 - strix.core.runner: Starting Strix scan internationalclinics-com_6d82 (image=ghcr.io/usestrix/strix-sandbox:1.3.0, max_turns=500, interactive=True, run_dir=/home/sam/Desktop/hadith-site/hadith-platform/strix_runs/internationalclinics-com_6d82)
+2026-09-04 01:16:50.187 INFO    internationalclinics-com_6d82 - strix.core.runner: LLM model resolved: openai/Qwen3.6-35B-A3B-NVFP4
+2026-09-04 01:16:50.188 INFO    internationalclinics-com_6d82 - strix.core.runner: Bringing up sandbox session for scan internationalclinics-com_6d82
+2026-09-04 01:16:50.188 DEBUG   internationalclinics-com_6d82 - strix.runtime.backends: Selected sandbox backend: docker
+2026-09-04 01:16:50.188 INFO    internationalclinics-com_6d82 - strix.runtime.session_manager: Creating sandbox session for scan internationalclinics-com_6d82 (backend=docker, image=ghcr.io/usestrix/strix-sandbox:1.3.0)
+2026-09-04 01:16:50.395 DEBUG   internationalclinics-com_6d82 - strix.runtime.docker_client: Creating sandbox container: image=ghcr.io/usestrix/strix-sandbox:1.3.0 caps=['NET_ADMIN', 'NET_RAW'] exposed_ports=[48080]
+2026-09-04 01:16:50.471 INFO    internationalclinics-com_6d82 - strix.runtime.docker_client: Sandbox container created: id=45ffd98e2505 image=ghcr.io/usestrix/strix-sandbox:1.3.0
+2026-09-04 01:16:50.896 DEBUG   internationalclinics-com_6d82 - strix.runtime.session_manager: Caido host endpoint resolved: http://127.0.0.1:32773
+2026-09-04 01:16:50.896 INFO    internationalclinics-com_6d82 - strix.runtime.session_manager: Sandbox session for scan internationalclinics-com_6d82 ready and cached
+2026-09-04 01:16:50.896 INFO    internationalclinics-com_6d82 - strix.core.runner: Sandbox ready for scan internationalclinics-com_6d82
+2026-09-04 01:16:50.900 DEBUG   internationalclinics-com_6d82 - strix.skills: Loaded skill: scan_modes/quick -> quick
+2026-09-04 01:16:50.902 DEBUG   internationalclinics-com_6d82 - strix.skills: Loaded skill: tooling/agent_browser -> agent_browser
+2026-09-04 01:16:50.906 DEBUG   internationalclinics-com_6d82 - strix.skills: Loaded skill: tooling/python -> python
+2026-09-04 01:16:50.911 DEBUG   internationalclinics-com_6d82 - strix.skills: Loaded skill: analysis/counterevidence -> counterevidence
+2026-09-04 01:16:50.915 DEBUG   internationalclinics-com_6d82 - strix.skills: Loaded skill: analysis/severity_calibration -> severity_calibration
+2026-09-04 01:16:50.919 DEBUG   internationalclinics-com_6d82 - strix.skills: Loaded skill: coordination/root_agent -> root_agent
+2026-09-04 01:16:50.919 DEBUG   internationalclinics-com_6d82 - strix.skills: load_skills: 6 skill(s) resolved
+2026-09-04 01:16:50.943 DEBUG   internationalclinics-com_6d82 - strix.agents.prompt: render_system_prompt: scan_mode=quick root=True whitebox=False skills=6 prompt_len=102898
+2026-09-04 01:16:50.944 INFO    internationalclinics-com_6d82 - strix.agents.factory: Built root agent 'Root Agent' (skills=0, tools=41, scan_mode=quick, whitebox=False)
+2026-09-04 01:16:50.944 INFO    internationalclinics-com_6d82 - strix.core.agents: agent.register f5da6777 (Root Agent) parent=-
+2026-09-04 01:16:50.954 INFO    internationalclinics-com_6d82 - strix.runtime.caido_bootstrap: Bootstrapping Caido client (host=http://127.0.0.1:32773, container=http://127.0.0.1:48080)
+2026-09-04 01:16:50.965 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating trace
+2026-09-04 01:16:50.967 DEBUG   internationalclinics-com_6d82 - openai.agents: Setting current trace: no-op
+2026-09-04 01:16:50.967 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:16:50.977 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:16:50.977 DEBUG   internationalclinics-com_6d82 - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-09-04 01:16:50.977 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:16:50.979 DEBUG   internationalclinics-com_6d82 - openai.agents: No conversation_id available for request
+2026-09-04 01:16:50.979 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:16:50.982 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:16:51.158 INFO    internationalclinics-com_6d82 - strix.runtime.caido_bootstrap: Caido project selected: 3d501e51-df91-4b51-93c9-4ccb5ff46652
+2026-09-04 01:16:51.821 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 2.0s (attempt 1/5).
+2026-09-04 01:16:52.804 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 01:16:52.806 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 01:16:52.809 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 01:16:52.812 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 01:16:52.819 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 01:16:52.820 DEBUG   - - strix.telemetry.posthog: posthog event sent: skill_loaded
+2026-09-04 01:16:53.823 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:16:53.826 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:16:54.124 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 4.0s (attempt 2/5).
+2026-09-04 01:16:54.950 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 01:16:54.952 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 01:16:54.954 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 01:16:54.959 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 01:16:54.960 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 01:16:54.961 DEBUG   - - strix.telemetry.scarf: scarf event sent: skill_loaded
+2026-09-04 01:16:58.126 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:16:58.129 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:16:58.693 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 8.0s (attempt 3/5).
+2026-09-04 01:17:06.696 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:17:06.700 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:17:07.232 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 16.0s (attempt 4/5).
+2026-09-04 01:17:23.233 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:17:23.235 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:17:23.513 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 32.0s (attempt 5/5).
+2026-09-04 01:17:40.349 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /?token=Uaq9sWrsH27ne9YqBwt13FuKQ0XCOICSE78cCmhNzeI HTTP/1.1" 200 -
+2026-09-04 01:17:40.377 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /assets/index-qwPOPAGC.css HTTP/1.1" 200 -
+2026-09-04 01:17:40.378 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /assets/index-Bpn8GiSb.js HTTP/1.1" 200 -
+2026-09-04 01:17:40.523 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /logo.png HTTP/1.1" 200 -
+2026-09-04 01:17:40.653 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/auth/status HTTP/1.1" 200 -
+2026-09-04 01:17:40.656 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/runs HTTP/1.1" 200 -
+2026-09-04 01:17:40.658 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/capabilities HTTP/1.1" 200 -
+2026-09-04 01:17:40.659 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:40.666 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /logo.png HTTP/1.1" 200 -
+2026-09-04 01:17:40.673 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/report HTTP/1.1" 200 -
+2026-09-04 01:17:40.674 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:40.676 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:41.196 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:41.206 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:41.207 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:41.647 DEBUG   - - strix.telemetry.posthog: posthog event sent: viewer_opened
+2026-09-04 01:17:41.722 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:41.734 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:41.735 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:42.245 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:42.257 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:42.257 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:42.767 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:42.778 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:42.779 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:43.294 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:43.306 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:43.308 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:43.821 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:43.833 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:43.834 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:44.346 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:44.356 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:44.358 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:44.873 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:44.885 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:44.887 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:45.398 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:45.411 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:45.413 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:45.934 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:45.945 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:45.945 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:46.459 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:46.470 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:46.470 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:46.981 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:46.991 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:46.993 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:47.504 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:47.516 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:47.517 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:48.028 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:48.041 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:48.042 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:48.554 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/run HTTP/1.1" 200 -
+2026-09-04 01:17:48.565 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/transcript HTTP/1.1" 200 -
+2026-09-04 01:17:48.565 DEBUG   - - strix.interface.viewer.server: viewer 127.0.0.1 - "GET /api/vulnerabilities HTTP/1.1" 200 -
+2026-09-04 01:17:55.515 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:17:55.520 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:17:55.770 DEBUG   internationalclinics-com_6d82 - openai.agents: Resetting current trace
+2026-09-04 01:17:55.771 WARNING internationalclinics-com_6d82 - strix.core.execution: transient model/provider error for f5da6777; replaying turn (attempt 1/5, backoff 2.0s): APIError('prompt is too long: 54789 tokens > 30000 maximum (prompt + generation); shorten the prompt or increase the KV cache budget')
+2026-09-04 01:17:57.783 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating trace
+2026-09-04 01:17:57.786 DEBUG   internationalclinics-com_6d82 - openai.agents: Setting current trace: no-op
+2026-09-04 01:17:57.787 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:17:57.804 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:17:57.804 DEBUG   internationalclinics-com_6d82 - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-09-04 01:17:57.804 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:17:57.807 DEBUG   internationalclinics-com_6d82 - openai.agents: No conversation_id available for request
+2026-09-04 01:17:57.807 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:17:57.811 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:17:58.032 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 2.0s (attempt 1/5).
+2026-09-04 01:18:00.035 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:18:00.038 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:18:00.296 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 4.0s (attempt 2/5).
+2026-09-04 01:18:04.300 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:18:04.305 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:18:04.577 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 8.0s (attempt 3/5).
+2026-09-04 01:18:12.579 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:18:12.583 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:18:12.871 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 16.0s (attempt 4/5).
+2026-09-04 01:18:28.873 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:18:28.876 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:18:29.152 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 32.0s (attempt 5/5).
+2026-09-04 01:19:01.154 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:19:01.159 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:19:01.485 DEBUG   internationalclinics-com_6d82 - openai.agents: Resetting current trace
+2026-09-04 01:19:01.486 WARNING internationalclinics-com_6d82 - strix.core.execution: transient model/provider error for f5da6777; replaying turn (attempt 2/5, backoff 4.0s): APIError('prompt is too long: 54789 tokens > 30000 maximum (prompt + generation); shorten the prompt or increase the KV cache budget')
+2026-09-04 01:19:05.497 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating trace
+2026-09-04 01:19:05.501 DEBUG   internationalclinics-com_6d82 - openai.agents: Setting current trace: no-op
+2026-09-04 01:19:05.501 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:19:05.517 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:19:05.517 DEBUG   internationalclinics-com_6d82 - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-09-04 01:19:05.518 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:19:05.519 DEBUG   internationalclinics-com_6d82 - openai.agents: No conversation_id available for request
+2026-09-04 01:19:05.520 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:19:05.523 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:19:05.812 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 2.0s (attempt 1/5).
+2026-09-04 01:19:07.815 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:19:07.817 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:19:08.030 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 4.0s (attempt 2/5).
+2026-09-04 01:19:12.031 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:19:12.034 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:19:12.365 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 8.0s (attempt 3/5).
+2026-09-04 01:19:20.367 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:19:20.369 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:19:20.659 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 16.0s (attempt 4/5).
+2026-09-04 01:19:36.661 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:19:36.664 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:19:36.942 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 32.0s (attempt 5/5).
+2026-09-04 01:20:08.943 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:20:08.946 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:20:09.198 DEBUG   internationalclinics-com_6d82 - openai.agents: Resetting current trace
+2026-09-04 01:20:09.199 WARNING internationalclinics-com_6d82 - strix.core.execution: transient model/provider error for f5da6777; replaying turn (attempt 3/5, backoff 8.0s): APIError('prompt is too long: 54789 tokens > 30000 maximum (prompt + generation); shorten the prompt or increase the KV cache budget')
+2026-09-04 01:20:17.209 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating trace
+2026-09-04 01:20:17.213 DEBUG   internationalclinics-com_6d82 - openai.agents: Setting current trace: no-op
+2026-09-04 01:20:17.213 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:20:17.226 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:20:17.226 DEBUG   internationalclinics-com_6d82 - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-09-04 01:20:17.227 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:20:17.228 DEBUG   internationalclinics-com_6d82 - openai.agents: No conversation_id available for request
+2026-09-04 01:20:17.228 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:20:17.230 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:20:17.459 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 2.0s (attempt 1/5).
+2026-09-04 01:20:19.461 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:20:19.467 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:20:19.853 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 4.0s (attempt 2/5).
+2026-09-04 01:20:23.855 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:20:23.857 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:20:24.148 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 8.0s (attempt 3/5).
+2026-09-04 01:20:32.149 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:20:32.152 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:20:32.443 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 16.0s (attempt 4/5).
+2026-09-04 01:20:48.446 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:20:48.451 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:20:48.724 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 32.0s (attempt 5/5).
+2026-09-04 01:21:20.727 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:21:20.731 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:21:21.089 DEBUG   internationalclinics-com_6d82 - openai.agents: Resetting current trace
+2026-09-04 01:21:21.090 WARNING internationalclinics-com_6d82 - strix.core.execution: transient model/provider error for f5da6777; replaying turn (attempt 4/5, backoff 16.0s): APIError('prompt is too long: 54789 tokens > 30000 maximum (prompt + generation); shorten the prompt or increase the KV cache budget')
+2026-09-04 01:21:37.100 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating trace
+2026-09-04 01:21:37.104 DEBUG   internationalclinics-com_6d82 - openai.agents: Setting current trace: no-op
+2026-09-04 01:21:37.104 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:21:37.121 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:21:37.122 DEBUG   internationalclinics-com_6d82 - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-09-04 01:21:37.122 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:21:37.124 DEBUG   internationalclinics-com_6d82 - openai.agents: No conversation_id available for request
+2026-09-04 01:21:37.125 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:21:37.128 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:21:37.882 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 2.0s (attempt 1/5).
+2026-09-04 01:21:39.884 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:21:39.892 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:21:40.024 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 4.0s (attempt 2/5).
+2026-09-04 01:21:44.025 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:21:44.027 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:21:44.327 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 8.0s (attempt 3/5).
+2026-09-04 01:21:52.329 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:21:52.333 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:21:52.623 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 16.0s (attempt 4/5).
+2026-09-04 01:22:08.625 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:22:08.627 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:22:08.907 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 32.0s (attempt 5/5).
+2026-09-04 01:22:40.908 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:22:40.911 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:22:41.369 DEBUG   internationalclinics-com_6d82 - openai.agents: Resetting current trace
+2026-09-04 01:22:41.369 WARNING internationalclinics-com_6d82 - strix.core.execution: transient model/provider error for f5da6777; replaying turn (attempt 5/5, backoff 32.0s): APIError('prompt is too long: 54789 tokens > 30000 maximum (prompt + generation); shorten the prompt or increase the KV cache budget')
+2026-09-04 01:23:13.378 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating trace
+2026-09-04 01:23:13.381 DEBUG   internationalclinics-com_6d82 - openai.agents: Setting current trace: no-op
+2026-09-04 01:23:13.381 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:23:13.396 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:23:13.397 DEBUG   internationalclinics-com_6d82 - openai.agents: Starting turn 1, current_agent=Root Agent
+2026-09-04 01:23:13.397 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:23:13.399 DEBUG   internationalclinics-com_6d82 - openai.agents: No conversation_id available for request
+2026-09-04 01:23:13.400 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:23:13.403 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:23:13.723 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 2.0s (attempt 1/5).
+2026-09-04 01:23:15.725 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:23:15.730 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:23:16.094 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 4.0s (attempt 2/5).
+2026-09-04 01:23:20.096 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:23:20.101 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:23:20.382 DEBUG   internationalclinics-com_6d82 - openai.agents: Retrying failed streamed model request in 8.0s (attempt 3/5).
+2026-09-04 01:23:28.384 DEBUG   internationalclinics-com_6d82 - openai.agents: Tracing is disabled. Not creating span
+2026-09-04 01:23:28.389 DEBUG   internationalclinics-com_6d82 - openai.agents: Calling LLM
+2026-09-04 01:23:33.983 INFO    internationalclinics-com_6d82 - strix.core.runner: Scan internationalclinics-com_6d82 interrupted by the user
+2026-09-04 01:23:33.983 INFO    internationalclinics-com_6d82 - strix.core.agents: agent.status f5da6777=running
+2026-09-04 01:23:33.987 INFO    internationalclinics-com_6d82 - strix.core.runner: Tearing down sandbox session for scan internationalclinics-com_6d82
+2026-09-04 01:23:34.229 INFO    internationalclinics-com_6d82 - strix.runtime.session_manager: Cleaned up sandbox session for scan internationalclinics-com_6d82
+2026-09-04 01:23:34.230 INFO    internationalclinics-com_6d82 - strix.core.runner: Strix scan internationalclinics-com_6d82 done
