@@ -12,6 +12,6 @@ export function CollapsiblePanel({ title, subtitle, icon, children, collapsedCon
       <ChevronDown size={17} className={open ? "is-open" : undefined} />
     </button>
     <div className={`collapsible-sidebar-body${open ? " is-open" : ""}`} hidden={!open}>{children}</div>
-    {collapsedContent && <div className="collapsible-sidebar-collapsed-icons" hidden={open}>{collapsedContent}</div>}
+    {collapsedContent && !open && <div className="collapsible-sidebar-collapsed-icons">{collapsedContent}</div>}
   </div>;
 }

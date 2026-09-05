@@ -37,7 +37,7 @@ const T = {
     ended: "انتهى",
     generalSession: "مجلس عامّ",
     minutes: "دقيقة",
-    search: "ابحث في المقررات أو المحاضرين", status: "الحالة", all: "الكل", active: "نشط", allStages: "كل المراحل", noResults: "لا توجد مقررات مطابقة", pagination: "صفحات المقررات",
+    search: "ابحث في المقررات أو المحاضرين", status: "الحالة", all: "الكل", active: "نشط", allStages: "كل المراحل", noResults: "لا توجد مقررات مطابقة", pagination: "صفحات المقررات", waitingApproval: "بانتظار موافقة الإدارة",
   },
   en: {
     myCourses: "My courses",
@@ -63,7 +63,7 @@ const T = {
     ended: "Ended",
     generalSession: "General session",
     minutes: "min",
-    search: "Search courses or instructors", status: "Status", all: "All", active: "Active", allStages: "All stages", noResults: "No matching courses", pagination: "Course pages",
+    search: "Search courses or instructors", status: "Status", all: "All", active: "Active", allStages: "All stages", noResults: "No matching courses", pagination: "Course pages", waitingApproval: "Waiting for admin approval",
   },
 } as const;
 
