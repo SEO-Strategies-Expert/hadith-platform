@@ -19,7 +19,7 @@ export async function studentLogin(
   try {
     if (!(await consumeRateLimit("student-login", String(formData.get("email") ?? "unknown")))) return lang === "en" ? "Too many attempts. Try again in 15 minutes." : "محاولات كثيرة. حاول بعد 15 دقيقة.";
     await signIn("credentials", {
-      email: formData.get("email"),
+      email: String(formData.get("email") ?? "").trim().toLowerCase(),
       password: formData.get("password"),
       redirectTo: lang === "en" ? "/en/student" : "/student",
     });
