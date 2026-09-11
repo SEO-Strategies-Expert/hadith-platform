@@ -336,6 +336,7 @@ html[dir="rtl"] .ticker-track{animation-name:tickerRtlArabic}
 /* Keep the complete artwork visible on desktop screens; some source slides are
    taller than the hero and were being cropped by `object-fit: cover`. */
 @media(min-width:761px){.slide img{object-fit:contain;background:var(--navy-950)}.slide.is-active img{animation:none}}
+@media(min-width:761px){.hero-stage{aspect-ratio:1672/941;max-height:none}}
 /* Solid gold typography is easier to read than the metallic wave effect. */
 .gold-text{background:none!important;color:var(--gold-2)!important;-webkit-text-fill-color:currentColor!important;filter:none!important}
 

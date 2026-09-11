@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Link from "next/link";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import type { Lang } from "@/lib/site-data";
 import { studentLogin } from "@/app/(site)/student-actions";
@@ -68,6 +69,9 @@ export function StudentLoginForm({ lang }: { lang: Lang }) {
       >
         {pending ? t.pending : t.submit}
       </button>
+      <Link className="student-register-link" href={lang === "en" ? "/en/student-register.html" : "/student-register.html"}>
+        {lang === "en" ? "New student? Create an account" : "طالب جديد؟ إنشاء حساب"}
+      </Link>
       <p style={{ marginTop: 14, textAlign: "center", fontSize: 13, color: "var(--ink-soft)" }}>
         {t.hint}
       </p>

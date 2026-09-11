@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import type { Lang } from "@/lib/site-data";
 import { getPageBySlug } from "@/lib/site-content";
 import { StudentLoginForm } from "@/components/site/StudentLoginForm";
-import Link from "next/link";
 
 const T = {
   ar: { kicker:"بوابة الطالب", title:"مرحبًا بعودتك", intro:"سجّل دخولك للوصول إلى مقرراتك ومحاضراتك واختباراتك وشهاداتك.", secure:"دخول آمن إلى حسابك الأكاديمي" },
@@ -15,6 +14,6 @@ export async function StudentLoginPage({ lang }: { lang: Lang }) {
   const t=T[lang];
   return <main className="student-login-modern" style={page.heroImage ? {backgroundImage:`linear-gradient(rgba(7,22,48,.78),rgba(7,22,48,.9)),url(${page.heroImage})`} : undefined}>
     <div className="student-login-orb student-login-orb-one"/><div className="student-login-orb student-login-orb-two"/>
-    <section className="student-login-card"><div className="student-login-brand"><img src="/assets/img/logo-official.png" alt="" width="82" height="82"/><span>{t.kicker}</span></div><header><h1>{t.title}</h1><p>{t.intro}</p></header><StudentLoginForm lang={lang}/><p style={{textAlign:"center",marginTop:12}}><Link href={lang === "en" ? "/en/student-register.html" : "/student-register.html"}>{lang === "en" ? "New student? Create an account" : "طالب جديد؟ إنشاء حساب"}</Link></p><footer><span>✓</span> {t.secure}</footer></section>
+    <section className="student-login-card"><div className="student-login-brand"><img src="/assets/img/logo-official.png" alt="" width="82" height="82"/><span>{t.kicker}</span></div><header><h1>{t.title}</h1><p>{t.intro}</p></header><StudentLoginForm lang={lang}/><footer><span>✓</span> {t.secure}</footer></section>
   </main>;
 }
