@@ -26,10 +26,20 @@ export async function getFooterNav() {
 }
 
 export async function getSocialLinks() {
-  return prisma.socialLink.findMany({
+  const rows = await prisma.socialLink.findMany({
     where: { visible: true },
     orderBy: { order: "asc" },
   });
+  const official: Record<string, string> = {
+    youtube: "https://www.youtube.com/@HCH-h9n",
+    telegram: "https://t.me/highercollegehadith",
+    x: "https://x.com/higherCH",
+    instagram: "https://www.instagram.com/alklytallyallhdyth?stkn=a2YzNWxicnJmanV6",
+    facebook: "https://www.facebook.com/profile.php?id=61593191340672&mibextid=rS40aB7S9Ucbxw6v",
+    snapchat: "https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYeW5wZ2l2c2NnAaBn_9XLAaBn_9VdAAAAAw?share_id=ryA1LUb1pxE&locale=ar-EG",
+    tiktok: "https://www.tiktok.com/@hchde87",
+  };
+  return rows.map((row) => ({ ...row, url: row.url && row.url !== "#" ? row.url : official[row.key] || row.url }));
 }
 
 export async function getSettingsMap() {

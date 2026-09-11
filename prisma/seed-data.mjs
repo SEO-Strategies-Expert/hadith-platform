@@ -17,13 +17,13 @@ export const settings = [
 ];
 
 export const socialLinks = [
-  { key: "youtube", labelAr: "يوتيوب", labelEn: "YouTube", icon: "s-yt", order: 1 },
-  { key: "facebook", labelAr: "فيسبوك", labelEn: "Facebook", icon: "s-fb", order: 2 },
-  { key: "x", labelAr: "إكس", labelEn: "X", icon: "s-x", order: 3 },
-  { key: "snapchat", labelAr: "سناب شات", labelEn: "Snapchat", icon: "s-sc", order: 4 },
-  { key: "tiktok", labelAr: "تيك توك", labelEn: "TikTok", icon: "s-tk", order: 5 },
-  { key: "instagram", labelAr: "إنستجرام", labelEn: "Instagram", icon: "s-ig", order: 6 },
-  { key: "telegram", labelAr: "تليجرام", labelEn: "Telegram", icon: "s-tg", order: 7 },
+  { key: "youtube", labelAr: "يوتيوب", labelEn: "YouTube", icon: "s-yt", order: 1, url: "https://www.youtube.com/@HCH-h9n" },
+  { key: "facebook", labelAr: "فيسبوك", labelEn: "Facebook", icon: "s-fb", order: 2, url: "https://www.facebook.com/profile.php?id=61593191340672&mibextid=rS40aB7S9Ucbxw6v" },
+  { key: "x", labelAr: "إكس", labelEn: "X", icon: "s-x", order: 3, url: "https://x.com/higherCH" },
+  { key: "snapchat", labelAr: "سناب شات", labelEn: "Snapchat", icon: "s-sc", order: 4, url: "https://www.snapchat.com/spotlight/W7_EDlXWTBiXAEEniNoMPwAAYeW5wZ2l2c2NnAaBn_9XLAaBn_9VdAAAAAw?share_id=ryA1LUb1pxE&locale=ar-EG" },
+  { key: "tiktok", labelAr: "تيك توك", labelEn: "TikTok", icon: "s-tk", order: 5, url: "https://www.tiktok.com/@hchde87" },
+  { key: "instagram", labelAr: "إنستجرام", labelEn: "Instagram", icon: "s-ig", order: 6, url: "https://www.instagram.com/alklytallyallhdyth?stkn=a2YzNWxicnJmanV6" },
+  { key: "telegram", labelAr: "تليجرام", labelEn: "Telegram", icon: "s-tg", order: 7, url: "https://t.me/highercollegehadith" },
   { key: "whatsapp", labelAr: "واتساب", labelEn: "WhatsApp", icon: "s-wa", order: 8 },
 ];
 
