@@ -7,6 +7,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { currentUser } from "@/lib/guard";
 import { consumeRateLimit } from "@/lib/rate-limit";
+import bcrypt from "bcryptjs";
+import { z } from "zod";
 
 /** دخول الطالب من بوابة الطلاب — يستخدم نفس مزوّد المصادقة. */
 export async function studentLogin(
@@ -34,6 +36,17 @@ export async function studentLogin(
 
 export async function studentLogout(lang: Lang) {
   await signOut({ redirectTo: lang === "en" ? "/en/student-login.html" : "/student-login.html" });
+}
+
+export async function studentRegister(lang: Lang, _prev: string | undefined, formData: FormData): Promise<string | undefined> {
+  const parsed = z.object({ name: z.string().trim().min(2), email: z.string().trim().email(), password: z.string().min(8), confirm: z.string() }).safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return lang === "en" ? "Enter a name, valid email, and password of at least 8 characters." : "أدخل الاسم والبريد وكلمة مرور لا تقل عن 8 أحرف.";
+  if (parsed.data.password !== parsed.data.confirm) return lang === "en" ? "Passwords do not match." : "كلمتا المرور غير متطابقتين.";
+  const email = parsed.data.email.toLowerCase();
+  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+  if (existing) return lang === "en" ? "An account with this email already exists." : "يوجد حساب مسجّل بهذا البريد الإلكتروني بالفعل.";
+  await prisma.user.create({ data: { name: parsed.data.name, email, passwordHash: await bcrypt.hash(parsed.data.password, 12), role: "STUDENT" } });
+  return lang === "en" ? "Account created. You can sign in now." : "تم إنشاء الحساب. يمكنك تسجيل الدخول الآن.";
 }
 
 export type CourseRequestState = { ok: boolean; message: string } | undefined;

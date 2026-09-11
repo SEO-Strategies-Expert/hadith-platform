@@ -1,0 +1,3 @@
+import type { Lang } from "@/lib/site-data";
+import { StudentRegisterForm } from "./StudentRegisterForm";
+export function StudentRegisterPage({lang}:{lang:Lang}) { const ar=lang==="ar"; return <main className="student-login-modern"><section className="student-login-card"><div className="student-login-brand"><img src="/assets/img/logo-official.png" alt="" width="82" height="82"/><span>{ar?"تسجيل طالب جديد":"Student registration"}</span></div><header><h1>{ar?"إنشاء حساب طالب":"Create your student account"}</h1><p>{ar?"أنشئ حسابك للوصول إلى طلبات الالتحاق والمقررات.":"Create an account to apply for courses and access your learning portal."}</p></header><StudentRegisterForm lang={lang}/></section></main>; }
