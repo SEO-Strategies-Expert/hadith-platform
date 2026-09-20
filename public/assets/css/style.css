@@ -61,7 +61,7 @@
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;scroll-padding-top:120px}
 body{
-  margin:0;font-family:'PlexAr','IBM Plex Sans Arabic','Segoe UI',system-ui,sans-serif;
+  margin:0;font-family:var(--font-body,'PlexAr','IBM Plex Sans Arabic','Segoe UI',system-ui,sans-serif);
   background:var(--cream-50);color:var(--ink);
   font-size:16px;line-height:1.85;-webkit-font-smoothing:antialiased;
   overflow-x:hidden;
@@ -81,7 +81,8 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke
 svg.brandicon{fill:currentColor;stroke:none}
 
 /* الخطوط العربية */
-.thuluth{font-family:'Thuluth','ThuluthAlt','NaskhQ',serif;font-weight:400;line-height:2.25}
+.thuluth{font-family:var(--font-heading,'Thuluth','ThuluthAlt','NaskhQ',serif);font-weight:400;line-height:2.25}
+.page-title,.section-cap h2,.inner-cta h2,.portal-copy h1,.hero-bar-text,.brand-ar,.brand-en{font-family:var(--font-heading,'Thuluth','ThuluthAlt','NaskhQ',serif)}
 .naskh{font-family:'ThuluthAlt','NaskhQ',serif;font-weight:700;line-height:1.9}
 
 /* ==========================================================================

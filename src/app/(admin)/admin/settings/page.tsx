@@ -19,6 +19,8 @@ const EXTRA_KEYS: { key: string; group: string }[] = [
   { key: "certificate.signature2", group: "certificate" },
   { key: "certificate.signature2Name", group: "certificate" },
   { key: "system.debug", group: "system" },
+  { key: "font.heading", group: "appearance" },
+  { key: "font.body", group: "appearance" },
 ];
 
 const LABELS: Record<string, string> = {
@@ -44,6 +46,8 @@ const LABELS: Record<string, string> = {
   "certificate.signature2": "التوقيع الإلكتروني الثاني",
   "certificate.signature2Name": "اسم وصفة صاحب التوقيع الثاني",
   "system.debug": "وضع التصحيح (Debug — إظهار تفاصيل الأخطاء)",
+  "font.heading": "خط الشعار والعناوين",
+  "font.body": "خط الفقرات والنصوص",
 };
 
 const HINTS: Record<string, string> = {
@@ -63,6 +67,7 @@ const GROUP_TITLES: Record<string, string> = {
   admissions: "القبول والمقابلات",
   certificate: "تصميم الشهادات والتواقيع",
   system: "النظام والتشخيص",
+  appearance: "خطوط الواجهة الأمامية",
 };
 
 function isLtr(key: string) {
@@ -154,6 +159,10 @@ export default async function SettingsPage({
                           </span>
                         </div>
                       );
+                    }
+                    if (s.key === "font.heading" || s.key === "font.body") {
+                      const heading = s.key === "font.heading";
+                      return <div key={s.key}><label className="mb-1.5 block text-[12px] font-bold text-navy-800">{label}</label><select name={s.key} defaultValue={value || (heading ? "Thuluth" : "PlexAr")} className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-[14px] text-navy-950 outline-none focus:border-gold"><option value={heading ? "Thuluth" : "PlexAr"}>{heading ? "Thuluth (الافتراضي)" : "PlexAr / IBM Plex Sans Arabic (الافتراضي)"}</option>{heading ? <><option value="ThuluthAlt">ThuluthAlt</option><option value="NaskhQ">NaskhQ</option></> : <><option value="Segoe">Segoe UI</option><option value="System">System UI</option></>}</select><span className="mt-1 block text-[11px] text-ink-soft">يُطبّق على الواجهة الأمامية بعد الحفظ.</span></div>;
                     }
                     return (
                       <div key={s.key} className={isLong(s.key) ? "sm:col-span-2" : ""}>

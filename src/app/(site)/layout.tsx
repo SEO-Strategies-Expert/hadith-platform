@@ -6,6 +6,7 @@ import { IconLibrary } from "@/components/site/IconLibrary";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { Ticker } from "@/components/site/Ticker";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { getSettingsMap } from "@/lib/site-data";
 
 export default async function SiteLayout({
   children,
@@ -30,6 +31,11 @@ export default async function SiteLayout({
     pathname === "/en/student" ||
     pathname.startsWith("/en/student/");
   const isPortal = currentSlug === "student-login" || isStudentDashboard || inApp;
+  const settings = await getSettingsMap();
+  const headingFonts: Record<string, string> = { Thuluth: "'Thuluth','ThuluthAlt','NaskhQ',serif", ThuluthAlt: "'ThuluthAlt','NaskhQ',serif", NaskhQ: "'NaskhQ','ThuluthAlt',serif" };
+  const bodyFonts: Record<string, string> = { PlexAr: "'PlexAr','IBM Plex Sans Arabic','Segoe UI',system-ui,sans-serif", Segoe: "'Segoe UI',system-ui,sans-serif", System: "system-ui,sans-serif" };
+  const headingFont = headingFonts[settings.get("font.heading") || "Thuluth"] || headingFonts.Thuluth;
+  const bodyFont = bodyFonts[settings.get("font.body") || "PlexAr"] || bodyFonts.PlexAr;
 
   return (
     <html lang={lang} dir={lang === "ar" ? "rtl" : "ltr"}>
@@ -41,7 +47,7 @@ export default async function SiteLayout({
         <link rel="stylesheet" href="/assets/css/inner-pages.css" />
         {lang === "en" && <link rel="stylesheet" href="/assets/css/en.css" />}
       </head>
-      <body data-page={isPortal ? "portal" : currentSlug === "index" ? "home" : "inner"}>
+      <body data-page={isPortal ? "portal" : currentSlug === "index" ? "home" : "inner"} style={{ "--font-heading": headingFont, "--font-body": bodyFont } as React.CSSProperties}>
         <a className="skip-link" href="#main">
           {skipLabel}
         </a>
