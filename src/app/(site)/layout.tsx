@@ -32,8 +32,8 @@ export default async function SiteLayout({
     pathname.startsWith("/en/student/");
   const isPortal = currentSlug === "student-login" || isStudentDashboard || inApp;
   const settings = await getSettingsMap();
-  const headingFonts: Record<string, string> = { Thuluth: "'Thuluth','ThuluthAlt','NaskhQ',serif", ThuluthAlt: "'ThuluthAlt','NaskhQ',serif", NaskhQ: "'NaskhQ','ThuluthAlt',serif" };
-  const bodyFonts: Record<string, string> = { PlexAr: "'PlexAr','IBM Plex Sans Arabic','Segoe UI',system-ui,sans-serif", Segoe: "'Segoe UI',system-ui,sans-serif", System: "system-ui,sans-serif" };
+  const headingFonts: Record<string, string> = { Thuluth: "'Thuluth','ThuluthAlt','NaskhQ',serif", ThuluthAlt: "'ThuluthAlt','NaskhQ',serif", NaskhQ: "'NaskhQ','ThuluthAlt',serif", Cairo: "Cairo,'PlexAr',sans-serif", Tajawal: "Tajawal,'PlexAr',sans-serif", Amiri: "Amiri,'NaskhQ',serif", Scheherazade: "'Scheherazade New','NaskhQ',serif", NotoKufi: "'Noto Kufi Arabic','PlexAr',sans-serif", ReemKufi: "'Reem Kufi','PlexAr',sans-serif", Changa: "Changa,'PlexAr',sans-serif", Mada: "Mada,'PlexAr',sans-serif" };
+  const bodyFonts: Record<string, string> = { PlexAr: "'PlexAr','IBM Plex Sans Arabic','Segoe UI',system-ui,sans-serif", Cairo: "Cairo,'PlexAr',sans-serif", Tajawal: "Tajawal,'PlexAr',sans-serif", Almarai: "Almarai,'PlexAr',sans-serif", NotoSans: "'Noto Sans Arabic','PlexAr',sans-serif", NotoKufi: "'Noto Kufi Arabic','PlexAr',sans-serif", Changa: "Changa,'PlexAr',sans-serif", Mada: "Mada,'PlexAr',sans-serif", Readex: "'Readex Pro','PlexAr',sans-serif", IBM: "'IBM Plex Sans Arabic','PlexAr',sans-serif", Segoe: "'Segoe UI',system-ui,sans-serif", System: "system-ui,sans-serif" };
   const headingFont = headingFonts[settings.get("font.heading") || "Thuluth"] || headingFonts.Thuluth;
   const bodyFont = bodyFonts[settings.get("font.body") || "PlexAr"] || bodyFonts.PlexAr;
 
@@ -43,6 +43,9 @@ export default async function SiteLayout({
         <meta name="theme-color" content="#123159" />
         <link rel="icon" type="image/png" href="/assets/img/favicon.png" />
         <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/plex-600.woff2" crossOrigin="" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&family=Changa:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Mada:wght@400;600;700&family=Noto+Kufi+Arabic:wght@400;600;700&family=Noto+Sans+Arabic:wght@400;600;700&family=Readex+Pro:wght@400;600;700&family=Reem+Kufi:wght@400;600;700&family=Scheherazade+New:wght@400;700&family=Tajawal:wght@400;500;700&display=swap" />
         <link rel="stylesheet" href="/assets/css/style.css" />
         <link rel="stylesheet" href="/assets/css/inner-pages.css" />
         {lang === "en" && <link rel="stylesheet" href="/assets/css/en.css" />}
