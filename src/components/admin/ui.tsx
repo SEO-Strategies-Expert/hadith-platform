@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { ExternalLink, Plus } from "lucide-react";
 
 export function PageHeader({
   title,
@@ -8,7 +8,7 @@ export function PageHeader({
 }: {
   title: string;
   desc?: string;
-  action?: { href: string; label: string };
+  action?: { href: string; label: string; external?: boolean };
 }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
@@ -19,9 +19,11 @@ export function PageHeader({
       {action && (
         <Link
           href={action.href}
+          target={action.external ? "_blank" : undefined}
+          rel={action.external ? "noopener noreferrer" : undefined}
           className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-l from-gold-1 to-gold-3 px-4 py-2.5 text-[13.5px] font-extrabold text-navy-950 shadow-md hover:brightness-105"
         >
-          <Plus size={17} /> {action.label}
+          {action.external ? <ExternalLink size={17} /> : <Plus size={17} />} {action.label}
         </Link>
       )}
     </div>

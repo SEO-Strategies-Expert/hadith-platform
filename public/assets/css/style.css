@@ -1359,6 +1359,14 @@ html[dir="rtl"] .news-list li a>div,html[dir="rtl"] .news-mini>div{grid-column:2
   .inner-section{padding:52px 0}
 }
 
+/* الشاشات القصيرة: يكتفي صفّ الهيدر بالشعار، مع قائمة أوضح وأسهل للقراءة. */
+@media(max-width:600px){
+  .menubar .brand-copy{display:none!important}
+  .menubar .brand{flex:0 0 auto;gap:0}
+  .menubar .nav-item em,
+  .menubar.nav-collapsed .nav-item em{font-size:16px}
+}
+
 /* ---------- (10) بقايا نصوص دون 12.5px — قواعدها الأصلية أعلى تخصيصًا ---- */
 @media(max-width:1366px){
   .cat-list button .n,.thread-meta .rank,.thread-stats span,.agenda-list .when,

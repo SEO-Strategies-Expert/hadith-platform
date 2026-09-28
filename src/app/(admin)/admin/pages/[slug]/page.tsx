@@ -27,7 +27,15 @@ export default async function EditPagePage({
 
   return (
     <div>
-      <PageHeader title={`تحرير: ${p.titleAr}`} desc={`المعرّف: ${slug}`} />
+      <PageHeader
+        title={`تحرير: ${p.titleAr}`}
+        desc={`المعرّف: ${slug}`}
+        action={{
+          href: slug === "index" ? "/" : `/${slug}.html`,
+          label: "فتح الصفحة",
+          external: true,
+        }}
+      />
       <Card className="max-w-5xl bg-slate-50/70 p-4 sm:p-6">
         <ActionForm action={updatePage.bind(null, slug)} cancelHref="/admin/pages">
           <div className="space-y-7">

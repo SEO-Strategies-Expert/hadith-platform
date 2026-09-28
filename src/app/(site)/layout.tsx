@@ -32,9 +32,10 @@ export default async function SiteLayout({
     pathname.startsWith("/en/student/");
   const isPortal = currentSlug === "student-login" || isStudentDashboard || inApp;
   const settings = await getSettingsMap();
-  const headingFonts: Record<string, string> = { Thuluth: "'Thuluth','ThuluthAlt','NaskhQ',serif", ThuluthAlt: "'ThuluthAlt','NaskhQ',serif", NaskhQ: "'NaskhQ','ThuluthAlt',serif", Cairo: "Cairo,'PlexAr',sans-serif", Tajawal: "Tajawal,'PlexAr',sans-serif", Amiri: "Amiri,'NaskhQ',serif", Scheherazade: "'Scheherazade New','NaskhQ',serif", NotoKufi: "'Noto Kufi Arabic','PlexAr',sans-serif", ReemKufi: "'Reem Kufi','PlexAr',sans-serif", Changa: "Changa,'PlexAr',sans-serif", Mada: "Mada,'PlexAr',sans-serif" };
+  // استخدم النسخة الأبسط والأوضح حتى مع الإعداد القديم "Thuluth" المحفوظ سابقًا.
+  const headingFonts: Record<string, string> = { Thuluth: "'ThuluthAlt','NaskhQ',serif", ThuluthAlt: "'ThuluthAlt','NaskhQ',serif", NaskhQ: "'NaskhQ','ThuluthAlt',serif", Cairo: "Cairo,'PlexAr',sans-serif", Tajawal: "Tajawal,'PlexAr',sans-serif", Amiri: "Amiri,'NaskhQ',serif", Scheherazade: "'Scheherazade New','NaskhQ',serif", NotoKufi: "'Noto Kufi Arabic','PlexAr',sans-serif", ReemKufi: "'Reem Kufi','PlexAr',sans-serif", Changa: "Changa,'PlexAr',sans-serif", Mada: "Mada,'PlexAr',sans-serif" };
   const bodyFonts: Record<string, string> = { PlexAr: "'PlexAr','IBM Plex Sans Arabic','Segoe UI',system-ui,sans-serif", Cairo: "Cairo,'PlexAr',sans-serif", Tajawal: "Tajawal,'PlexAr',sans-serif", Almarai: "Almarai,'PlexAr',sans-serif", NotoSans: "'Noto Sans Arabic','PlexAr',sans-serif", NotoKufi: "'Noto Kufi Arabic','PlexAr',sans-serif", Changa: "Changa,'PlexAr',sans-serif", Mada: "Mada,'PlexAr',sans-serif", Readex: "'Readex Pro','PlexAr',sans-serif", IBM: "'IBM Plex Sans Arabic','PlexAr',sans-serif", Segoe: "'Segoe UI',system-ui,sans-serif", System: "system-ui,sans-serif" };
-  const headingFont = headingFonts[settings.get("font.heading") || "Thuluth"] || headingFonts.Thuluth;
+  const headingFont = headingFonts[settings.get("font.heading") || "ThuluthAlt"] || headingFonts.ThuluthAlt;
   const bodyFont = bodyFonts[settings.get("font.body") || "PlexAr"] || bodyFonts.PlexAr;
 
   return (

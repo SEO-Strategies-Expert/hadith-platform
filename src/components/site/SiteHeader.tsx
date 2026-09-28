@@ -20,7 +20,7 @@ const T = {
     home: "الرئيسية",
     live: "البث المباشر",
     uniSocial: "صفحات الجامعة",
-    accreditation: "الإعتماد",
+    accreditation: "الاعتماد",
     logout: "تسجيل الخروج",
     account: "حسابي", profile: "الملف الشخصي", myCourses: "مقرراتي", mySessions: "مجالسي", myCertificates: "شهاداتي", myPayments: "مدفوعاتي", library: "المكتبة الرقمية",
   },
