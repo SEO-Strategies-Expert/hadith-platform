@@ -21,6 +21,9 @@ const EXTRA_KEYS: { key: string; group: string }[] = [
   { key: "system.debug", group: "system" },
   { key: "font.heading", group: "appearance" },
   { key: "font.body", group: "appearance" },
+  { key: "translation.provider", group: "translation" },
+  { key: "translation.model", group: "translation" },
+  { key: "translation.apiKey", group: "translation" },
 ];
 
 const LABELS: Record<string, string> = {
@@ -48,6 +51,9 @@ const LABELS: Record<string, string> = {
   "system.debug": "وضع التصحيح (Debug — إظهار تفاصيل الأخطاء)",
   "font.heading": "خط الشعار والعناوين",
   "font.body": "خط الفقرات والنصوص",
+  "translation.provider": "مزود الترجمة",
+  "translation.model": "نموذج الترجمة",
+  "translation.apiKey": "مفتاح API الترجمة",
 };
 
 const HINTS: Record<string, string> = {
@@ -68,6 +74,7 @@ const GROUP_TITLES: Record<string, string> = {
   certificate: "تصميم الشهادات والتواقيع",
   system: "النظام والتشخيص",
   appearance: "خطوط الواجهة الأمامية",
+  translation: "الترجمة التلقائية",
 };
 
 function isLtr(key: string) {
@@ -165,6 +172,11 @@ export default async function SettingsPage({
                       const options = heading ? [["ThuluthAlt", "ثلث واضح (الافتراضي)"], ["Thuluth", "ثلث (متوافق)"], ["NaskhQ", "NaskhQ"], ["Cairo", "Cairo"], ["Tajawal", "Tajawal"], ["Amiri", "Amiri"], ["Scheherazade", "Scheherazade New"], ["NotoKufi", "Noto Kufi Arabic"], ["ReemKufi", "Reem Kufi"], ["Changa", "Changa"], ["Mada", "Mada"]] : [["PlexAr", "PlexAr / IBM Plex Sans Arabic (الافتراضي)"], ["Cairo", "Cairo"], ["Tajawal", "Tajawal"], ["Almarai", "Almarai"], ["NotoSans", "Noto Sans Arabic"], ["NotoKufi", "Noto Kufi Arabic"], ["Changa", "Changa"], ["Mada", "Mada"], ["Readex", "Readex Pro"], ["IBM", "IBM Plex Sans Arabic"], ["Segoe", "Segoe UI"], ["System", "System UI"]];
                       return <div key={s.key}><label className="mb-1.5 block text-[12px] font-bold text-navy-800">{label}</label><select name={s.key} defaultValue={value || (heading ? "ThuluthAlt" : "PlexAr")} className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-[14px] text-navy-950 outline-none focus:border-gold">{options.map(([fontValue, fontLabel]) => <option key={fontValue} value={fontValue}>{fontLabel}</option>)}</select><span className="mt-1 block text-[11px] text-ink-soft">يُطبّق على الواجهة الأمامية بعد الحفظ.</span></div>;
                     }
+                    if (s.key === "translation.provider" || s.key === "translation.model") {
+                      const options = s.key === "translation.provider" ? [["mistral", "Mistral"]] : [["mistral-small-latest", "Mistral Small (موصى به)"], ["mistral-large-latest", "Mistral Large"]];
+                      return <div key={s.key}><label className="mb-1.5 block text-[12px] font-bold text-navy-800">{label}</label><select name={s.key} defaultValue={value || options[0][0]} className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-[14px] text-navy-950 outline-none focus:border-gold">{options.map(([optionValue, optionLabel]) => <option key={optionValue} value={optionValue}>{optionLabel}</option>)}</select></div>;
+                    }
+                    if (s.key === "translation.apiKey") return <div key={s.key}><Field label={label} name={s.key} type="password" defaultValue={value} dir="ltr" hint="يُحفظ في إعدادات الخادم ولا يُرسل إلى المتصفح إلا كحقل مخفي." /></div>;
                     return (
                       <div key={s.key} className={isLong(s.key) ? "sm:col-span-2" : ""}>
                         {/^certificate\.(logo|signature\d)$/.test(s.key) ? (

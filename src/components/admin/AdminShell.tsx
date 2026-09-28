@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Menu, ExternalLink, LogOut, ChevronDown, Search, X } from "lucide-react";
 import { Sidebar } from "./Sidebar";
 import { adminNav } from "@/lib/admin-nav";
+import { AutoTranslate } from "./AutoTranslate";
 
 export function AdminShell({
   user,
@@ -38,6 +39,7 @@ export function AdminShell({
 
   return (
     <div className="min-h-screen">
+      <AutoTranslate />
       <Sidebar role={user.role} open={open} onNavigate={() => setOpen(false)} />
 
       {open && (
