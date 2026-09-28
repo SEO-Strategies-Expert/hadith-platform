@@ -47,6 +47,20 @@
   --ease-out:cubic-bezier(.16,1,.3,1);
 }
 
+/* اسم الكلية في الهيدر: كتابة عربية واضحة بحركات أساسية فقط، بلا تأثيرات
+   التدرّج/الظل التي تجعل التشكيل يبدو كزخارف متراكبة. */
+.brand-name.brand-name{
+  font-family:'NaskhQ','ThuluthAlt',serif!important;
+  font-weight:700;
+  background:none!important;
+  color:var(--gold-1)!important;
+  -webkit-text-fill-color:currentColor!important;
+  filter:none!important;
+  padding-block:0!important;
+  margin-block:0!important;
+  line-height:1.55;
+}
+
 /* التدرّج الذهبي المعدني */
 .gold-text{
   background-image:linear-gradient(177deg,
