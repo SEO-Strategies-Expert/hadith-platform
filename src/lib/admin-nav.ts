@@ -57,6 +57,7 @@ export const adminNav: NavSection[] = [
       { label: "خطوات المسارات", href: "/admin/steps", icon: ListOrdered },
       { label: "الجداول (الاعتماد والخطة)", href: "/admin/curriculum", icon: Table },
       { label: "التنقّل والقوائم", href: "/admin/navigation", icon: Navigation },
+      { label: "روابط التواصل", href: "/admin/social", icon: MessagesSquare },
       { label: "الأخبار والفعاليات", href: "/admin/news", icon: Newspaper },
       { label: "ديوان العلماء", href: "/admin/diwan", icon: MessagesSquare },
       { label: "الإصدارات والمجلة", href: "/admin/publications", icon: BookMarked },

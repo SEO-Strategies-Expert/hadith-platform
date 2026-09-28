@@ -34,7 +34,7 @@ export interface FieldDef {
 export interface ColumnDef {
   name: string;
   label: string;
-  kind?: "text" | "bool" | "image" | "badge";
+  kind?: "text" | "bool" | "image" | "badge" | "url";
 }
 
 export interface ResourceConfig {
@@ -419,14 +419,14 @@ export const resources: Record<string, ResourceConfig> = {
     orderBy: { order: "asc" },
     columns: [
       { name: "labelAr", label: "المنصّة" },
-      { name: "url", label: "الرابط", kind: "text" },
+      { name: "url", label: "الرابط", kind: "url" },
       { name: "visible", label: "ظاهر", kind: "bool" },
     ],
     fields: [
       { name: "key", label: "المفتاح", type: "ltr", half: true, required: true, hint: "youtube, x, instagram…" },
       { name: "icon", label: "الأيقونة", type: "ltr", half: true, hint: "s-yt, s-fb…" },
       ...bilingual("label", "الاسم", { required: true }),
-      { name: "url", label: "الرابط", type: "ltr" },
+      { name: "url", label: "الرابط أو رقم الهاتف/اسم المستخدم", type: "ltr", hint: "لـ WhatsApp اكتب رقمًا مثل +974xxxxxxxx أو اسم المستخدم؛ سيُحفظ كرابط wa.me كامل." },
       ...commonTail,
     ],
   },

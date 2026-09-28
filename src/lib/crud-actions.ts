@@ -57,6 +57,18 @@ function validate(fields: FieldDef[], data: Record<string, unknown>): string | n
   return null;
 }
 
+/** يحوّل إدخال واتساب المختصر (رقمًا أو اسم مستخدم) إلى رابط محادثة كامل. */
+function normalizeSocialUrl(data: Record<string, unknown>) {
+  if (data.key !== "whatsapp" || typeof data.url !== "string") return;
+  const value = data.url.trim();
+  if (!value || value === "#" || /^https?:\/\//i.test(value)) return;
+  const input = value.replace(/^@/, "");
+  const phone = input.replace(/[\s().-]/g, "");
+  data.url = /^\+?\d{7,15}$/.test(phone)
+    ? `https://wa.me/${phone.replace(/^\+/, "")}`
+    : `https://wa.me/${encodeURIComponent(input)}`;
+}
+
 function friendly(e: unknown): string {
   const msg = String((e as Error)?.message || e);
   if (msg.includes("Unique constraint")) return "قيمة مكرّرة — المفتاح مستخدم بالفعل.";
@@ -72,6 +84,7 @@ export async function createRecord(
   const cfg = getResource(resourceKey);
   if (!cfg) return "مورد غير معروف.";
   const data = coerce(cfg.fields, formData);
+  normalizeSocialUrl(data);
   if (cfg.model === "course") {
     const instructorIds = Array.isArray(data.instructorIds) ? data.instructorIds as string[] : [];
     delete data.instructorIds;
@@ -110,6 +123,7 @@ export async function updateRecord(
   const cfg = getResource(resourceKey);
   if (!cfg) return "مورد غير معروف.";
   const data = coerce(cfg.fields, formData);
+  normalizeSocialUrl(data);
   if (cfg.model === "course") {
     const instructorIds = Array.isArray(data.instructorIds) ? data.instructorIds as string[] : [];
     delete data.instructorIds;

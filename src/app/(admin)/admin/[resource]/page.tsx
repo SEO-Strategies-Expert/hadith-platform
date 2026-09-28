@@ -15,6 +15,9 @@ function cell(kind: string | undefined, value: any) {
   if (kind === "badge") return value ? <Badge tone="gold">{value}</Badge> : "—";
   if (kind === "image")
     return value ? <span className="text-[11.5px] text-ink-soft" dir="ltr">{String(value).split("/").pop()}</span> : "—";
+  if (kind === "url") {
+    return value && value !== "#" ? <a href={String(value)} target="_blank" rel="noreferrer" className="block max-w-[26rem] truncate text-[12px] text-blue-700 underline-offset-2 hover:underline" dir="ltr" title={String(value)}>{String(value)}</a> : <span className="text-ink-soft">غير محدّد</span>;
+  }
   const s = value == null || value === "" ? "—" : String(value);
   return s.length > 60 ? s.slice(0, 60) + "…" : s;
 }
