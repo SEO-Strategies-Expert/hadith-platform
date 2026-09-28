@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Eye, EyeOff, Paperclip, Lock } from "lucide-react";
+import { Eye, EyeOff, Paperclip } from "lucide-react";
 import {
   requireInstructor,
   getInstructorCourse,
@@ -12,6 +12,7 @@ import {
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
 import { formatDateTime } from "@/components/admin/datetime";
 import { ProgressBar } from "@/components/instructor/ProgressBar";
+import { updateInstructorCourse } from "./actions";
 
 /**
  * تفاصيل مقرّر المحاضر: بنيته للاطّلاع، وطلابه بنسب تقدّمهم.
@@ -62,12 +63,15 @@ export default async function InstructorCoursePage({
         )}
       </div>
 
-      <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-[12.5px] text-sky-800">
-        <Lock size={16} className="mt-0.5 shrink-0" />
-        <p className="font-semibold leading-6">
-          هذه الشاشة للاطّلاع فقط. لتعديل الوحدات أو الدروس أو تسجيل الطلاب راجع إدارة المنصّة.
-        </p>
-      </div>
+      <Card className="mb-5 p-5">
+        <h2 className="mb-3 text-[16px] font-extrabold text-navy-900">تعديل بيانات المقرر</h2>
+        <form action={updateInstructorCourse.bind(null, id)} className="grid gap-4 sm:grid-cols-2">
+          <label className="block"><span className="mb-1 block text-[12px] font-bold">العنوان بالعربية</span><input name="titleAr" defaultValue={course.titleAr} required className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm" /></label>
+          <label className="block"><span className="mb-1 block text-[12px] font-bold">العنوان بالإنجليزية</span><input name="titleEn" defaultValue={course.titleEn} dir="ltr" className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm" /></label>
+          <label className="block sm:col-span-2"><span className="mb-1 block text-[12px] font-bold">الملخص</span><textarea name="summaryAr" defaultValue={course.summaryAr ?? ""} rows={3} className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm" /></label>
+          <button className="w-fit rounded-lg bg-navy-800 px-4 py-2 text-sm font-bold text-white hover:bg-navy-700">حفظ التعديلات</button>
+        </form>
+      </Card>
 
       {/* ---------------- بنية المقرّر ---------------- */}
       <h2 className="mb-3 text-[16px] font-extrabold text-navy-900">وحدات المقرّر ودروسه</h2>
