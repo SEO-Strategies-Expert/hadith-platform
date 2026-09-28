@@ -16,7 +16,7 @@ export function AutoTranslate() {
         if (response.ok && data.translation) {
           target.value = data.translation;
           target.dispatchEvent(new Event("input", { bubbles: true }));
-        }
+        } else if (data.error) target.title = data.error;
       } finally { delete target.dataset.translating; }
     };
     document.addEventListener("focusout", onBlur);
