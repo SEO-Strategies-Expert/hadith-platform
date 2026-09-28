@@ -42,6 +42,7 @@ export default async function InstructorCoursePage({
       <PageHeader title={course.titleAr} desc={course.summaryAr ?? course.descAr ?? undefined} />
 
       <div className="mb-4 flex flex-wrap gap-2">
+        <Link href={`/instructor/courses/${id}/manage`} className="rounded-lg bg-navy-800 px-3.5 py-2 text-[12.5px] font-bold text-white">إدارة المحتوى</Link>
         <Link
           href="/instructor/courses"
           className="rounded-lg border border-black/10 bg-white px-3.5 py-2 text-[12.5px] font-bold text-navy-700 hover:border-gold/50"
