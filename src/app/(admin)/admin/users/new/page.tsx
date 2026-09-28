@@ -13,7 +13,7 @@ export default async function NewUserPage() {
 
   return (
     <div>
-      <PageHeader title="إضافة مستخدم" desc="أنشئ حساب مدير أو محرّر جديد." />
+      <PageHeader title="إضافة مستخدم" desc="أنشئ حساب مدير أو محرّر أو مدرّس جديد." />
       <Card className="max-w-2xl p-6">
         <ActionForm action={createUser} cancelHref="/admin/users">
           <div className="grid gap-5 sm:grid-cols-2">
@@ -26,6 +26,7 @@ export default async function NewUserPage() {
               defaultValue="EDITOR"
               options={[
                 { value: "EDITOR", label: "محرّر" },
+                { value: "INSTRUCTOR", label: "مدرّس" },
                 { value: "ADMIN", label: "مدير" },
               ]}
             />

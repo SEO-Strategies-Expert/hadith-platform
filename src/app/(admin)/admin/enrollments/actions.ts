@@ -109,7 +109,7 @@ export async function approveEnrollment(id: string) {
   await requireUser();
   const current = await prisma.enrollment.findUnique({
     where: { id },
-    select: { status: true },
+    select: { status: true, userId: true, courseId: true, course: { select: { titleAr: true, titleEn: true } } },
   });
   if (!current) return;
   // The approval control is intentionally a toggle: clicking an approved
@@ -118,5 +118,8 @@ export async function approveEnrollment(id: string) {
     where: { id },
     data: { status: current.status === "ACTIVE" ? "PENDING" : "ACTIVE" },
   });
+  if (current.status !== "ACTIVE") {
+    await prisma.notification.create({ data: { userId: current.userId, kind: "enrollment", titleAr: "تم قبول تسجيلك", titleEn: "Your enrollment was accepted", bodyAr: `تم قبول تسجيلك في «${current.course.titleAr}».`, bodyEn: `Your enrollment in “${current.course.titleEn || current.course.titleAr}” was accepted.`, href: `/student/course/${current.courseId}` } });
+  }
   revalidatePath("/admin/enrollments");
 }

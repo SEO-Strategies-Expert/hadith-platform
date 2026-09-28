@@ -66,6 +66,8 @@ export async function requestCourseEnrollment(lang: Lang, _prev: CourseRequestSt
   if(existing && existing.status!=="CANCELLED")return {ok:existing.status==="PENDING",message:existing.status==="PENDING"?(ar?"طلبك لهذا المقرر قيد المراجعة بالفعل.":"Your request is already under review."):(ar?"أنت مسجّل في هذا المقرر بالفعل.":"You are already enrolled in this course.")};
   if(existing)await prisma.enrollment.update({where:{id:existing.id},data:{status:"PENDING",feeOption,progressPct:0,completedAt:null,enrolledAt:new Date()}});
   else await prisma.enrollment.create({data:{userId:user.id,courseId,status:"PENDING",feeOption}});
+  const admins = await prisma.user.findMany({ where: { role: "ADMIN", status: "ACTIVE" }, select: { id: true } });
+  await prisma.$transaction(admins.map((admin) => prisma.notification.create({ data: { userId: admin.id, kind: "enrollment", titleAr: "طلب تسجيل جديد", titleEn: "New enrollment request", bodyAr: `طلب الطالب التسجيل في «${course.titleAr}».`, bodyEn: `A student requested enrollment in “${course.titleEn || course.titleAr}”.`, href: "/admin/enrollments" } })));
   revalidatePath("/admin/enrollments"); revalidatePath(lang==="en"?"/en/student":"/student");
   return {ok:true,message:ar?`تم إرسال طلب التسجيل في «${course.titleAr}». ستظهر حالته في بوابتك بعد مراجعة الإدارة.`:`Your request for “${course.titleEn||course.titleAr}” was sent and is awaiting review.`};
 }

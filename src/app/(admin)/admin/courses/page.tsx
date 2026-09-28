@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Eye, Pencil, ListTree, Search, X, Bug, AlertTriangle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/guard";
+import { requireAdmin } from "@/lib/guard";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { deleteRecord } from "@/lib/crud-actions";
@@ -91,7 +91,7 @@ export default async function CoursesPage({
 }: {
   searchParams?: Promise<{ page?: string; q?: string; stageId?: string; instructorId?: string; students?: string; status?: string }>;
 }) {
-  await requireUser();
+  await requireAdmin();
 
   const sp = await searchParams;
   const rawPage = Number.parseInt(sp?.page ?? "1", 10);

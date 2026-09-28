@@ -83,6 +83,7 @@ export async function createRecord(
   const actor = await requireUser();
   const cfg = getResource(resourceKey);
   if (!cfg) return "مورد غير معروف.";
+  if (cfg.model === "course" && actor.role !== "ADMIN") return "لا يمكن إلا للمدير إدارة المقرّرات.";
   const data = coerce(cfg.fields, formData);
   normalizeSocialUrl(data);
   if (cfg.model === "course") {
@@ -122,6 +123,7 @@ export async function updateRecord(
   const actor = await requireUser();
   const cfg = getResource(resourceKey);
   if (!cfg) return "مورد غير معروف.";
+  if (cfg.model === "course" && actor.role !== "ADMIN") return "لا يمكن إلا للمدير إدارة المقرّرات.";
   const data = coerce(cfg.fields, formData);
   normalizeSocialUrl(data);
   if (cfg.model === "course") {
@@ -154,6 +156,7 @@ export async function deleteRecord(resourceKey: string, id: string) {
   const actor = await requireUser();
   const cfg = getResource(resourceKey);
   if (!cfg) return;
+  if (cfg.model === "course" && actor.role !== "ADMIN") return;
   await (prisma as any)[cfg.model].delete({ where: { id } });
   await prisma.auditLog.create({ data: { actorId: actor.id, action: "delete", entity: cfg.model, entityId: id } });
   revalidatePath(`/admin/${resourceKey}`);

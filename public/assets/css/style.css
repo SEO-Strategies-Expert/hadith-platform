@@ -1372,8 +1372,10 @@ html[dir="rtl"] .news-list li a>div,html[dir="rtl"] .news-mini>div{grid-column:2
 
 /* الشاشات القصيرة: يكتفي صفّ الهيدر بالشعار، مع قائمة أوضح وأسهل للقراءة. */
 @media(max-width:600px){
-  .menubar .brand-copy{display:none!important}
-  .menubar .brand{flex:0 0 auto;gap:0}
+  .menubar .brand-copy{display:flex!important;max-width:clamp(92px,30vw,150px);overflow:hidden}
+  .menubar .brand{flex:0 1 auto;gap:5px;min-width:0}
+  .menubar .brand-name{display:block;overflow:hidden;text-overflow:ellipsis;font-size:10px;line-height:1.35;white-space:nowrap}
+  .menubar .brand-emblem{width:46px;height:46px}
   .menubar .nav-item em,
   .menubar.nav-collapsed .nav-item em{font-size:16px}
 }

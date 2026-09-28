@@ -40,6 +40,7 @@ export default async function EditUserPage({
               defaultValue={user.role}
               options={[
                 { value: "EDITOR", label: "محرّر" },
+                { value: "INSTRUCTOR", label: "مدرّس" },
                 { value: "ADMIN", label: "مدير" },
               ]}
             />

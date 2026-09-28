@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Menu, ExternalLink, LogOut, ChevronDown, Search, X } from "lucide-react";
 import { Sidebar } from "./Sidebar";
 import { adminNav } from "@/lib/admin-nav";
@@ -98,6 +99,7 @@ export function AdminShell({
                         {user.role === "ADMIN" ? "مدير" : "محرّر"}
                       </span>
                     </div>
+                    <Link href="/admin/profile" onClick={() => setMenu(false)} className="block px-4 py-3 text-[13.5px] font-semibold text-navy-800 hover:bg-cream-50">ملفي الشخصي</Link>
                     <form action={signOutAction}>
                       <button
                         type="submit"

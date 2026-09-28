@@ -16,7 +16,7 @@ export default async function UsersPage() {
 
   // حسابات الطلاب لها قسمها الخاصّ — هذه الشاشة لطاقم اللوحة.
   const users = await prisma.user.findMany({
-    where: { role: { in: ["ADMIN", "EDITOR"] } },
+    where: { role: { in: ["ADMIN", "EDITOR", "INSTRUCTOR"] } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -56,8 +56,8 @@ export default async function UsersPage() {
                     </td>
                     <td className="px-4 py-3 text-ink-soft" dir="ltr">{u.email}</td>
                     <td className="px-4 py-3">
-                      <Badge tone={u.role === "ADMIN" ? "gold" : "blue"}>
-                        {u.role === "ADMIN" ? "مدير" : "محرّر"}
+                      <Badge tone={u.role === "ADMIN" ? "gold" : u.role === "INSTRUCTOR" ? "green" : "blue"}>
+                        {u.role === "ADMIN" ? "مدير" : u.role === "INSTRUCTOR" ? "مدرّس" : "محرّر"}
                       </Badge>
                     </td>
                     <td className="px-4 py-3">

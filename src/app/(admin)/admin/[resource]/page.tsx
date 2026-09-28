@@ -18,6 +18,11 @@ function cell(kind: string | undefined, value: any) {
   if (kind === "url") {
     return value && value !== "#" ? <a href={String(value)} target="_blank" rel="noreferrer" className="block max-w-[26rem] truncate text-[12px] text-blue-700 underline-offset-2 hover:underline" dir="ltr" title={String(value)}>{String(value)}</a> : <span className="text-ink-soft">غير محدّد</span>;
   }
+  if (kind === "datetime") {
+    if (!value) return <span className="text-ink-soft">دائمًا</span>;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? "—" : <span dir="ltr" className="whitespace-nowrap text-[12px]">{new Intl.DateTimeFormat("ar", { dateStyle: "short", timeStyle: "short" }).format(date)}</span>;
+  }
   const s = value == null || value === "" ? "—" : String(value);
   return s.length > 60 ? s.slice(0, 60) + "…" : s;
 }

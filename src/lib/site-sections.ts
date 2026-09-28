@@ -92,7 +92,8 @@ function imageCard(c: CardData, lang: Lang): string {
 const visibleOrder = { where: { visible: true }, orderBy: { order: "asc" as const } };
 
 function newsQuery() {
-  return prisma.newsItem.findMany({ where: { visible: true }, orderBy: [{ date: "desc" }] });
+  const now = new Date();
+  return prisma.newsItem.findMany({ where: { visible: true, AND: [{ OR: [{ startsAt: null }, { startsAt: { lte: now } }] }, { OR: [{ endsAt: null }, { endsAt: { gte: now } }] }] }, orderBy: [{ date: "desc" }] });
 }
 
 function eventsQuery() {

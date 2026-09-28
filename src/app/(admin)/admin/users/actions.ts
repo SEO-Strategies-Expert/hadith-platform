@@ -10,7 +10,7 @@ import { requireAdmin, currentUser } from "@/lib/guard";
 const base = {
   name: z.string().min(2, "الاسم قصير جدًّا"),
   email: z.string().email("بريد غير صحيح"),
-  role: z.enum(["ADMIN", "EDITOR"]),
+  role: z.enum(["ADMIN", "EDITOR", "INSTRUCTOR"]),
   status: z.enum(["ACTIVE", "DISABLED"]),
 };
 

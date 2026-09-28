@@ -50,8 +50,9 @@ export async function getSettingsMap() {
 }
 
 export async function getTickerItems(lang: Lang) {
+  const now = new Date();
   const items = await prisma.newsItem.findMany({
-    where: { visible: true },
+    where: { visible: true, AND: [{ OR: [{ startsAt: null }, { startsAt: { lte: now } }] }, { OR: [{ endsAt: null }, { endsAt: { gte: now } }] }] },
     orderBy: { date: "desc" },
     take: 6,
   });
