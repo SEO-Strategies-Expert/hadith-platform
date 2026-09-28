@@ -72,8 +72,6 @@ export const resources: Record<string, ResourceConfig> = {
       { name: "titleAr", label: "العنوان" },
       { name: "tagAr", label: "التصنيف", kind: "badge" },
       { name: "featured", label: "رئيس", kind: "bool" },
-      { name: "startsAt", label: "يظهر من", kind: "datetime" },
-      { name: "endsAt", label: "يظهر حتى", kind: "datetime" },
       { name: "visible", label: "ظاهر", kind: "bool" },
     ],
     fields: [
@@ -85,8 +83,6 @@ export const resources: Record<string, ResourceConfig> = {
       { name: "bodyEn", label: "التفاصيل (إنجليزي)", type: "textarea-ltr" },
       { name: "imageUrl", label: "رابط الصورة", type: "image", half: true },
       { name: "date", label: "التاريخ", type: "date", half: true },
-      { name: "startsAt", label: "يظهر من (اختياري)", type: "datetime", half: true, nullable: true, hint: "اتركه فارغًا ليظهر دون بداية محددة." },
-      { name: "endsAt", label: "يظهر حتى (اختياري)", type: "datetime", half: true, nullable: true, hint: "اتركه فارغًا ليبقى ظاهرًا دون نهاية محددة." },
       { name: "featured", label: "خبر رئيس (مميّز)", type: "bool" },
       ...commonTail,
     ],

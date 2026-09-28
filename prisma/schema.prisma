@@ -218,8 +218,6 @@ model NewsItem {
   tagAr     String?
   tagEn     String?
   date      DateTime @default(now())
-  startsAt  DateTime?
-  endsAt    DateTime?
   featured  Boolean  @default(false)
   visible   Boolean  @default(true)
   order     Int      @default(0)
