@@ -14,7 +14,13 @@ export async function POST(request: Request) {
     }));
     const key = settings.get("translation.apiKey");
     if (!key) return NextResponse.json({ error: "لم يُضبط مفتاح الترجمة" }, { status: 503 });
-    const response = await fetch("https://api.mistral.ai/v1/chat/completions", { method: "POST", headers: { "content-type": "application/json", Authorization: `Bearer ${key}` }, body: JSON.stringify({ model: settings.get("translation.model") || "mistral-small-latest", temperature: 0.2, messages: [{ role: "system", content: "Translate Arabic to clear, natural English. Return only the translation." }, { role: "user", content: text }] }) });
+    const provider = settings.get("translation.provider") || "mistral";
+    const endpoint = provider === "groq" ? "https://api.groq.com/openai/v1/chat/completions" : "https://api.mistral.ai/v1/chat/completions";
+    const configuredModel = settings.get("translation.model") || "";
+    const model = provider === "groq"
+      ? (configuredModel.startsWith("openai/") ? configuredModel : "openai/gpt-oss-20b")
+      : (configuredModel.startsWith("mistral-") ? configuredModel : "mistral-small-latest");
+    const response = await fetch(endpoint, { method: "POST", headers: { "content-type": "application/json", Authorization: `Bearer ${key}` }, body: JSON.stringify({ model, temperature: 0.2, messages: [{ role: "system", content: "Translate Arabic to clear, natural English. Return only the translation." }, { role: "user", content: text }] }) });
     const data = await response.json();
     if (!response.ok) {
       const providerMessage = typeof data?.message === "string" ? data.message : typeof data?.error === "string" ? data.error : "تحقق من مفتاح API واسم النموذج في الإعدادات.";
