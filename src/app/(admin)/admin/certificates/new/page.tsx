@@ -8,6 +8,7 @@ import { withRelationOptions } from "@/lib/resource-options";
 import type { FieldDef } from "@/lib/resources";
 import { certificateCoreFields, ijazaFields } from "../fields";
 import { createCertificate } from "../actions";
+import { CERTIFICATE_FORMULAS } from "@/lib/certificate-formulas";
 
 export default async function NewCertificatePage() {
   await requireUser();
@@ -57,6 +58,18 @@ export default async function NewCertificatePage() {
           </div>
 
           <ActionForm action={createCertificate} cancelHref="/admin/certificates" submitLabel="إصدار الوثيقة">
+            <fieldset className="mb-5 grid gap-2 sm:grid-cols-2">
+              <legend className="mb-2 text-[13.5px] font-extrabold text-navy-900">صيغة نص الشهادة</legend>
+              {CERTIFICATE_FORMULAS.map((formula) => (
+                <label key={formula.id} className="flex cursor-pointer items-start gap-2 rounded-xl border border-black/10 px-3 py-2.5 has-[:checked]:border-gold has-[:checked]:bg-gold/10">
+                  <input type="radio" name="designStyle" value={formula.id} defaultChecked={formula.id === "course"} required />
+                  <span>
+                    <b className="block text-[13px] text-navy-900">{formula.label}</b>
+                    <small className="text-[11.5px] text-ink-soft">{formula.titleAr}</small>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
             <ResourceFields fields={fields} record={{ kind: "CERTIFICATE" }} />
 
             {/* السند والمُجيز في صندوقٍ مستقلّ: مصطلحٌ شرعيّ لا يخصّ شهادة الإتمام. */}

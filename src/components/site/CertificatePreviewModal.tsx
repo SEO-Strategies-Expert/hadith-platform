@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { OfficialCertificate } from "@/components/site/OfficialCertificate";
 
 type CertificatePreviewData = {
   title: string;
@@ -11,6 +12,10 @@ type CertificatePreviewData = {
   issuedAt: string;
   kind: string;
   style: string;
+  subject?: string;
+  extra?: string;
+  granter?: string;
+  issuedAtIso?: string;
   pdfUrl: string | null;
   labels: { preview: string; close: string; download: string; print: string; holder: string; related: string; serial: string; issuedAt: string };
 };
@@ -59,17 +64,19 @@ export function CertificatePreviewModal({ data }: { data: CertificatePreviewData
       </button>
       {open && typeof document !== "undefined" && createPortal((
         <div className="certificate-modal-backdrop" role="dialog" aria-modal="true" aria-label={data.labels.preview} onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
-          <div ref={certificateRef} className={`certificate-modal certificate-preview certificate-style-${data.style || "classic"}`}>
+          <div className="certificate-modal certificate-modal-official">
             <button type="button" className="certificate-modal-close" onClick={() => setOpen(false)} aria-label={data.labels.close}>×</button>
-            <span className="certificate-decor certificate-decor-one" /><span className="certificate-decor certificate-decor-two" /><span className="certificate-wave certificate-wave-one" /><span className="certificate-wave certificate-wave-two" />
-            <div className="certificate-modal-content">
-              <img src="/assets/img/logo-official.png" alt="" className="certificate-modal-logo" />
-              <div className="certificate-modal-kicker">The Higher College of Prophetic Hadith</div>
-              <div className="certificate-modal-kind">{data.kind}</div>
-              <h2>{data.title}</h2>
-              <p>{data.labels.holder}</p><strong>{data.holder}</strong>
-              {data.related && <p className="certificate-modal-related">{data.related}</p>}
-              <div className="certificate-modal-meta"><span><b>{data.labels.serial}</b>{data.serial}</span><span><b>{data.labels.issuedAt}</b>{data.issuedAt}</span></div>
+            <div ref={certificateRef}>
+              <OfficialCertificate
+                formulaId={data.style}
+                kind={/ijaza|إجاز/i.test(data.kind) ? "IJAZA" : "CERTIFICATE"}
+                holder={data.holder}
+                subject={data.subject || data.related}
+                extra={data.extra}
+                granter={data.granter}
+                issuedAt={data.issuedAtIso || data.issuedAt}
+                serial={data.serial}
+              />
             </div>
             <div className="certificate-modal-actions">
               <button className="btn btn-gold" type="button" onClick={downloadPdf} disabled={downloading}>{downloading ? "…" : data.labels.download}</button>

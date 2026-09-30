@@ -64,8 +64,9 @@ export async function claimCourseCertificate(courseId: string, lang: "ar" | "en"
     kind: "CERTIFICATE",
     userId: user.id,
     courseId,
-    titleAr: `شهادة إتمام ${course.titleAr}`,
-    titleEn: `Certificate of completion: ${course.titleEn}`,
+    titleAr: "شهادة إتمام دورة علمية",
+    titleEn: "Certificate of scholarly course completion",
+    designStyle: "course",
   });
 
   revalidatePath("/student/certificates");

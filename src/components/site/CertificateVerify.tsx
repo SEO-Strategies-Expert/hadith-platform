@@ -18,6 +18,7 @@ import type { Lang } from "@/lib/site-data";
 import { longDate } from "@/lib/site-format";
 import { siteHref } from "@/lib/site-links";
 import { verifyCertificate, formatVerifyCode, VERIFY_CODE_LENGTH } from "@/lib/certificates";
+import { OfficialCertificate } from "@/components/site/OfficialCertificate";
 
 const T = {
   ar: {
@@ -210,6 +211,20 @@ export async function CertificateVerify({ lang, code }: { lang: Lang; code?: str
                 </div>
               </div>
             ) : (
+              <>
+              <div className="reveal" style={{ maxWidth: 980, margin: "0 auto 22px" }}>
+                <OfficialCertificate
+                  formulaId={cert.designStyle}
+                  kind={cert.kind}
+                  holder={cert.holderName}
+                  subject={cert.courseAr || cert.stageAr || ""}
+                  extra={cert.isnadAr || ""}
+                  granter={cert.grantedByAr || ""}
+                  issuedAt={cert.issuedAt}
+                  serial={cert.serial}
+                  verifyCode={formatVerifyCode(cert.verifyCode)}
+                />
+              </div>
               <div
                 className={`form-panel reveal certificate-public-card certificate-style-${cert.designStyle || "classic"}`}
                 style={{
@@ -297,6 +312,7 @@ export async function CertificateVerify({ lang, code }: { lang: Lang; code?: str
                     </div>
                   )}
               </div>
+              </>
             )}
           </div>
         </section>

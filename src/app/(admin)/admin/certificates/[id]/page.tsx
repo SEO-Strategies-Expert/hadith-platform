@@ -4,6 +4,7 @@ import { ArrowRight, Ban, ScrollText } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
 import { formatVerifyCode, verifyPath } from "@/lib/certificates";
+import { formulaForCertificate } from "@/lib/certificate-formulas";
 import { PageHeader, Card, Badge } from "@/components/admin/ui";
 import { formatDateTime } from "@/components/admin/datetime";
 import { kindLabel, kindTone } from "../fields";
@@ -34,7 +35,7 @@ export default async function CertificatePage({
   const { id } = await params;
   const flags = await searchParams;
 
-  const [cert, certificateSettings] = await Promise.all([prisma.certificate.findUnique({
+  const cert = await prisma.certificate.findUnique({
     where: { id },
     select: {
       id: true,
@@ -56,9 +57,8 @@ export default async function CertificatePage({
       stage: { select: { titleAr: true } },
       issuedBy: { select: { name: true } },
     },
-  }), prisma.setting.findMany({ where: { key: { startsWith: "certificate." } }, select: { key: true, value: true } })]);
+  });
   if (!cert) notFound();
-  const design = Object.fromEntries(certificateSettings.map(s => [s.key, String(s.value ?? "")]));
 
   const arPath = verifyPath("ar", cert.verifyCode);
   const enPath = verifyPath("en", cert.verifyCode);
@@ -106,28 +106,20 @@ export default async function CertificatePage({
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="grid gap-5">
-          <Card className="overflow-hidden p-2">
-            <div className={`certificate-preview certificate-style-${cert.designStyle || "classic"} relative min-h-[430px] border-[6px] border-double border-gold bg-cream-50 px-8 py-9 text-center sm:px-14`}>
-              <span className="certificate-decor certificate-decor-one" /><span className="certificate-decor certificate-decor-two" /><span className="certificate-wave certificate-wave-one" /><span className="certificate-wave certificate-wave-two" />
-              <div className="absolute inset-3 border border-gold/30" />
-              <div className="relative">
-                <img src={design["certificate.logo"] || "/assets/img/logo-official.png"} alt="" className="mx-auto mb-4 h-20 w-20 object-contain" />
-                <div className="text-sm font-bold tracking-wide text-gold-3">الكلّية العليا للحديث النبوي</div>
-                <h2 className="my-5 text-3xl font-extrabold text-navy-900">{cert.titleAr}</h2>
-                <p className="text-sm text-ink-soft">تشهد بأن الطالب/ة</p>
-                <div className="my-3 text-2xl font-extrabold text-navy-800">{cert.user.name}</div>
-                <p className="mx-auto max-w-xl leading-8 text-ink-soft">قد أتم بنجاح {cert.course?.titleAr ?? cert.stage?.titleAr ?? "متطلبات البرنامج"}</p>
-                <div className="mt-10 grid grid-cols-2 gap-8">
-                  {[1,2].map(n => design[`certificate.signature${n}`] && <div key={n} className="text-xs text-navy-800"><img src={design[`certificate.signature${n}`]} alt="توقيع إلكتروني" className="mx-auto h-14 max-w-40 object-contain"/><div className="mt-1 border-t border-gold/50 pt-2">{design[`certificate.signature${n}Name`]}</div></div>)}
-                </div>
-                <div className="mt-8 flex justify-between gap-4 text-[11px] text-ink-soft"><span>{formatDateTime(cert.issuedAt)}</span><span dir="ltr">{cert.serial}</span></div>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-5">
-            <h2 className="mb-1 text-[14px] font-extrabold text-navy-900">نمط تصميم الشهادة</h2>
-            <p className="mb-3 text-[11.5px] leading-6 text-ink-soft">اختر مظهرًا من ثلاثة قوالب. يظهر النمط في المعاينة وصفحة التحقّق العامة.</p>
-            <CertificateStyleForm id={cert.id} value={cert.designStyle || "classic"} />
+          <Card className="overflow-hidden p-3">
+            <CertificateStyleForm
+              id={cert.id}
+              value={formulaForCertificate(cert.designStyle, cert.kind).id}
+              kind={cert.kind}
+              holder={cert.user.name}
+              subject={cert.course?.titleAr ?? cert.stage?.titleAr ?? ""}
+              extra={cert.isnadAr ?? ""}
+              granter={cert.grantedByAr ?? design["certificate.signature1Name"] ?? ""}
+              issuedAt={cert.issuedAt.toISOString()}
+              serial={cert.serial}
+              verifyCode={formatVerifyCode(cert.verifyCode)}
+              signatures={[]}
+            />
           </Card>
           <Card className="p-6">
             <div className="mb-4 flex flex-wrap items-center gap-2">

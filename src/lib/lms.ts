@@ -158,7 +158,7 @@ export async function recomputeProgress(userId: string, courseId: string): Promi
   });
   if (completed && course.autoCertificate) {
     const exists = await prisma.certificate.findFirst({ where: { userId, courseId, revoked: false }, select: { id: true } });
-    if (!exists) await issueCertificate({ kind: "CERTIFICATE", userId, courseId, titleAr: `شهادة إتمام ${course.titleAr}`, titleEn: `Certificate of completion: ${course.titleEn}` });
+    if (!exists) await issueCertificate({ kind: "CERTIFICATE", userId, courseId, titleAr: "شهادة إتمام دورة علمية", titleEn: "Certificate of scholarly course completion", designStyle: "course" });
   }
   return pct;
 }

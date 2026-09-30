@@ -6,6 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
 import { issueCertificate } from "@/lib/certificates";
+import { formulaById, isCertificateFormula } from "@/lib/certificate-formulas";
 
 /**
  * إجراءات الشهادات والإجازات.
@@ -21,8 +22,9 @@ import { issueCertificate } from "@/lib/certificates";
 const issueSchema = z.object({
   kind: z.enum(["CERTIFICATE", "IJAZA"]),
   userId: z.string().trim().min(1, "اختر الطالب صاحب الوثيقة."),
-  titleAr: z.string().trim().min(1, "عنوان الوثيقة بالعربية مطلوب."),
-  titleEn: z.string().trim().min(1, "عنوان الوثيقة بالإنجليزية مطلوب."),
+  titleAr: z.string().trim().optional(),
+  titleEn: z.string().trim().optional(),
+  designStyle: z.string().trim().optional(),
   courseId: z.string().optional(),
   stageId: z.string().optional(),
   isnadAr: z.string().optional(),
@@ -57,9 +59,12 @@ export async function createCertificate(
   const isnadAr = optionalText(d.isnadAr);
   const grantedByAr = optionalText(d.grantedByAr);
   // الإجازة المسنَدة سندٌ متّصلٌ عن شيخ؛ إجازةٌ بلا سندٍ ولا مُجيزٍ ليست إجازة.
-  if (d.kind === "IJAZA" && !isnadAr) return "نصّ السند بالعربية مطلوب للإجازة المسنَدة.";
-  if (d.kind === "IJAZA" && !grantedByAr) return "اسم المُجيز بالعربية مطلوب للإجازة المسنَدة.";
-
+  const formula = formulaById(d.designStyle);
+  if ((formula?.kind ?? d.kind) === "IJAZA" && !isnadAr) return "نصّ السند بالعربية مطلوب للإجازة المسنَدة.";
+  if ((formula?.kind ?? d.kind) === "IJAZA" && !grantedByAr) return "اسم المُجيز بالعربية مطلوب للإجازة المسنَدة.";
+  const titleAr = d.titleAr || formula?.titleAr;
+  const titleEn = d.titleEn || formula?.titleEn;
+  if (!titleAr || !titleEn) return "اختر صيغة الشهادة أو اكتب عنوانها.";
   const courseId = optionalText(d.courseId);
   const stageId = optionalText(d.stageId);
   if (courseId && !(await prisma.course.findUnique({ where: { id: courseId }, select: { id: true } }))) {
@@ -72,12 +77,13 @@ export async function createCertificate(
   let issuedId: string;
   try {
     const issued = await issueCertificate({
-      kind: d.kind,
+      kind: formula?.kind ?? d.kind,
       userId: holder.id,
       courseId,
       stageId,
-      titleAr: d.titleAr,
-      titleEn: d.titleEn,
+      titleAr,
+      titleEn,
+      designStyle: formula?.id,
       isnadAr,
       isnadEn: optionalText(d.isnadEn),
       grantedByAr,
@@ -116,7 +122,7 @@ export async function issueCourseCertificates(
   const targets = course.enrollments.filter(e => !issued.has(e.userId));
   if (!targets.length) return "سبق إصدار شهادات لكل الطلاب المكتملين في هذا المقرر.";
   for (const enrollment of targets) {
-    await issueCertificate({ kind: "CERTIFICATE", userId: enrollment.userId, courseId, titleAr, titleEn, issuedById: admin.id ?? null });
+    await issueCertificate({ kind: "CERTIFICATE", userId: enrollment.userId, courseId, titleAr, titleEn, designStyle: "course", issuedById: admin.id ?? null });
   }
   revalidatePath("/admin/certificates");
   redirect(`/admin/certificates?batch=${targets.length}`);
@@ -152,9 +158,13 @@ export async function updateCertificateDesign(
   formData: FormData
 ): Promise<string | undefined> {
   await requireUser();
-  const style = String(formData.get("designStyle") ?? "classic");
-  if (!["classic", "waves", "particles"].includes(style)) return "نمط تصميم غير صالح.";
-  await prisma.certificate.update({ where: { id }, data: { designStyle: style } });
+  const style = String(formData.get("designStyle") ?? "");
+  if (!isCertificateFormula(style)) return "صيغة الشهادة غير صالحة.";
+  const formula = formulaById(style)!;
+  await prisma.certificate.update({
+    where: { id },
+    data: { designStyle: formula.id, kind: formula.kind, titleAr: formula.titleAr, titleEn: formula.titleEn },
+  });
   revalidatePath(`/admin/certificates/${id}`);
   revalidatePath("/verify.html");
   redirect(`/admin/certificates/${id}?design=1`);

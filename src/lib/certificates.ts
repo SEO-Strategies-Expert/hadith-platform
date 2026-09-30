@@ -138,6 +138,7 @@ export interface IssueCertificateInput {
   issuedAt?: Date;
   issuedById?: string | null;
   pdfUrl?: string | null;
+  designStyle?: string | null;
 }
 
 export interface IssuedCertificate {
@@ -183,6 +184,7 @@ export async function issueCertificate(input: IssueCertificateInput): Promise<Is
           issuedAt,
           issuedById: input.issuedById || null,
           pdfUrl: input.pdfUrl || null,
+          designStyle: input.designStyle || (input.kind === "IJAZA" ? "ijaza" : "course"),
         },
         select: { id: true, serial: true, verifyCode: true },
       });
