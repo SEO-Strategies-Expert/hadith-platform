@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
+import { notifyStaff } from "@/lib/admin-notifications";
 
 /**
  * إجراءات تسجيل الطلاب في المقرّرات.
@@ -37,13 +38,13 @@ export async function createEnrollment(
 
   const student = await prisma.user.findUnique({
     where: { id: parsed.data.userId },
-    select: { role: true },
+    select: { role: true, name: true },
   });
   if (!student || student.role !== "STUDENT") return "الحساب المختار ليس حساب طالب.";
 
   const course = await prisma.course.findUnique({
     where: { id: parsed.data.courseId },
-    select: { id: true },
+    select: { id: true, titleAr: true, titleEn: true },
   });
   if (!course) return "المقرّر غير موجود.";
 
@@ -54,7 +55,7 @@ export async function createEnrollment(
   if (existing) return "هذا الطالب مسجَّل في هذا المقرّر بالفعل.";
 
   const status = parsed.data.status;
-  await prisma.enrollment.create({
+  const enrollment = await prisma.enrollment.create({
     data: {
       userId: parsed.data.userId,
       courseId: parsed.data.courseId,
@@ -62,7 +63,18 @@ export async function createEnrollment(
       feeOption: parsed.data.feeOption || "free",
       completedAt: status === "COMPLETED" ? new Date() : null,
     },
+    select: { id: true },
   });
+  if (status !== "CANCELLED") {
+    await notifyStaff({
+      kind: "enrollment",
+      titleAr: "تسجيل طالب في مقرر",
+      titleEn: "Student enrolled in a course",
+      bodyAr: `${student.name} سجّل في «${course.titleAr}».`,
+      bodyEn: `${student.name} enrolled in “${course.titleEn || course.titleAr}”.`,
+      href: `/admin/enrollments/${enrollment.id}`,
+    });
+  }
 
   revalidatePath("/admin/enrollments");
   redirect("/admin/enrollments");

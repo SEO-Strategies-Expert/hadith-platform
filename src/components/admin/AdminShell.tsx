@@ -7,14 +7,17 @@ import { Menu, ExternalLink, LogOut, ChevronDown, Search, X } from "lucide-react
 import { Sidebar } from "./Sidebar";
 import { adminNav } from "@/lib/admin-nav";
 import { AutoTranslate } from "./AutoTranslate";
+import { AdminNoticeBell, type AdminNoticeItem } from "./AdminNoticeBell";
 
 export function AdminShell({
   user,
   signOutAction,
+  notices,
   children,
 }: {
   user: { name?: string | null; email?: string | null; role: "ADMIN" | "EDITOR" };
   signOutAction: () => Promise<void>;
+  notices: { unread: number; items: AdminNoticeItem[] };
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -70,6 +73,7 @@ export function AdminShell({
               rel="noreferrer"
               className="hidden items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-[13px] font-bold text-white hover:bg-emerald-700 sm:flex"
             >
+            <AdminNoticeBell unread={notices.unread} items={notices.items} />
               <ExternalLink size={16} /> عرض الموقع
             </a>
 

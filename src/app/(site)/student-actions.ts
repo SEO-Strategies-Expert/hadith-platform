@@ -6,6 +6,7 @@ import type { Lang } from "@/lib/site-data";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { currentUser } from "@/lib/guard";
+import { notifyStaff } from "@/lib/admin-notifications";
 import { consumeRateLimit } from "@/lib/rate-limit";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
@@ -64,10 +65,22 @@ export async function requestCourseEnrollment(lang: Lang, _prev: CourseRequestSt
   if(course.prerequisiteCourseId){const prerequisite=await prisma.enrollment.findUnique({where:{userId_courseId:{userId:user.id,courseId:course.prerequisiteCourseId}},select:{status:true}});if(prerequisite?.status!=="COMPLETED")return {ok:false,message:ar?"يجب إكمال المقرر السابق المطلوب أولًا.":"Complete the prerequisite course first."};}
   const existing=await prisma.enrollment.findUnique({where:{userId_courseId:{userId:user.id,courseId}}});
   if(existing && existing.status!=="CANCELLED")return {ok:existing.status==="PENDING",message:existing.status==="PENDING"?(ar?"طلبك لهذا المقرر قيد المراجعة بالفعل.":"Your request is already under review."):(ar?"أنت مسجّل في هذا المقرر بالفعل.":"You are already enrolled in this course.")};
-  if(existing)await prisma.enrollment.update({where:{id:existing.id},data:{status:"PENDING",feeOption,progressPct:0,completedAt:null,enrolledAt:new Date()}});
-  else await prisma.enrollment.create({data:{userId:user.id,courseId,status:"PENDING",feeOption}});
-  const admins = await prisma.user.findMany({ where: { role: "ADMIN", status: "ACTIVE" }, select: { id: true } });
-  await prisma.$transaction(admins.map((admin) => prisma.notification.create({ data: { userId: admin.id, kind: "enrollment", titleAr: "طلب تسجيل جديد", titleEn: "New enrollment request", bodyAr: `طلب الطالب التسجيل في «${course.titleAr}».`, bodyEn: `A student requested enrollment in “${course.titleEn || course.titleAr}”.`, href: "/admin/enrollments" } })));
+  const enrollment = existing
+    ? await prisma.enrollment.update({ where: { id: existing.id }, data: { status: "PENDING", feeOption, progressPct: 0, completedAt: null, enrolledAt: new Date() }, select: { id: true } })
+    : await prisma.enrollment.create({ data: { userId: user.id, courseId, status: "PENDING", feeOption }, select: { id: true } });
+  const studentName = user.name || (ar ? "طالب" : "A student");
+  try {
+    await notifyStaff({
+      kind: "enrollment",
+      titleAr: "تسجيل طالب في مقرر",
+      titleEn: "Student enrolled in a course",
+      bodyAr: `${studentName} طلب التسجيل في «${course.titleAr}».`,
+      bodyEn: `${studentName} requested enrollment in “${course.titleEn || course.titleAr}”.`,
+      href: `/admin/enrollments/${enrollment.id}`,
+    });
+  } catch {
+    // فشل الإشعار لا يمنع قبول طلب الطالب.
+  }
   revalidatePath("/admin/enrollments"); revalidatePath(lang==="en"?"/en/student":"/student");
   return {ok:true,message:ar?`تم إرسال طلب التسجيل في «${course.titleAr}». ستظهر حالته في بوابتك بعد مراجعة الإدارة.`:`Your request for “${course.titleEn||course.titleAr}” was sent and is awaiting review.`};
 }

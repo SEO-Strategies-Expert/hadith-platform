@@ -978,8 +978,8 @@ html[dir="rtl"] .news-list li a>div,html[dir="rtl"] .news-mini>div{grid-column:2
   .foot-top{justify-items:center;text-align:center}
   .foot-brand{align-items:center}
   .foot-brand .row,.foot-social{justify-content:center}
-  .foot-brand .row{flex-wrap:nowrap;gap:10px}
-  .foot-brand .nm.thuluth{min-width:0;white-space:nowrap;font-size:clamp(10px,3.1vw,13px);line-height:1.5;letter-spacing:-.15px}
+  .foot-brand .row{flex-wrap:wrap;justify-content:center;gap:10px}
+  .foot-brand .nm.thuluth{min-width:0;white-space:normal;font-size:clamp(16px,4.4vw,20px);line-height:1.7;letter-spacing:0;text-align:center}
   .foot-brand p{max-width:34ch}
   .foot-col{width:100%;text-align:center}
   .foot-col h5::after{left:50%;inset-inline-start:auto;transform:translateX(-50%)}
@@ -1163,9 +1163,9 @@ html[dir="rtl"] .news-list li a>div,html[dir="rtl"] .news-mini>div{grid-column:2
 @media(max-width:600px){
   /* The fully vocalized Arabic college name is deliberately kept as one footer
      lockup beside the emblem instead of wrapping into multiple short lines. */
-  .foot-brand .row{width:100%;flex-wrap:nowrap;gap:10px}
+  .foot-brand .row{width:100%;flex-wrap:wrap;justify-content:center;gap:10px}
   .foot-brand img{width:58px;height:58px;flex:none}
-  .foot-brand .nm.thuluth{min-width:0;white-space:nowrap;font-size:clamp(10px,3.1vw,13px);line-height:1.5;letter-spacing:-.15px}
+  .foot-brand .nm.thuluth{min-width:0;white-space:normal;font-size:clamp(16px,4.4vw,20px);line-height:1.7;letter-spacing:0;text-align:center}
   /* أخفِ الروابط السريعة لكن أبقِ زرّ تبديل اللغة (أيقونة فقط) ظاهرًا دائمًا */
   .navbar-links{display:flex;gap:0;padding-inline-start:8px;margin-inline-start:6px;
     border-inline-start:1px solid rgba(217,174,75,.24)}
@@ -1256,10 +1256,10 @@ html[dir="rtl"] .news-list li a>div,html[dir="rtl"] .news-mini>div{grid-column:2
 
 /* ---------- (3) اسم الكلّية ظاهر على كل الأجهزة (لا يُخفى أبدًا) --------- */
 @media(max-width:600px){
-  .brand-copy{display:flex}
-  .brand{gap:9px;flex:1 1 auto;min-width:0}
-  .brand-name{white-space:normal;font-size:12.5px;line-height:1.72}
-  .brand-emblem{width:44px;height:44px}
+  .brand-copy{display:flex;flex:1 1 auto;max-width:none;min-width:0;overflow:visible}
+  .brand{gap:10px;flex:1 1 100%;min-width:0;align-items:center}
+  .brand-name{white-space:normal;overflow:visible;text-overflow:clip;font-size:clamp(17px,4.7vw,20px);line-height:1.75}
+  .brand-emblem{width:54px;height:54px}
 }
 
 /* ---------- (4) صفّ الشعار: حيّز حقيقي لكل عنصر ------------------------
@@ -1284,8 +1284,8 @@ html[dir="rtl"] .news-list li a>div,html[dir="rtl"] .news-mini>div{grid-column:2
 @media(max-width:560px){
   .menubar>.container{flex-wrap:wrap;row-gap:9px}
   .brand{flex:1 1 100%}
-  /* الصفّ صار بعرض كامل، فالاسم يتّسع لحجم مقروء بخطّ الثلث */
-  .brand-name{font-size:16px;line-height:1.85}
+  /* الصفّ صار بعرض كامل، فالاسم يُعرض كاملًا بحجم مقروء */
+  .brand-name{font-size:clamp(17px,4.7vw,20px);line-height:1.75;white-space:normal;overflow:visible;text-overflow:clip}
   .menubar-end{flex:1 1 100%;justify-content:space-between}
   .menubar-end .btn-student{flex:1 1 auto;justify-content:center}
 }
@@ -1384,12 +1384,19 @@ html[dir="rtl"] .news-list li a>div,html[dir="rtl"] .news-mini>div{grid-column:2
   .inner-section{padding:52px 0}
 }
 
-/* الشاشات القصيرة: يكتفي صفّ الهيدر بالشعار، مع قائمة أوضح وأسهل للقراءة. */
+/* الشاشات القصيرة: اسم الكلّية يملأ الصف كاملًا، بحجم مقروء، بلا اقتطاع. */
 @media(max-width:600px){
-  .menubar .brand-copy{display:flex!important;max-width:clamp(92px,30vw,150px);overflow:hidden}
-  .menubar .brand{flex:0 1 auto;gap:5px;min-width:0}
-  .menubar .brand-name{display:block;overflow:hidden;text-overflow:ellipsis;font-size:10px;line-height:1.35;white-space:nowrap}
-  .menubar .brand-emblem{width:46px;height:46px}
+  .menubar .brand{flex:1 1 100%;gap:10px;min-width:0;align-items:center}
+  .menubar .brand-copy{display:flex!important;flex:1 1 auto;max-width:none;min-width:0;overflow:visible}
+  .menubar .brand-name{
+    display:block;
+    overflow:visible;
+    text-overflow:clip;
+    white-space:normal;
+    font-size:clamp(17px,4.7vw,20px);
+    line-height:1.75;
+  }
+  .menubar .brand-emblem{width:54px;height:54px}
   .menubar .nav-item em,
   .menubar.nav-collapsed .nav-item em{font-size:16px}
 }

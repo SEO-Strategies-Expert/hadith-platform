@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { uploadFile, SUBMISSION_PREFIX } from "@/lib/blob";
+import { notifyStaff } from "@/lib/admin-notifications";
 
 /**
  * نقطة استقبال نماذج الموقع العام (بلا تسجيل دخول):
@@ -48,9 +49,23 @@ export async function POST(req: Request, { params }: { params: Promise<{ kind: s
       const email = text(fd, "email", 160);
       const message = text(fd, "message", MAX_TEXT);
       if (!name || !message || invalidEmail(email)) return backTo(req, fd, "?error=1");
-      await prisma.contactMessage.create({
-        data: { name, email, department: text(fd, "department", 120) || null, message, lang },
+      const department = text(fd, "department", 120) || null;
+      const row = await prisma.contactMessage.create({
+        data: { name, email, department, message, lang },
+        select: { id: true },
       });
+      try {
+        await notifyStaff({
+          kind: "contact",
+          titleAr: "رسالة إلى الكلية",
+          titleEn: "Message to the college",
+          bodyAr: `${name} أرسل رسالة من صفحة التواصل${department ? ` — ${department}` : ""}.`,
+          bodyEn: `${name} sent a message from the contact page.`,
+          href: `/admin/inbox/contact/${row.id}`,
+        });
+      } catch {
+        // وصول الرسالة أهم من الإشعار.
+      }
       return backTo(req, fd, "?sent=1");
     }
 

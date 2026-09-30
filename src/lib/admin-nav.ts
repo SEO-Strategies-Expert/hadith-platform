@@ -14,6 +14,7 @@ import {
   Search,
   Users,
   Inbox,
+  Bell,
   LayoutGrid,
   HelpCircle,
   ListOrdered,
@@ -46,6 +47,7 @@ export const adminNav: NavSection[] = [
     items: [
       { label: "لوحة القيادة", href: "/admin", icon: LayoutDashboard },
       { label: "صندوق الوارد", href: "/admin/inbox", icon: Inbox },
+      { label: "الإشعارات", href: "/admin/notifications", icon: Bell },
     ],
   },
   {

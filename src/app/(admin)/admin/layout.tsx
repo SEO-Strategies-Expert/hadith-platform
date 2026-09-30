@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { adminNoticeFeed } from "@/lib/admin-notifications";
+import { formatDateTime } from "@/components/admin/datetime";
 
 export default async function AdminLayout({
   children,
@@ -16,6 +18,7 @@ export default async function AdminLayout({
   // الحارس الأوسط ليس حدَّ أمانٍ وحيدًا.
   if (normalizedRole === "INSTRUCTOR") redirect("/instructor");
   const role = normalizedRole as "ADMIN" | "EDITOR";
+  const feed = await adminNoticeFeed(session.user.id, 8);
 
   async function doSignOut() {
     "use server";
@@ -28,6 +31,18 @@ export default async function AdminLayout({
         name: session.user.name,
         email: session.user.email,
         role,
+      }}
+      notices={{
+        unread: feed.unread,
+        items: feed.items.map((item) => ({
+          id: item.id,
+          kind: item.kind === "contact" ? "contact" : "enrollment",
+          title: item.titleAr,
+          body: item.bodyAr ?? "",
+          href: item.href || "/admin/notifications",
+          unread: !item.readAt,
+          when: formatDateTime(item.createdAt),
+        })),
       }}
       signOutAction={doSignOut}
     >
