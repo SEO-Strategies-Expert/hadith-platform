@@ -88,6 +88,44 @@ export async function getInstructorCourses(scholarId: string) {
  * تعيد `null` لمقرّر غير موجود أو ليس له — والصفحة تُظهر 404 في الحالتين
  * حتى لا يكون وجود المقرّر نفسه معلومةً تتسرّب.
  */
+/** شرط ملكيّة المقرّر: المحاضر الأساسي أو أحد المدرّسين المشاركين. */
+export function ownedCourseFilter(scholarId: string) {
+  return { OR: [{ instructorId: scholarId }, { instructors: { some: { id: scholarId } } }] };
+}
+
+/** وحدة داخل مقرّر يملكه المحاضر — وإلا `null` حتى لا يتسرّب وجودها. */
+export async function getInstructorModule(scholarId: string, courseId: string, moduleId: string) {
+  return prisma.module.findFirst({
+    where: { id: moduleId, courseId, course: ownedCourseFilter(scholarId) },
+    include: {
+      course: { select: { id: true, titleAr: true } },
+      _count: { select: { lessons: true } },
+    },
+  });
+}
+
+/** درس ومرفقاته إن كان ضمن مقرّر يملكه المحاضر. */
+export async function getInstructorLesson(scholarId: string, courseId: string, lessonId: string) {
+  return prisma.lesson.findFirst({
+    where: { id: lessonId, module: { courseId, course: ownedCourseFilter(scholarId) } },
+    include: {
+      module: {
+        select: { id: true, titleAr: true, courseId: true, course: { select: { id: true, titleAr: true } } },
+      },
+      attachments: { orderBy: { order: "asc" } },
+    },
+  });
+}
+
+/** دروس مقرّر المحاضر فقط — لخيارات «الدرس السابق» دون كشف دروس غيره. */
+export async function getInstructorCourseLessons(scholarId: string, courseId: string) {
+  return prisma.lesson.findMany({
+    where: { module: { courseId, course: ownedCourseFilter(scholarId) } },
+    orderBy: [{ module: { order: "asc" } }, { order: "asc" }],
+    select: { id: true, titleAr: true },
+  });
+}
+
 export async function getInstructorCourse(scholarId: string, courseId: string) {
   return prisma.course.findFirst({
     where: { id: courseId, OR: [{ instructorId: scholarId }, { instructors: { some: { id: scholarId } } }] },

@@ -23,7 +23,7 @@ export default async function InstructorCoursesPage() {
     <div>
       <PageHeader
         title="مقرّراتي"
-        desc="المقرّرات المسنَدة إليك. المحتوى للاطّلاع — تحريره من لوحة الإدارة."
+        desc="المقرّرات المسنَدة إليك. أدر وحدات كل مقرّر ودروسه وملفاته من «المواد»."
       />
 
       <Card>
@@ -61,12 +61,20 @@ export default async function InstructorCoursesPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        href={`/instructor/courses/${c.id}`}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[12.5px] font-bold text-navy-800 hover:border-gold/50"
-                      >
-                        التفاصيل <ArrowLeft size={14} />
-                      </Link>
+                      <div className="flex flex-wrap gap-1.5">
+                        <Link
+                          href={`/instructor/courses/${c.id}/manage`}
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-navy-800 px-3 py-1.5 text-[12.5px] font-bold text-white hover:bg-navy-700"
+                        >
+                          المواد
+                        </Link>
+                        <Link
+                          href={`/instructor/courses/${c.id}`}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 py-1.5 text-[12.5px] font-bold text-navy-800 hover:border-gold/50"
+                        >
+                          التفاصيل <ArrowLeft size={14} />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}

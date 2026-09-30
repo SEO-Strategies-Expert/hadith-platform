@@ -5,8 +5,9 @@ import { uploadFile, MEDIA_PREFIX } from "@/lib/blob";
 
 export async function POST(request: Request) {
   const session = await auth();
-  const role = session?.user?.role;
-  if (role !== "ADMIN" && role !== "EDITOR") {
+  const role = String(session?.user?.role ?? "").toUpperCase();
+  // المحاضر يرفع مواد مقرّراته من لوحته؛ المسار نفسه تستخدمه حقول الرفع في اللوحة.
+  if (role !== "ADMIN" && role !== "EDITOR" && role !== "INSTRUCTOR") {
     return NextResponse.json({ error: "غير مصرَّح" }, { status: 401 });
   }
 

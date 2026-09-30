@@ -15,8 +15,8 @@ import { ProgressBar } from "@/components/instructor/ProgressBar";
 import { updateInstructorCourse } from "./actions";
 
 /**
- * تفاصيل مقرّر المحاضر: بنيته للاطّلاع، وطلابه بنسب تقدّمهم.
- * لا تحرير هنا بتاتًا — تحرير المحتوى في لوحة الإدارة وحدها.
+ * تفاصيل مقرّر المحاضر: بياناته، طلابه، ورابط إدارة المواد والدروس.
+ * تحرير المحتوى نفسه في `/manage` بعد التحقّق من ملكيّة المقرّر.
  */
 export default async function InstructorCoursePage({
   params,
@@ -42,7 +42,7 @@ export default async function InstructorCoursePage({
       <PageHeader title={course.titleAr} desc={course.summaryAr ?? course.descAr ?? undefined} />
 
       <div className="mb-4 flex flex-wrap gap-2">
-        <Link href={`/instructor/courses/${id}/manage`} className="rounded-lg bg-navy-800 px-3.5 py-2 text-[12.5px] font-bold text-white">إدارة المحتوى</Link>
+        <Link href={`/instructor/courses/${id}/manage`} className="rounded-lg bg-navy-800 px-3.5 py-2 text-[12.5px] font-bold text-white">إدارة المواد والدروس</Link>
         <Link
           href="/instructor/courses"
           className="rounded-lg border border-black/10 bg-white px-3.5 py-2 text-[12.5px] font-bold text-navy-700 hover:border-gold/50"
@@ -116,6 +116,7 @@ export default async function InstructorCoursePage({
                         <th className="px-4 py-2.5 font-bold">المدّة</th>
                         <th className="px-4 py-2.5 font-bold">مرفقات</th>
                         <th className="px-4 py-2.5 font-bold">الحالة</th>
+                        <th className="px-4 py-2.5 font-bold">المواد</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -146,6 +147,14 @@ export default async function InstructorCoursePage({
                               {l.visible ? <Badge tone="green">ظاهر</Badge> : <Badge tone="gray">مخفي</Badge>}
                               {l.freePreview && <Badge tone="blue">معاينة مجّانيّة</Badge>}
                             </div>
+                          <td className="px-4 py-2.5">
+                            <Link
+                              href={`/instructor/courses/${id}/manage/lessons/${l.id}`}
+                              className="font-bold text-navy-800 underline decoration-gold/60 underline-offset-2"
+                            >
+                              تعديل
+                            </Link>
+                          </td>
                           </td>
                         </tr>
                       ))}
