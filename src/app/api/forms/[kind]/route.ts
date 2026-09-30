@@ -63,6 +63,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ kind: s
           bodyEn: `${name} sent a message from the contact page.`,
           href: `/admin/inbox/contact/${row.id}`,
         });
+        // حدّث صفحات الإشعارات مباشرة بعد وصول رسالة جديدة.
+        const { revalidatePath } = await import("next/cache");
+        revalidatePath("/admin/notifications");
+        revalidatePath("/admin/inbox/contact");
       } catch {
         // وصول الرسالة أهم من الإشعار.
       }

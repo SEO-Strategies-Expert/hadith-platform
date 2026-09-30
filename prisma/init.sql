@@ -772,6 +772,7 @@ CREATE TABLE "certificates" (
     "isnadEn" TEXT,
     "grantedByAr" TEXT,
     "grantedByEn" TEXT,
+    "formulaData" JSONB,
     "issuedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "issuedById" TEXT,
     "pdfUrl" TEXT,

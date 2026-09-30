@@ -72,3 +72,16 @@ export const ijazaFields: FieldDef[] = [
   { name: "grantedByAr", label: "اسم المُجيز (عربي)", type: "text", half: true },
   { name: "grantedByEn", label: "اسم المُجيز (إنجليزي)", type: "ltr", half: true },
 ];
+
+/** حقول المواضع المتغيرة في صيغ Word الخمس. تُحفظ مجتمعةً مع الشهادة. */
+export const certificateFormulaFields: FieldDef[] = [
+  { name: "formulaGender", label: "صيغة المخاطبة", type: "select", half: true, options: [{ value: "male", label: "طالب" }, { value: "female", label: "طالبة" }] },
+  { name: "formulaSubjectAr", label: "اسم الكتاب أو الدورة", type: "text", half: true },
+  { name: "formulaAuthorAr", label: "اسم المؤلف (للإجازة العلمية)", type: "text", half: true },
+  { name: "formulaAttendance", label: "صفة السماع (للإجازة العلمية)", type: "select", half: true, options: [{ value: "complete", label: "سماعًا كاملًا" }, { value: "minor-loss", label: "سماعًا بفوت يسير" }, { value: "major-loss", label: "سماعًا بفوت كبير" }] },
+  { name: "formulaPeriodStart", label: "بداية الدورة (اختياري)", type: "date", half: true },
+  { name: "formulaPeriodEnd", label: "نهاية الدورة (اختياري)", type: "date", half: true },
+  { name: "formulaGradeAr", label: "التقدير (اختياري)", type: "text", half: true },
+  { name: "formulaResearchAr", label: "عنوان بحث الماجستير (اختياري)", type: "text", half: true },
+  { name: "formulaPerformance", label: "إضافة عبارة «بتفوق» لشهادة الدورة", type: "bool", half: true },
+];

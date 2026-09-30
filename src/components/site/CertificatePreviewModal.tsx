@@ -15,6 +15,7 @@ type CertificatePreviewData = {
   subject?: string;
   extra?: string;
   granter?: string;
+  formulaData?: unknown;
   issuedAtIso?: string;
   pdfUrl: string | null;
   labels: { preview: string; close: string; download: string; print: string; holder: string; related: string; serial: string; issuedAt: string };
@@ -76,6 +77,7 @@ export function CertificatePreviewModal({ data }: { data: CertificatePreviewData
                 granter={data.granter}
                 issuedAt={data.issuedAtIso || data.issuedAt}
                 serial={data.serial}
+                formulaData={data.formulaData}
               />
             </div>
             <div className="certificate-modal-actions">

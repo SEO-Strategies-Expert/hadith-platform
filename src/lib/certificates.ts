@@ -17,7 +17,7 @@
  *    بحساب الطالب فيه بريده وهاتفه ورقمه الجامعيّ. الاسم وبيانات الوثيقة فقط.
  */
 import { randomBytes } from "node:crypto";
-import type { CertificateKind } from "@prisma/client";
+import type { CertificateKind, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 // ---------------------------------------------------------------------------
@@ -139,6 +139,7 @@ export interface IssueCertificateInput {
   issuedById?: string | null;
   pdfUrl?: string | null;
   designStyle?: string | null;
+  formulaData?: Prisma.InputJsonValue | null;
 }
 
 export interface IssuedCertificate {
@@ -181,6 +182,7 @@ export async function issueCertificate(input: IssueCertificateInput): Promise<Is
           isnadEn: input.isnadEn || null,
           grantedByAr: input.grantedByAr || null,
           grantedByEn: input.grantedByEn || null,
+          formulaData: input.formulaData ?? undefined,
           issuedAt,
           issuedById: input.issuedById || null,
           pdfUrl: input.pdfUrl || null,
@@ -223,6 +225,7 @@ export interface PublicCertificate {
   grantedByAr: string | null;
   grantedByEn: string | null;
   designStyle: string;
+  formulaData: Prisma.JsonValue | null;
 }
 
 export type VerifyResult =
@@ -256,6 +259,7 @@ export async function verifyCertificate(rawCode: string | null | undefined): Pro
       grantedByAr: true,
       grantedByEn: true,
       designStyle: true,
+      formulaData: true,
       user: { select: { name: true } },
       course: { select: { titleAr: true, titleEn: true } },
       stage: { select: { titleAr: true, titleEn: true } },
@@ -280,6 +284,7 @@ export async function verifyCertificate(rawCode: string | null | undefined): Pro
     grantedByAr: row.grantedByAr,
     grantedByEn: row.grantedByEn,
     designStyle: row.designStyle,
+    formulaData: row.formulaData,
   };
 
   return row.revoked ? { status: "revoked", certificate } : { status: "valid", certificate };
@@ -305,6 +310,7 @@ export async function getStudentCertificates(userId: string) {
       revoked: true,
       pdfUrl: true,
       designStyle: true,
+      formulaData: true,
       isnadAr: true,
       isnadEn: true,
       grantedByAr: true,

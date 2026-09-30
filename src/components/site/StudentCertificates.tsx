@@ -137,7 +137,7 @@ export async function StudentCertificates({ lang, userId }: { lang: Lang; userId
                   )}
 
                   <div className="page-actions" style={{ marginTop: 18 }}>
-                    <CertificatePreviewModal data={{ title: pick(c.titleAr, c.titleEn), holder: c.user?.name ?? "", related, serial: c.serial, issuedAt: longDate(c.issuedAt, lang, { arabicDigits: lang === "ar" }), kind: c.kind === "IJAZA" ? t.kindIjaza : t.kindCertificate, style: c.designStyle || "classic", subject: related, extra: c.isnadAr || "", granter: c.grantedByAr || "", issuedAtIso: c.issuedAt.toISOString(), pdfUrl: c.pdfUrl, labels: { preview: t.preview, close: t.close, download: t.download, print: t.print, holder: lang === "ar" ? "صاحب الوثيقة" : "Holder", related: lang === "ar" ? "الوثيقة مرتبطة بالمقرر" : "Related course", serial: t.serial, issuedAt: t.issuedAt } }} />
+                    <CertificatePreviewModal data={{ title: pick(c.titleAr, c.titleEn), holder: c.user?.name ?? "", related, serial: c.serial, issuedAt: longDate(c.issuedAt, lang, { arabicDigits: lang === "ar" }), kind: c.kind === "IJAZA" ? t.kindIjaza : t.kindCertificate, style: c.designStyle || "classic", subject: related, extra: c.isnadAr || "", granter: c.grantedByAr || "", formulaData: c.formulaData, issuedAtIso: c.issuedAt.toISOString(), pdfUrl: c.pdfUrl, labels: { preview: t.preview, close: t.close, download: t.download, print: t.print, holder: lang === "ar" ? "صاحب الوثيقة" : "Holder", related: lang === "ar" ? "الوثيقة مرتبطة بالمقرر" : "Related course", serial: t.serial, issuedAt: t.issuedAt } }} />
                     <Link className="btn btn-gold" href={href}>
                       {t.verify}
                     </Link>

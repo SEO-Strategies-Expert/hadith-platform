@@ -31,6 +31,14 @@ const issueSchema = z.object({
   isnadEn: z.string().optional(),
   grantedByAr: z.string().optional(),
   grantedByEn: z.string().optional(),
+  formulaGender: z.enum(["male", "female"]).optional(),
+  formulaSubjectAr: z.string().optional(),
+  formulaAuthorAr: z.string().optional(),
+  formulaAttendance: z.enum(["complete", "minor-loss", "major-loss"]).optional(),
+  formulaPeriodStart: z.string().optional(),
+  formulaPeriodEnd: z.string().optional(),
+  formulaGradeAr: z.string().optional(),
+  formulaResearchAr: z.string().optional(),
 });
 
 function optionalText(v: unknown): string | null {
@@ -88,6 +96,17 @@ export async function createCertificate(
       isnadEn: optionalText(d.isnadEn),
       grantedByAr,
       grantedByEn: optionalText(d.grantedByEn),
+      formulaData: {
+        gender: d.formulaGender || "male",
+        subjectAr: optionalText(d.formulaSubjectAr),
+        authorAr: optionalText(d.formulaAuthorAr),
+        attendance: d.formulaAttendance || "complete",
+        periodStart: optionalText(d.formulaPeriodStart),
+        periodEnd: optionalText(d.formulaPeriodEnd),
+        gradeAr: optionalText(d.formulaGradeAr),
+        researchAr: optionalText(d.formulaResearchAr),
+        performance: formData.get("formulaPerformance") === "on",
+      },
       issuedById: admin.id ?? null,
     });
     issuedId = issued.id;

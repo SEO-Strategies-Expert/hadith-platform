@@ -222,6 +222,7 @@ export async function CertificateVerify({ lang, code }: { lang: Lang; code?: str
                   granter={cert.grantedByAr || ""}
                   issuedAt={cert.issuedAt}
                   serial={cert.serial}
+                  formulaData={cert.formulaData}
                   verifyCode={formatVerifyCode(cert.verifyCode)}
                 />
               </div>

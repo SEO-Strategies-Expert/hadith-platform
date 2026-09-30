@@ -17,6 +17,7 @@ export function CertificateStyleForm({
   serial,
   verifyCode,
   signatures,
+  formulaData,
 }: {
   id: string;
   value: string;
@@ -29,6 +30,7 @@ export function CertificateStyleForm({
   serial: string;
   verifyCode: string;
   signatures: { src?: string | null; name?: string | null; role: string }[];
+  formulaData?: unknown;
 }) {
   const initial = formulaForCertificate(value, kind).id;
   const [selected, setSelected] = useState<CertificateFormulaId>(initial);
@@ -47,6 +49,7 @@ export function CertificateStyleForm({
         serial={serial}
         verifyCode={verifyCode}
         signatures={signatures}
+        formulaData={formulaData}
       />
       <div>
         <h2 className="mb-1 text-[14px] font-extrabold text-navy-900">صيغة نص الشهادة</h2>

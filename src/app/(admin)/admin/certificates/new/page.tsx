@@ -6,7 +6,7 @@ import { ActionForm } from "@/components/admin/ActionForm";
 import { ResourceFields } from "@/components/admin/ResourceFields";
 import { withRelationOptions } from "@/lib/resource-options";
 import type { FieldDef } from "@/lib/resources";
-import { certificateCoreFields, ijazaFields } from "../fields";
+import { certificateCoreFields, ijazaFields, certificateFormulaFields } from "../fields";
 import { createCertificate } from "../actions";
 import { CERTIFICATE_FORMULAS } from "@/lib/certificate-formulas";
 
@@ -71,6 +71,12 @@ export default async function NewCertificatePage() {
               ))}
             </fieldset>
             <ResourceFields fields={fields} record={{ kind: "CERTIFICATE" }} />
+
+            <div className="rounded-xl border border-black/10 bg-cream-50 p-5">
+              <h2 className="mb-1 text-[13.5px] font-extrabold text-navy-900">البيانات التي تُدرج في نص الشهادة</h2>
+              <p className="mb-4 text-[11.5px] leading-6 text-ink-soft">املأ ما ينطبق على الصيغة المختارة؛ بقية الحقول اختيارية. اسم الطالب وتاريخ الإصدار يؤخذان تلقائيًا من السجل.</p>
+              <ResourceFields fields={certificateFormulaFields} />
+            </div>
 
             {/* السند والمُجيز في صندوقٍ مستقلّ: مصطلحٌ شرعيّ لا يخصّ شهادة الإتمام. */}
             <div className="rounded-xl border border-gold/40 bg-gold/5 p-5">

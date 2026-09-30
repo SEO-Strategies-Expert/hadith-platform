@@ -48,6 +48,7 @@ export default async function CertificatePage({
       revoked: true,
       revokeNote: true,
       designStyle: true,
+      formulaData: true,
       isnadAr: true,
       isnadEn: true,
       grantedByAr: true,
@@ -114,7 +115,8 @@ export default async function CertificatePage({
               holder={cert.user.name}
               subject={cert.course?.titleAr ?? cert.stage?.titleAr ?? ""}
               extra={cert.isnadAr ?? ""}
-              granter={cert.grantedByAr ?? design["certificate.signature1Name"] ?? ""}
+              granter={cert.grantedByAr ?? ""}
+              formulaData={cert.formulaData}
               issuedAt={cert.issuedAt.toISOString()}
               serial={cert.serial}
               verifyCode={formatVerifyCode(cert.verifyCode)}

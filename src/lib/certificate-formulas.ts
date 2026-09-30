@@ -84,14 +84,46 @@ export type CertificateFill = {
   granter: string;
   date: string;
   hijri: string;
+  data?: CertificateFormulaData;
 };
 
-const HAMD =
-  "الْحَمْدُ لِلَّهِ عَزَّ وَجَلَّ، هَدَى وَأَضَلَّ، وَأَصَحَّ وَأَعَلَّ، وَبِالْكَمَالِ وَحْدَهُ اسْتَقَلَّ. وَالصَّلَاةُ وَالسَّلَامُ عَلَى نَبِيِّنَا مُحَمَّدٍ.";
-const COLLEGE =
-  "فَإِنَّ الْكُلِّيَّةَ الْعُلْيَا لِلْحَدِيثِ النَّبَوِيِّ وَعُلُومِهِ وَعِلَلِهِ (جَامِعَةَ أَبِي بَكْرِ بْنِ إِبْرَاهِيمَ الدَّوْلِيَّةَ)";
-const CHARGE =
-  "وَإِنَّا إِذْ نَمْنَحُهُ / نَمْنَحُهَا هَذِهِ الشَّهَادَةَ، نُوصِيهِ / نُوصِيهَا بِتَقْوَى اللَّهِ تَعَالَى فِي السِّرِّ وَالْعَلَنِ، وَالْعَمَلِ بِمَا عَلِمَ / عَلِمَتْ، وَنَشْرِ سُنَّةِ النَّبِيِّ ﷺ وَالذَّبِّ عَنْهَا بِالْحِكْمَةِ وَالْمَوْعِظَةِ الْحَسَنَةِ.";
+export type CertificateFormulaData = {
+  gender?: "male" | "female";
+  subjectAr?: string;
+  authorAr?: string;
+  attendance?: "complete" | "minor-loss" | "major-loss";
+  periodStart?: string;
+  periodEnd?: string;
+  gradeAr?: string;
+  researchAr?: string;
+  performance?: boolean;
+};
+
+export function normalizeCertificateFormulaData(value: unknown): CertificateFormulaData {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const data = value as Record<string, unknown>;
+  return {
+    gender: data.gender === "female" ? "female" : "male",
+    subjectAr: typeof data.subjectAr === "string" ? data.subjectAr : "",
+    authorAr: typeof data.authorAr === "string" ? data.authorAr : "",
+    attendance: data.attendance === "minor-loss" || data.attendance === "major-loss" ? data.attendance : "complete",
+    periodStart: typeof data.periodStart === "string" ? data.periodStart : "",
+    periodEnd: typeof data.periodEnd === "string" ? data.periodEnd : "",
+    gradeAr: typeof data.gradeAr === "string" ? data.gradeAr : "",
+    researchAr: typeof data.researchAr === "string" ? data.researchAr : "",
+    performance: data.performance === true,
+  };
+}
+
+const HAMD = "الْحَمْدُ لِلَّهِ وَالصَّلَاةُ وَالسَّلَامُ عَلَى رَسُولِ اللَّهِ وَعَلَى آلِهِ وَصَحْبِهِ وَمَنْ وَالَاهُ، وَبَعْدُ:";
+const COLLEGE = "الْكُلِّيَّةُ الْعُلْيَا لِلْحَدِيثِ النَّبَوِيِّ وَعُلُومِهِ وَعِلَلِهِ (جَامِعَةُ أَبِي بَكْرِ بْنِ إِبْرَاهِيمَ الدَّوْلِيَّةُ)";
+const CHARGE = "وَإِنَّنَا إِذْ نَمْنَحُهُ هَذِهِ الشَّهَادَةَ، نُوصِيهِ بِتَقْوَى اللَّهِ تَعَالَى فِي السِّرِّ وَالْعَلَنِ، وَالْعَمَلِ بِمَا عَلِمَ، وَنَشْرِ سُنَّةِ النَّبِيِّ ﷺ وَالذَّبِّ عَنْهَا بِالْحِكْمَةِ وَالْمَوْعِظَةِ الْحَسَنَةِ.";
+
+function formatTemplateDate(value?: string) {
+  if (!value) return ".... / .... / ....";
+  const date = new Date(`${value}T12:00:00`);
+  return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat("ar-QA-u-nu-arab", { day: "numeric", month: "long", year: "numeric" }).format(date);
+}
 
 function subjectOf(fill: CertificateFill, fallback: string) {
   return fill.subject.trim() || fallback;
@@ -99,32 +131,41 @@ function subjectOf(fill: CertificateFill, fallback: string) {
 
 export function formulaParagraphs(id: CertificateFormulaId, fill: CertificateFill): string[] {
   const name = fill.name.trim() || "..................";
-  const dateLine = `تَحْرِيرًا فِي: ${fill.hijri || ".... / .... / .... هـ"} — الْمُوَافِقِ ${fill.date || ".... / .... / .... م"}.`;
+  const d = normalizeCertificateFormulaData(fill.data);
+  const female = d.gender === "female";
+  const student = female ? "الطَّالِبَةَ" : "الطَّالِبَ";
+  const heard = female ? "سَمِعَتْ" : "سَمِعَ";
   const issuedLine = `صَدَرَتْ فِي: ${fill.hijri || ".... / .... / .... هـ"} — الْمُوَافِقِ ${fill.date || ".... / .... / .... م"}.`;
-  const grade = fill.extra.trim();
+  const periodStart = formatTemplateDate(d.periodStart);
+  const periodEnd = formatTemplateDate(d.periodEnd);
+  const grade = d.gradeAr?.trim() || fill.extra.trim();
 
   if (id === "ijaza") {
-    const book = subjectOf(fill, "الكتاب المسموع");
+    const book = d.subjectAr?.trim() || subjectOf(fill, "اسْمُ الْكِتَابِ الْمَسْمُوعِ");
+    const author = d.authorAr?.trim() ? `${d.authorAr.trim()} رَحِمَهُ اللَّهُ` : "اسْمُ الْمُؤَلِّفِ رَحِمَهُ اللَّهُ";
     const granter = fill.granter.trim() || "الشيخ المجيز";
+    const attendance = d.attendance === "minor-loss" ? "سَمَاعًا بِفَوْتٍ يَسِيرٍ" : d.attendance === "major-loss" ? "سَمَاعًا بِفَوْتٍ كَبِيرٍ" : "سَمَاعًا كَامِلًا";
     return [
       HAMD,
       "أَمَّا بَعْدُ:",
-      `${COLLEGE} قَدْ عَقَدَتْ مَجْلِسَ سَمَاعٍ فِي كِتَابِ «${book}»، بِإِسْمَاعِ الشَّيْخِ الْمُجِيزِ: ${granter}.`,
-      `وَيَقُولُ الْمُجِيزُ: قَدْ سَمِعَ عَلَيْنَا الطَّالِبُ / الطَّالِبَةُ ${name} هَذَا الْكِتَابَ سَمَاعًا تَامًّا.${grade ? ` ${grade}` : ""}`,
-      "وَعَلَيْهِ؛ فَقَدْ أَجَزْنَاهُ / أَجَزْنَاهَا بِرِوَايَةِ هَذَا الْكِتَابِ عَنِّي، بِسَنَدِي الْمُتَّصِلِ إِلَى مُؤَلِّفِهِ، إِجَازَةً خَاصَّةً مِنْ مُعَيَّنٍ فِي مُعَيَّنٍ، بِالشَّرْطِ الْمُعْتَبَرِ عِنْدَ أَهْلِ الْحَدِيثِ وَالْأَثَرِ.",
-      "وَإِنَّا إِذْ نَمْنَحُهُ / نَمْنَحُهَا هَذِهِ الْإِجَازَةَ الْعِلْمِيَّةَ، نُوصِيهِ / نُوصِيهَا بِتَقْوَى اللَّهِ تَعَالَى فِي السِّرِّ وَالْعَلَنِ، وَالْعَمَلِ بِمَا عَلِمَ / عَلِمَتْ، وَنَشْرِ سُنَّةِ النَّبِيِّ ﷺ وَالذَّبِّ عَنْهَا بِالْحِكْمَةِ وَالْمَوْعِظَةِ الْحَسَنَةِ.",
+      `${COLLEGE} قَدْ عَقَدَتْ مَجَالِسَ سَمَاعٍ فِي كِتَابِ «${book}» لِلْإِمَامِ «${author}»، بِإِسْمَاعِ الشَّيْخِ الْمُجِيزِ: ${granter}.`,
+      `وَيَقُولُ الْمُجِيزُ: قَدْ ${heard} عَلَيْنَا ${student} ${name} كِتَابَ «${book}» لِلْإِمَامِ «${author}» ${attendance}.`,
+      `وَعَلَيْهِ؛ فَقَدْ أَجَزْنَاهُ بِرِوَايَةِ هَذَا الْكِتَابِ عَنِّي، بِسَنَدِي الْمُتَّصِلِ إِلَى مُؤَلِّفِهِ، إِجَازَةً خَاصَّةً مِنْ مُعَيَّنٍ فِي مُعَيَّنٍ، بِالشَّرْطِ الْمُعْتَبَرِ عِنْدَ أَهْلِ الْحَدِيثِ وَالْأَثَرِ.${grade ? ` ${grade}` : ""}`,
+      female ? "وَإِنَّنَا إِذْ نَمْنَحُهَا هَذِهِ الْإِجَازَةَ الْعِلْمِيَّةَ، نُوصِيهَا بِتَقْوَى اللَّهِ تَعَالَى فِي السِّرِّ وَالْعَلَنِ، وَالْعَمَلِ بِمَا عَلِمَتْ، وَنَشْرِ سُنَّةِ النَّبِيِّ ﷺ وَالذَّبِّ عَنْهَا بِالْحِكْمَةِ وَالْمَوْعِظَةِ الْحَسَنَةِ." : "وَإِنَّنَا إِذْ نَمْنَحُهُ هَذِهِ الْإِجَازَةَ الْعِلْمِيَّةَ، نُوصِيهِ بِتَقْوَى اللَّهِ تَعَالَى فِي السِّرِّ وَالْعَلَنِ، وَالْعَمَلِ بِمَا عَلِمَ، وَنَشْرِ سُنَّةِ النَّبِيِّ ﷺ وَالذَّبِّ عَنْهَا بِالْحِكْمَةِ وَالْمَوْعِظَةِ الْحَسَنَةِ.",
       issuedLine,
     ];
   }
 
   if (id === "course") {
-    const course = subjectOf(fill, "الدورة العلمية");
+    const course = d.subjectAr?.trim() || subjectOf(fill, "اسْمُ الدَّوْرَةِ الْعِلْمِيَّةِ");
+    const excellence = d.performance ? "بِتَفَوُّقٍ " : "";
     return [
       HAMD,
       "أَمَّا بَعْدُ:",
-      `${COLLEGE} تَشْهَدُ بِأَنَّ الطَّالِبَ / الطَّالِبَةَ: ${name}`,
-      `قَدْ شَارَكَ / شَارَكَتْ وَاجْتَازَ / اجْتَازَتِ الدَّوْرَةَ الْعِلْمِيَّةَ التَّخَصُّصِيَّةَ الْمَوْسُومَةَ بِـ: «${course}».`,
-      CHARGE,
+      `${COLLEGE} تَشْهَدُ بِأَنَّ ${student}: ${name}`,
+      `قَدْ ${female ? "شَارَكَتْ" : "شَارَكَ"} وَ${female ? "اجْتَازَتْ" : "اجْتَازَ"} ${excellence}الدَّوْرَةَ الْعِلْمِيَّةَ التَّخَصُّصِيَّةَ الْمَوْسُومَةَ بِـ: «${course}».`,
+      `وَالْمُقَامَةِ فِي الْفَتْرَةِ مِنْ: ${periodStart} إِلَى ${periodEnd}.`,
+      female ? CHARGE.replaceAll("نَمْنَحُهُ", "نَمْنَحُهَا").replaceAll("نُوصِيهِ", "نُوصِيهَا").replaceAll("عَلِمَ،", "عَلِمَتْ،") : CHARGE,
       issuedLine,
     ];
   }
@@ -132,18 +173,18 @@ export function formulaParagraphs(id: CertificateFormulaId, fill: CertificateFil
   const degree =
     id === "bachelor" ? "الْبَكَالُورِيُوسِ" : id === "diploma" ? "الدِّبْلُومِ الْأَكَادِيمِيِّ الْمُعْتَمَدِ" : "الْمَاجِسْتِيرِ";
   const research =
-    id === "master" && fill.subject.trim()
-      ? `، وَإِجَازَةِ بَحْثِهِ / بَحْثِهَا الْمَوْسُومِ بِـ: «${fill.subject.trim()}»`
+    id === "master" && (d.researchAr || fill.subject).trim()
+      ? `، وَإِجَازَةِ بَحْثِهِ الْمَوْسُومِ بِـ: «${(d.researchAr || fill.subject).trim()}»`
       : "";
   return [
     HAMD,
     "أَمَّا بَعْدُ:",
-    `${COLLEGE} تَمْنَحُ الطَّالِبَ / الطَّالِبَةَ: ${name}`,
+    `${COLLEGE} تَمْنَحُ ${student}: ${name}`,
     `شَهَادَةَ ${degree} فِي الْحَدِيثِ النَّبَوِيِّ وَعُلُومِهِ وَعِلَلِهِ.`,
-    `وَذَلِكَ بَعْدَ اسْتِيفَائِهِ / اسْتِيفَائِهَا السَّاعَاتِ الدِّرَاسِيَّةِ الْمُقَرَّرَةِ، وَاجْتِيَازِهِ / اجْتِيَازِهَا الِاخْتِبَارَاتِ النَّظَرِيَّةِ وَالتَّطْبِيقِيَّةِ فِي الْمَنَاهِجِ وَالْمُقَرَّرَاتِ${research}.`,
-    grade ? `وَحَصَلَ / حَصَلَتْ عَلَى تَقْدِيرِ: ${grade}.` : "وَحَصَلَ / حَصَلَتْ عَلَى التَّقْدِيرِ الْمُعْتَمَدِ فِي سِجِلِّ الْكُلِّيَّةِ.",
-    CHARGE,
-    dateLine,
+    `وَذَلِكَ بَعْدَ اسْتِيفَائِ${female ? "هَا" : "هِ"} السَّاعَاتِ الدِّرَاسِيَّةِ الْمُقَرَّرَةِ، وَاجْتِيَازِ${female ? "هَا" : "هِ"} الِاخْتِبَارَاتِ النَّظَرِيَّةِ وَالتَّطْبِيقِيَّةِ فِي الْمَنَاهِجِ وَالْمُقَرَّرَاتِ${research}.`,
+    grade ? `وَ${female ? "حَصَلَتْ" : "حَصَلَ"} عَلَى تَقْدِيرِ: ${grade}.` : `وَ${female ? "حَصَلَتْ" : "حَصَلَ"} عَلَى التَّقْدِيرِ الْمُعْتَمَدِ فِي سِجِلِّ الْكُلِّيَّةِ.`,
+    female ? CHARGE.replaceAll("نَمْنَحُهُ", "نَمْنَحُهَا").replaceAll("نُوصِيهِ", "نُوصِيهَا").replaceAll("عَلِمَ،", "عَلِمَتْ،") : CHARGE,
+    `تَحْرِيرًا فِي: ${fill.hijri || ".... / .... / .... هـ"} — الْمُوَافِقِ ${fill.date || ".... / .... / .... م"}.`,
   ];
 }
 

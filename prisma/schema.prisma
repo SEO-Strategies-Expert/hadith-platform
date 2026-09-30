@@ -983,6 +983,7 @@ model Certificate {
   isnadEn     String?
   grantedByAr String?
   grantedByEn String?
+  formulaData Json? // الحقول الإضافية الخاصة بصيغة الوثيقة المختارة
 
   issuedAt   DateTime @default(now())
   issuedById String?
