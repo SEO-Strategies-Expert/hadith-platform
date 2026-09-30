@@ -73,9 +73,9 @@ export function AdminShell({
               rel="noreferrer"
               className="hidden items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-[13px] font-bold text-white hover:bg-emerald-700 sm:flex"
             >
-            <AdminNoticeBell unread={notices.unread} items={notices.items} />
               <ExternalLink size={16} /> عرض الموقع
             </a>
+            <AdminNoticeBell unread={notices.unread} items={notices.items} />
 
             <div className="relative">
               <button
