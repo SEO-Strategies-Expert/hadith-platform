@@ -75,8 +75,8 @@ export default async function DashboardPage() {
 
       {!dbReady && (
         <div className="rounded-xl border border-amber-300 bg-amber-50 px-5 py-4 text-[13.5px] text-amber-800">
-          <b>قاعدة البيانات غير متّصلة بعد.</b> فعّل Vercel Postgres وأضف متغيّرات البيئة
-          ثم شغّل الترحيل (migrations) لتظهر البيانات الحقيقية.
+          <b>قاعدة البيانات غير متّصلة بعد.</b> اضبط <code dir="ltr">DATABASE_URL</code> على قاعدة PostgreSQL،
+          ثم طبّق مخطط Prisma لتظهر البيانات الحقيقية.
         </div>
       )}
 

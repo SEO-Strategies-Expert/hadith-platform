@@ -63,46 +63,17 @@ export default async function SystemPage({
     ["المراقبة", Boolean(process.env.SENTRY_DSN)],
     ["مهام Cron", Boolean(process.env.CRON_SECRET)],
   ] as const;
-  const providerTone = db.provider === "Neon" ? "blue" : db.provider === "Local" ? "gold" : "gray";
+  const providerTone = db.provider === "Local" ? "gold" : "blue";
   const hasSchemaError = !db.ok || Boolean(logsError) || Boolean(jobsError);
   const isVercel = Boolean(process.env.VERCEL);
   const runtimeName = isVercel ? "Vercel" : "تشغيل محلي";
   const deploymentEnv = process.env.VERCEL_ENV || (process.env.NODE_ENV === "production" ? "production" : "development");
+  const databaseUrl = process.env.DATABASE_URL;
   const dbEnvironmentVariables = [
-    {
-      name: "POSTGRES_PRISMA_URL",
-      value: process.env.POSTGRES_PRISMA_URL,
-      usage: "اتصال Prisma المستخدم فعليًا بواسطة التطبيق",
-      required: true,
-    },
-    {
-      name: "POSTGRES_URL_NON_POOLING",
-      value: process.env.POSTGRES_URL_NON_POOLING,
-      usage: "الاتصال المباشر للترحيلات ومزامنة الهيكل",
-      required: true,
-    },
-    {
-      name: "DATABASE_URL",
-      value: process.env.DATABASE_URL,
-      usage: "اسم متوافق مع أدوات الاستضافة — غير مستخدم مباشرة في schema الحالية",
-      required: false,
-    },
-    {
-      name: "DIRECT_URL",
-      value: process.env.DIRECT_URL,
-      usage: "اسم متوافق للاتصال المباشر — غير مستخدم مباشرة في schema الحالية",
-      required: false,
-    },
+    { name: "DATABASE_URL", value: databaseUrl, usage: "رابط PostgreSQL المستخدم بواسطة التطبيق وPrisma", required: true },
   ] as const;
-  const primaryConnectionUrl = process.env.POSTGRES_PRISMA_URL;
-  const directConnectionUrl = process.env.POSTGRES_URL_NON_POOLING;
-  const credentials = parseConnectionCredentials(primaryConnectionUrl);
-  const localEnvTemplate = [
-    `POSTGRES_PRISMA_URL=${JSON.stringify(primaryConnectionUrl || "")}`,
-    `POSTGRES_URL_NON_POOLING=${JSON.stringify(directConnectionUrl || primaryConnectionUrl || "")}`,
-    `DATABASE_URL=${JSON.stringify(process.env.DATABASE_URL || primaryConnectionUrl || "")}`,
-    `DIRECT_URL=${JSON.stringify(process.env.DIRECT_URL || directConnectionUrl || primaryConnectionUrl || "")}`,
-  ].join("\n");
+  const credentials = parseConnectionCredentials(databaseUrl);
+  const localEnvTemplate = `DATABASE_URL=${JSON.stringify(databaseUrl || "")}`;
 
   return <div><PageHeader title="الأمان والتشغيل" desc="سجل التدقيق، النسخ الاحتياطي، حالة التكاملات وطوابير المعالجة." />
     {restored && <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] font-bold text-emerald-700">تمت الاستعادة: أُدرج {restored} صفًّا (الموجود مسبقًا لم يُمسّ).</div>}
@@ -130,17 +101,13 @@ export default async function SystemPage({
       </div>
       <p className="mt-2 text-[13px] leading-6 text-ink-soft">
         {isVercel
-          ? "القيم المعروضة أدناه قادمة من Vercel Project Settings → Environment Variables، وليست من ملفات GitHub أو .env المحلية."
-          : "القيم المعروضة أدناه قادمة من بيئة التشغيل المحلية؛ يعطي Next.js ملف .env.local أولوية على .env."}
+          ? "القيمة قادمة من إعدادات متغيرات البيئة الخاصة بالاستضافة، وليست من GitHub أو ملفات البيئة المحلية."
+          : "القيمة قادمة من بيئة التشغيل الحالية؛ في التطوير المحلي يُفضّل ضبطها في .env.local."}
       </p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl bg-black/[.03] p-3">
-          <div className="text-[11.5px] font-bold text-ink-soft">المتغير الذي يستخدمه Prisma</div>
-          <code className="mt-1 block text-[12px] font-bold text-navy-900" dir="ltr">POSTGRES_PRISMA_URL</code>
-        </div>
-        <div className="rounded-xl bg-black/[.03] p-3">
-          <div className="text-[11.5px] font-bold text-ink-soft">متغير الاتصال المباشر</div>
-          <code className="mt-1 block text-[12px] font-bold text-navy-900" dir="ltr">POSTGRES_URL_NON_POOLING</code>
+          <div className="text-[11.5px] font-bold text-ink-soft">متغير الاتصال الوحيد</div>
+          <code className="mt-1 block text-[12px] font-bold text-navy-900" dir="ltr">DATABASE_URL</code>
         </div>
         <div className="rounded-xl bg-black/[.03] p-3">
           <div className="text-[11.5px] font-bold text-ink-soft">منطقة Vercel</div>
@@ -170,9 +137,7 @@ export default async function SystemPage({
       </div>
       {isVercel && (
         <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-[12.5px] leading-6 text-sky-900">
-          لتعديل الاتصال: افتح <b dir="ltr">Vercel → Project → Settings → Environment Variables</b>، حدّث
-          <code dir="ltr" className="mx-1">POSTGRES_PRISMA_URL</code> و
-          <code dir="ltr" className="mx-1">POSTGRES_URL_NON_POOLING</code> للبيئات المطلوبة، ثم نفّذ إعادة نشر. تعديل ملفات GitHub وحده لا يغيّر هذه القيم.
+          لتعديل اتصال قاعدة البيانات، حدّث <code dir="ltr">DATABASE_URL</code> في متغيرات بيئة الاستضافة ثم أعد النشر. لا تضع رابط قاعدة البيانات في GitHub.
         </div>
       )}
 
@@ -212,7 +177,7 @@ export default async function SystemPage({
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="font-extrabold text-navy-900">قاعدة البيانات</h2>
         <Badge tone={db.ok ? "green" : "red"}>{db.ok ? "متصلة" : "غير متصلة"}</Badge>
-        <Badge tone={providerTone}>{db.provider === "Neon" ? "Neon (سحابة)" : db.provider === "Local" ? "محلّية" : db.provider}</Badge>
+        <Badge tone={providerTone}>{db.provider === "Local" ? "محلّية" : db.provider === "Unknown" ? "غير معروف" : "PostgreSQL"}</Badge>
         {db.sizePretty && <Badge tone="gray">{db.sizePretty}</Badge>}
       </div>
       {!db.ok && db.error && <p className="mt-2 text-[13px] font-bold text-red-600" dir="ltr">{db.error}</p>}

@@ -16,7 +16,7 @@ export async function POST() {
     return Response.json({ ok: false, error: "FORBIDDEN" }, { status: 403 });
   }
 
-  const dbUrl = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
+  const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) {
     return Response.json({ ok: false, error: "DATABASE_URL_MISSING" }, { status: 500 });
   }
@@ -35,16 +35,15 @@ export async function POST() {
     const localBuild = path.join(cwd, "node_modules/prisma/build/index.js");
     let cmd: string;
     if (existsSync(localBin)) {
-      cmd = `"${localBin}" db push --accept-data-loss --skip-generate`;
+      cmd = `"${localBin}" db push --skip-generate`;
     } else if (existsSync(localBuild)) {
-      cmd = `node "${localBuild}" db push --accept-data-loss --skip-generate`;
+      cmd = `node "${localBuild}" db push --skip-generate`;
     } else {
-      cmd = "npx --yes prisma db push --accept-data-loss --skip-generate";
+      cmd = "npx --yes prisma db push --skip-generate";
     }
     const env: Record<string, string | undefined> = {
       ...process.env,
-      POSTGRES_PRISMA_URL: dbUrl,
-      POSTGRES_URL_NON_POOLING: dbUrl,
+      DATABASE_URL: dbUrl,
       HOME: "/tmp",
       TMPDIR: "/tmp",
       npm_config_cache: "/tmp/.npm",

@@ -2,7 +2,7 @@
 
 تطبيق **Next.js 16** واحد يضمّ: الموقع العام (يُقرأ من قاعدة البيانات، عربي/إنجليزي، نفس
 تصميم الموقع الأصلي حرفيًّا) + لوحة تحكم كاملة (CRUD) لكل المحتوى.
-البنية: Next.js (App Router) + Vercel Postgres (Neon) + Vercel Blob + NextAuth (مدير/محرّر) + Prisma 6.
+البنية: Next.js (App Router) + PostgreSQL عبر `DATABASE_URL` + NextAuth + Prisma 6. انظر [دليل النشر على Hostinger](HOSTINGER-DEPLOY-AR.md) للإعداد الحالي.
 
 ## ✅ الحالة: المراحل الأربع مكتملة ومُختبَرة
 1. **الأساس:** لوحة تحكم (قائمة جانبية + شريط علوي)، تسجيل دخول، حماية `/admin`، أدوار مدير/محرّر.
@@ -55,12 +55,13 @@
 كلمة المرور: (أُرسلت في المحادثة — غيّرها من /admin/users فور أول دخول)
 ```
 
-## ⚙️ متغيّرات البيئة (مُفعَّلة بالفعل على Vercel)
+## ⚙️ متغيّرات البيئة
 | المتغيّر | المصدر |
 |---|---|
-| `POSTGRES_PRISMA_URL` / `POSTGRES_URL_NON_POOLING` | Vercel Postgres (Neon) — أُضيفت تلقائيًّا عند الربط |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob — حدِّثه إذا أُنشئ مخزن جديد (انظر أعلاه) |
-| `AUTH_SECRET` | أُضيف يدويًّا في Environment Variables |
+| `DATABASE_URL` | رابط PostgreSQL؛ على Hostinger استخدم اتصال PostgreSQL المحلي في VPS. راجع [دليل Hostinger](HOSTINGER-DEPLOY-AR.md). |
+| `AUTH_SECRET` | سرّ جلسات عشوائي وقوي، يضبط في بيئة الخادم ولا يُرفع إلى GitHub. |
+| `SITE_URL` | عنوان الموقع الرسمي مع `https://` وبدون شرطة أخيرة. |
+| `BLOB_READ_WRITE_TOKEN` | اختياري، لرفع الملفات إلى Vercel Blob. |
 
 ## 🖥️ التشغيل محليًّا (للتطوير فقط)
 انسخ `.env.example` إلى `.env` واملأ نفس القيم أعلاه، ثم:

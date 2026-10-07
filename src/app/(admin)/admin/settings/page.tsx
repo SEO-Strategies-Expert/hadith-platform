@@ -126,7 +126,7 @@ export default async function SettingsPage({
         <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] leading-6 text-red-700">
           <b>تعذّر تحميل الإعدادات من قاعدة البيانات:</b> <code dir="ltr" className="break-all">{settingsError}</code>
           <span className="block mt-1 text-[12px] text-amber-800">
-            إن كانت قاعدة Neon غير متزامنة، اذهب إلى <a href="/admin/system" className="font-bold underline">/admin/system ← مزامنة الهيكل</a> أولًا، أو فعّل Debug عبر متغير البيئة <code dir="ltr">DEBUG=true</code> في Vercel.
+            إن كان مخطط قاعدة البيانات غير متزامن، اذهب إلى <a href="/admin/system" className="font-bold underline">/admin/system ← مزامنة الهيكل</a> أولًا، أو فعّل Debug عبر متغير البيئة <code dir="ltr">DEBUG=true</code> في بيئة الاستضافة.
           </span>
         </div>
       )}

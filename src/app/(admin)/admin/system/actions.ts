@@ -17,15 +17,16 @@ export async function queueBackup() {
  * لخطأ الإنتاج “This page couldn't load” بعد نشر نسخةٍ جديدةٍ غيّرت المخطط
  * ولم تُطبَّق ترحيلاتها بعد. ينشئ الجداول/الأعمدة الناقصة ويحدّث الفهارس.
  *
- * يعمل على cPanel/Neon pooler: يستخدم POSTGRES_URL_NON_POOLING إن وُجد
- * (Direct) وإلا POSTGRES_PRISMA_URL. يُشغِّل prisma عبر npx ويُعيد التوجيه
+ * يستخدم DATABASE_URL نفسها التي يعتمد عليها Prisma schema والتطبيق، حتى لا
+ * تُطبَّق المزامنة على قاعدةٍ مختلفة عن قاعدة تشغيل التطبيق. يُشغِّل Prisma
+ * عبر npx ويُعيد التوجيه
  * برسالة نجاح/فشل تُعرض في /admin/system.
  */
 export async function syncDatabase() {
   const actor = await requireAdmin();
   let target: string;
   try {
-    const dbUrl = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
+    const dbUrl = process.env.DATABASE_URL;
     if (!dbUrl) throw new Error("DATABASE_URL_MISSING: لم تُضبط متغيرات قاعدة البيانات في البيئة");
 
     let output = "";
@@ -41,8 +42,7 @@ export async function syncDatabase() {
       const execAsync = promisify(exec);
       const env: Record<string, string | undefined> = {
         ...process.env,
-        POSTGRES_PRISMA_URL: dbUrl,
-        POSTGRES_URL_NON_POOLING: dbUrl,
+        DATABASE_URL: dbUrl,
         HOME: "/tmp",
         TMPDIR: "/tmp",
         npm_config_cache: "/tmp/.npm",
@@ -53,11 +53,11 @@ export async function syncDatabase() {
       const localBuild = path.join(cwd, "node_modules/prisma/build/index.js");
       let cmd: string;
       if (existsSync(localBin)) {
-        cmd = `"${localBin}" db push --accept-data-loss --skip-generate`;
+        cmd = `"${localBin}" db push --skip-generate`;
       } else if (existsSync(localBuild)) {
-        cmd = `node "${localBuild}" db push --accept-data-loss --skip-generate`;
+        cmd = `node "${localBuild}" db push --skip-generate`;
       } else {
-        cmd = "npx --yes prisma db push --accept-data-loss --skip-generate";
+        cmd = "npx --yes prisma db push --skip-generate";
       }
       const { stdout, stderr } = await execAsync(cmd, {
         timeout: 120_000,

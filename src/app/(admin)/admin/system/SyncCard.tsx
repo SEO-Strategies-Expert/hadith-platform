@@ -13,7 +13,7 @@ export function SyncDatabaseCard({
 }: {
   hasSchemaError: boolean;
   databaseHost: string | null;
-  provider: "Neon" | "Local" | "Other" | "Unknown";
+  provider: "Local" | "Other" | "Unknown";
 }) {
   const [pending, startTransition] = useTransition();
 
@@ -47,7 +47,7 @@ export function SyncDatabaseCard({
 
     Swal.fire({
       title: "جارٍ المزامنة...",
-      text: "يتم تحديث جداول Neon — انتظر ولا تغلق الصفحة.",
+      text: "يتم تحديث جداول قاعدة البيانات — انتظر ولا تغلق الصفحة.",
       allowOutsideClick: false,
       didOpen: () => Swal.showLoading(),
       showConfirmButton: false,
@@ -94,8 +94,8 @@ export function SyncDatabaseCard({
               بعد نشر كود جديد غيّر الهيكل.
             </p>
             <p className="mt-1.5 text-[11.5px] text-ink-soft">
-              يعادل <code dir="ltr">npx prisma db push --accept-data-loss --skip-generate</code> على الخادم (يستخدم{" "}
-              <code dir="ltr">POSTGRES_URL_NON_POOLING</code> تلقائيًا).
+          يعادل <code dir="ltr">npx prisma db push --skip-generate</code> على الخادم ويستخدم{" "}
+              <code dir="ltr">DATABASE_URL</code>.
             </p>
           </div>
         </div>

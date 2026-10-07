@@ -195,7 +195,7 @@ export default async function CoursesPage({
               <h2 className="text-[16px] font-extrabold text-red-700">تعذّر تحميل المقرّرات (500)</h2>
               <p className="mt-1 text-[13px] leading-6 text-ink-soft">
                 فشل الاستعلام عن جدول <code dir="ltr">courses</code>. السبب الأكثر شيوعًا هو عدم مزامنة هيكل قاعدة
-                البيانات بعد نشر جديد على Vercel/Neon.
+                البيانات بعد نشر جديد.
               </p>
               {!debug ? (
                 <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] leading-6 text-amber-900">
@@ -207,7 +207,7 @@ export default async function CoursesPage({
                     <Bug size={12} /> الإعدادات ← تفعيل Debug
                   </Link>
                   <span className="block mt-1 text-[11.5px]">
-                    أو اذهب مباشرةً إلى <Link href="/admin/system" className="font-bold underline">/admin/system ← مزامنة الهيكل الآن</Link> لإصلاح قاعدة Neon.
+                    أو اذهب مباشرةً إلى <Link href="/admin/system" className="font-bold underline">/admin/system ← مزامنة الهيكل الآن</Link> لإصلاح قاعدة البيانات.
                   </span>
                 </div>
               ) : (
@@ -251,8 +251,7 @@ export default async function CoursesPage({
               )}
               {isMissingTable && (
                 <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-[12px] font-bold text-amber-900">
-                  تشخيص سريع: يبدو أن جدول <code dir="ltr">courses</code> أو أحد أعمدته غير موجود في Neon (
-                  <code dir="ltr">ep-noisy-mode-av88xqhy-pooler.c-11.us-east-1.aws.neon.tech</code>). شغّل
+                  تشخيص سريع: يبدو أن جدول <code dir="ltr">courses</code> أو أحد أعمدته غير موجود في قاعدة البيانات المتصلة. شغّل
                   <code dir="ltr"> prisma db push</code> من <Link href="/admin/system" className="underline">/admin/system</Link>.
                 </div>
               )}

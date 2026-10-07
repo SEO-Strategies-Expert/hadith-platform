@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 
 export type DbTableStat = { table: string; rows: number | null; sizeBytes: number | null };
-export type DbProvider = "Neon" | "Local" | "Other" | "Unknown";
+export type DbProvider = "Local" | "Other" | "Unknown";
 
 export type DbInfo = {
   ok: boolean;
@@ -51,7 +51,6 @@ function parseDbUrl(raw: string | undefined) {
 
 function detectProvider(host: string | null): DbProvider {
   if (!host) return "Unknown";
-  if (host.includes("neon.tech")) return "Neon";
   if (host === "localhost" || host === "127.0.0.1" || host === "::1") return "Local";
   return "Other";
 }
@@ -75,7 +74,7 @@ export function formatBytes(n: number | null | undefined): string {
  * لتظهر اللوحة حالة الفشل بدل صفحة 500.
  */
 export async function getDbInfo(): Promise<DbInfo> {
-  const raw = process.env.POSTGRES_PRISMA_URL;
+  const raw = process.env.DATABASE_URL;
   const { host, port, database, user } = parseDbUrl(raw);
   const base: DbInfo = {
     ok: false,

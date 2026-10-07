@@ -1,6 +1,6 @@
 // ==========================================================================
 // Prisma schema — الكلّية العليا للحديث النبوي — منصّة ولوحة التحكم
-// قاعدة البيانات: Vercel Postgres. كل المحتوى ثنائي اللغة (…Ar / …En).
+// قاعدة البيانات: PostgreSQL محلي للتطوير (ويُضبط DATABASE_URL للإنتاج).
 // ==========================================================================
 
 generator client {
@@ -9,9 +9,7 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  // أسماء متغيّرات Vercel Postgres — تُضاف تلقائيًا عند ربط التخزين بالمشروع
-  url       = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
+  url = env("DATABASE_URL")
 }
 
 // ---------------------- المستخدمون والأدوار ----------------------
