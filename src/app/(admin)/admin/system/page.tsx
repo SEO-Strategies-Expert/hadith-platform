@@ -11,7 +11,7 @@ function parseConnectionCredentials(raw: string | undefined) {
     const url = new URL(raw);
     return {
       host: url.hostname,
-      port: url.port || "5432",
+      port: url.port || "3306",
       database: decodeURIComponent(url.pathname.replace(/^\//, "")),
       user: decodeURIComponent(url.username),
       password: decodeURIComponent(url.password),
@@ -34,10 +34,12 @@ export default async function SystemPage({
     synced?: string;
     syncError?: string;
     syncOutput?: string;
+    instructorLinksImported?: string;
+    instructorLinksError?: string;
   }>;
 }) {
   await requireAdmin();
-  const { restored, restoreError, wiped, tables, wipeError, synced, syncError, syncOutput } = await searchParams;
+  const { restored, restoreError, wiped, tables, wipeError, synced, syncError, syncOutput, instructorLinksImported, instructorLinksError } = await searchParams;
 
   // هذه الصفحة يجب ألا تنهار حتى لو كان هيكل قاعدة البيانات غير متزامن:
   // عند نشر أولي تكون الجداول غير موجودة بعد، فتفشل كل استعلامات Prisma.
@@ -70,7 +72,7 @@ export default async function SystemPage({
   const deploymentEnv = process.env.VERCEL_ENV || (process.env.NODE_ENV === "production" ? "production" : "development");
   const databaseUrl = process.env.DATABASE_URL;
   const dbEnvironmentVariables = [
-    { name: "DATABASE_URL", value: databaseUrl, usage: "رابط PostgreSQL المستخدم بواسطة التطبيق وPrisma", required: true },
+    { name: "DATABASE_URL", value: databaseUrl, usage: "رابط MySQL/MariaDB المستخدم بواسطة التطبيق وPrisma", required: true },
   ] as const;
   const credentials = parseConnectionCredentials(databaseUrl);
   const localEnvTemplate = `DATABASE_URL=${JSON.stringify(databaseUrl || "")}`;
@@ -78,6 +80,8 @@ export default async function SystemPage({
   return <div><PageHeader title="الأمان والتشغيل" desc="سجل التدقيق، النسخ الاحتياطي، حالة التكاملات وطوابير المعالجة." />
     {restored && <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] font-bold text-emerald-700">تمت الاستعادة: أُدرج {restored} صفًّا (الموجود مسبقًا لم يُمسّ).</div>}
     {restoreError && <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-[13px] font-bold text-red-700">فشلت الاستعادة: {restoreError}</div>}
+    {instructorLinksImported && <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] font-bold text-emerald-700">تم استيراد {instructorLinksImported} رابطًا بين المقرّرات والمدرّسين الإضافيين.</div>}
+    {instructorLinksError && <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-[13px] font-bold text-red-700">فشل استيراد روابط المدرّسين: {decodeURIComponent(instructorLinksError)}</div>}
     {wiped !== undefined && <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-[13px] font-bold text-amber-800">حُذفت كل البيانات: {wiped} صفًّا تقريبًا من {tables ?? "?"} جدولًا. الجداول فارغة الآن — استعد نسخةً أو أعد البذر.</div>}
     {wipeError && <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-[13px] font-bold text-red-700">فشل الحذف: {wipeError === "CONFIRM_MISMATCH" ? "اكتب اسم قاعدة البيانات حرفيًّا كما يظهر أدناه." : wipeError}</div>}
     {synced && <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] font-bold text-emerald-700">تمت مزامنة الهيكل بنجاح{synced !== "ok" ? `: ${synced}` : ""} — أعد تحميل الصفحة إن استمر الخطأ.</div>}
@@ -177,7 +181,7 @@ export default async function SystemPage({
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="font-extrabold text-navy-900">قاعدة البيانات</h2>
         <Badge tone={db.ok ? "green" : "red"}>{db.ok ? "متصلة" : "غير متصلة"}</Badge>
-        <Badge tone={providerTone}>{db.provider === "Local" ? "محلّية" : db.provider === "Unknown" ? "غير معروف" : "PostgreSQL"}</Badge>
+        <Badge tone={providerTone}>{db.provider === "Local" ? "محلّية" : db.provider === "Unknown" ? "غير معروف" : "MySQL/MariaDB"}</Badge>
         {db.sizePretty && <Badge tone="gray">{db.sizePretty}</Badge>}
       </div>
       {!db.ok && db.error && <p className="mt-2 text-[13px] font-bold text-red-600" dir="ltr">{db.error}</p>}
@@ -232,6 +236,14 @@ export default async function SystemPage({
           <input type="file" name="backup" accept="application/json,.json" required className="text-sm" />
           <button type="submit" className="rounded-xl bg-gold-3 px-4 py-2 text-sm font-extrabold text-navy-950">استعادة (دمج)</button>
         </form>
+        <div className="mt-4 border-t border-black/10 pt-4">
+          <p className="mb-2 text-sm text-ink-soft">لنقل تعيينات المدرّسين الإضافيين من PostgreSQL القديم، صدّر نتيجة الاستعلام أدناه بصيغة CSV ثم ارفعها هنا بعد استعادة نسخة JSON:</p>
+          <code className="mb-3 block overflow-x-auto rounded-lg bg-black/[.04] p-2 text-[11px]" dir="ltr">SELECT &quot;A&quot; AS &quot;courseId&quot;, &quot;B&quot; AS &quot;instructorId&quot; FROM &quot;_CourseInstructors&quot;;</code>
+          <form action="/api/admin/db-import-course-instructors" method="post" encType="multipart/form-data" className="flex flex-wrap items-center gap-2">
+            <input type="file" name="relations" accept="text/csv,.csv" required className="text-sm" />
+            <button type="submit" className="rounded-xl border border-navy-900 px-4 py-2 text-sm font-bold text-navy-900">استيراد روابط المدرّسين</button>
+          </form>
+        </div>
       </Card>
     </div>
 

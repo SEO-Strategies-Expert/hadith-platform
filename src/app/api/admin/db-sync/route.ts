@@ -68,13 +68,10 @@ export async function POST() {
       cliError = [raw, extra].filter(Boolean).join(" — ").slice(0, 2000);
       const isEnginesMissing = /Cannot find module '@prisma\/engines'|Cannot find module.*engines|MODULE_NOT_FOUND.*engines/i.test(cliError);
       if (!isEnginesMissing && !/ENOENT.*mkdir/.test(cliError)) throw e;
-      output = `CLI فشل (${cliError.slice(0, 300)}) — التحويل إلى SQL…\n`;
+      output = `CLI فشل (${cliError.slice(0, 300)})`;
     }
     if (cliFailed) {
-      const { syncViaSQL } = await import("@/lib/db-sync-sql");
-      const res = await syncViaSQL();
-      output += `\nSQL sync: executed=${res.executed} skipped=${res.skipped}`;
-      if (res.errors.length > 0) output += `\nأخطاء: ${res.errors.slice(0, 3).join(" | ").slice(0, 500)}`;
+      throw new Error(`PRISMA_CLI_UNAVAILABLE: ${cliError || "شغّل npx prisma db push من طرفية الاستضافة."}`);
     }
 
     try {

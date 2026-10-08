@@ -1,10 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Include the SQL files required by the database sync routes in the build output.
-  outputFileTracingIncludes: {
-    "/admin/system": ["./prisma/init.sql", "./src/lib/init.sql"],
-    "/api/admin/db-sync": ["./prisma/init.sql", "./src/lib/init.sql"],
-  },
   async headers() {
     return [
       {

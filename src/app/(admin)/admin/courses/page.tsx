@@ -106,8 +106,8 @@ export default async function CoursesPage({
   const where = q
     ? {
         OR: [
-          { titleAr: { contains: q, mode: "insensitive" as const } },
-          { titleEn: { contains: q, mode: "insensitive" as const } },
+          { titleAr: { contains: q } },
+          { titleEn: { contains: q } },
         ],
       }
     : {};

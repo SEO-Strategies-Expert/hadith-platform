@@ -2,7 +2,7 @@
 
 تطبيق **Next.js 16** واحد يضمّ: الموقع العام (يُقرأ من قاعدة البيانات، عربي/إنجليزي، نفس
 تصميم الموقع الأصلي حرفيًّا) + لوحة تحكم كاملة (CRUD) لكل المحتوى.
-البنية: Next.js (App Router) + PostgreSQL عبر `DATABASE_URL` + NextAuth + Prisma 6. انظر [دليل النشر على Hostinger](HOSTINGER-DEPLOY-AR.md) للإعداد الحالي.
+البنية: Next.js (App Router) + MySQL/MariaDB عبر `DATABASE_URL` + NextAuth + Prisma 6. انظر [دليل النشر على Hostinger](HOSTINGER-DEPLOY-AR.md) للإعداد الحالي.
 
 ## ✅ الحالة: المراحل الأربع مكتملة ومُختبَرة
 1. **الأساس:** لوحة تحكم (قائمة جانبية + شريط علوي)، تسجيل دخول، حماية `/admin`، أدوار مدير/محرّر.
@@ -58,7 +58,7 @@
 ## ⚙️ متغيّرات البيئة
 | المتغيّر | المصدر |
 |---|---|
-| `DATABASE_URL` | رابط PostgreSQL؛ على Hostinger استخدم اتصال PostgreSQL المحلي في VPS. راجع [دليل Hostinger](HOSTINGER-DEPLOY-AR.md). |
+| `DATABASE_URL` | رابط اتصال MySQL/MariaDB كما يظهر في hPanel. راجع [دليل Hostinger](HOSTINGER-DEPLOY-AR.md). |
 | `AUTH_SECRET` | سرّ جلسات عشوائي وقوي، يضبط في بيئة الخادم ولا يُرفع إلى GitHub. |
 | `SITE_URL` | عنوان الموقع الرسمي مع `https://` وبدون شرطة أخيرة. |
 | `BLOB_READ_WRITE_TOKEN` | اختياري، لرفع الملفات إلى Vercel Blob. |

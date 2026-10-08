@@ -7,7 +7,7 @@ export async function GET() {
   await requireAdmin();
   let database: string | null = null;
   try {
-    const meta = await prisma.$queryRaw<{ database: string }[]>`SELECT current_database() AS database`;
+    const meta = await prisma.$queryRaw<{ database: string | null }[]>`SELECT DATABASE() AS database`;
     database = meta[0]?.database ?? null;
   } catch {
     /* يُسمّى الملف بتاريخ اليوم فقط */

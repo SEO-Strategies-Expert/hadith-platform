@@ -1,21 +1,33 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { backupOrder } from "@/lib/db-backup";
 import { requireAdmin } from "@/lib/guard";
 
-const SAFE_IDENT = /^[A-Za-z_][A-Za-z0-9_]*$/;
+type BulkDelegate = {
+  count: () => Promise<number>;
+  deleteMany: () => Promise<{ count: number }>;
+};
+
+const clientName = (model: string) => model.charAt(0).toLowerCase() + model.slice(1);
+
+function getDelegate(model: string): BulkDelegate | null {
+  const delegate = (prisma as unknown as Record<string, unknown>)[clientName(model)];
+  if (!delegate || typeof delegate !== "object") return null;
+  const candidate = delegate as Partial<BulkDelegate>;
+  return typeof candidate.count === "function" && typeof candidate.deleteMany === "function"
+    ? (candidate as BulkDelegate)
+    : null;
+}
 
 /**
- * حذف كل البيانات: TRUNCATE لكل جداول الـpublic مع CASCADE وإعادة العدّادات.
- * الجداول نفسها تبقى — الصفوف فقط تُحذَف (بما فيها حساب المدير نفسه).
- * الحماية: يجب كتابة اسم قاعدة البيانات الحالي حرفيًّا في حقل confirm.
- * الجلسة JWT فتبقى صالحة بعد الحذف، فيمكن الاستعادة فورًا من نسخة.
+ * حذف كل البيانات مع إبقاء الجداول. نتبع ترتيب الاعتماد العكسي لتفريغ
+ * الجداول التابعة أولًا، دون أوامر PostgreSQL أو تعطيل مفاتيح MySQL.
  */
 export async function POST(req: Request) {
   const user = await requireAdmin();
-  // انظر db-import: الـredirect خارج try حتى لا يبتلع الـcatch رسالة NEXT_REDIRECT.
   let target: string;
   try {
-    const meta = await prisma.$queryRaw<{ database: string }[]>`SELECT current_database() AS database`;
+    const meta = await prisma.$queryRaw<{ database: string | null }[]>`SELECT DATABASE() AS database`;
     const dbName = meta[0]?.database;
     if (!dbName) throw new Error("NO_DATABASE");
 
@@ -23,30 +35,20 @@ export async function POST(req: Request) {
     const confirm = String(form.get("confirm") ?? "").trim();
     if (confirm !== dbName) throw new Error("CONFIRM_MISMATCH");
 
-    const tables = await prisma.$queryRaw<{ tablename: string }[]>`
-      SELECT tablename FROM pg_tables WHERE schemaname = 'public'`;
-    const names = tables.map((t) => t.tablename).filter((n) => SAFE_IDENT.test(n));
-    if (names.length === 0) throw new Error("NO_TABLES");
+    const order = backupOrder().reverse();
+    const delegates = order.map((model) => ({ model, delegate: getDelegate(model) }))
+      .filter((entry): entry is { model: string; delegate: BulkDelegate } => Boolean(entry.delegate));
+    if (delegates.length === 0) throw new Error("NO_TABLES");
 
-    // عدّ الصفوف قبل الحذف للتقرير (تقديري سريع من reltuples).
-    let deleted = 0;
-    try {
-      const counts = await prisma.$queryRaw<{ c: bigint }[]>`
-        SELECT SUM(reltuples)::bigint AS c FROM pg_class
-        WHERE relkind = 'r' AND relnamespace = 'public'::regnamespace`;
-      deleted = counts[0]?.c != null ? Number(counts[0].c) : 0;
-    } catch {
-      /* التقرير تجميلي — الحذف هو الأساس */
-    }
-
-    const quoted = names.map((n) => `"${n}"`).join(", ");
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${quoted} RESTART IDENTITY CASCADE`);
+    const counts = await Promise.all(delegates.map(({ delegate }) => delegate.count().catch(() => 0)));
+    const deleted = counts.reduce((sum, count) => sum + count, 0);
+    for (const { delegate } of delegates) await delegate.deleteMany();
 
     await prisma.systemJob.create({
       data: {
         kind: "database.wipe",
         status: "completed",
-        payload: { requestedBy: user.id, database: dbName, tables: names.length, rowsApprox: deleted },
+        payload: { requestedBy: user.id, database: dbName, tables: delegates.length, rowsApprox: deleted },
       },
     });
     await prisma.auditLog.create({
@@ -54,10 +56,10 @@ export async function POST(req: Request) {
         actorId: user.id,
         action: "wipe",
         entity: "database",
-        metadata: { database: dbName, tables: names.length, rowsApprox: deleted },
+        metadata: { database: dbName, tables: delegates.length, rowsApprox: deleted },
       },
     });
-    target = `/admin/system?wiped=${deleted}&tables=${names.length}`;
+    target = `/admin/system?wiped=${deleted}&tables=${delegates.length}`;
   } catch (e) {
     const msg = e instanceof Error ? e.message : "FAILED";
     target = `/admin/system?wipeError=${encodeURIComponent(msg)}`;

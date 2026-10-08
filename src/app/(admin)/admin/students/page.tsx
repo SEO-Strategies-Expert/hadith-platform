@@ -18,8 +18,8 @@ export default async function StudentsPage({
     prisma.user.findMany({
       where: {
         role: "STUDENT",
-        ...(name ? { name: { contains: name, mode: "insensitive" } } : {}),
-        ...(studentNo ? { studentNo: { contains: studentNo, mode: "insensitive" } } : {}),
+        ...(name ? { name: { contains: name } } : {}),
+        ...(studentNo ? { studentNo: { contains: studentNo } } : {}),
         ...(program ? { program } : {}),
       },
       orderBy: { createdAt: "desc" },

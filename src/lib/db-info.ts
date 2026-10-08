@@ -40,7 +40,7 @@ function parseDbUrl(raw: string | undefined) {
     const u = new URL(raw);
     return {
       host: u.hostname || null,
-      port: u.port || null,
+      port: u.port || "3306",
       database: decodeURIComponent(u.pathname.replace(/^\//, "").split("?")[0]) || null,
       user: decodeURIComponent(u.username) || null,
     };
@@ -90,8 +90,10 @@ export async function getDbInfo(): Promise<DbInfo> {
   const started = Date.now();
   try {
     const meta = await prisma.$queryRaw<
-      { version: string; database: string; dbuser: string; size: bigint }[]
-    >`SELECT version() AS version, current_database() AS database, current_user AS dbuser, pg_database_size(current_database()) AS size`;
+      { version: string; database: string; dbuser: string; size: bigint | number }[]
+    >`SELECT VERSION() AS version, DATABASE() AS database, CURRENT_USER() AS dbuser,
+      COALESCE((SELECT SUM(data_length + index_length)
+        FROM information_schema.tables WHERE table_schema = DATABASE()), 0) AS size`;
     const latencyMs = Date.now() - started;
     const m = meta[0];
     const sizeBytes = m?.size != null ? Number(m.size) : null;
@@ -116,14 +118,15 @@ export async function getDbInfo(): Promise<DbInfo> {
       })
     );
 
-    // أكبر الجداول حجمًا (عدد الصفوف تقديري من reltuples).
+    // أكبر الجداول حجمًا (عدد الصفوف تقريبي بحسب محرك MySQL).
     let tables: DbTableStat[] = [];
     try {
-      const rows = await prisma.$queryRaw<{ table: string; rows: bigint | null; size: bigint | null }[]>`
-        SELECT relname AS table, reltuples::bigint AS rows, pg_total_relation_size(oid) AS size
-        FROM pg_class
-        WHERE relkind = 'r' AND relnamespace = 'public'::regnamespace
-        ORDER BY pg_total_relation_size(oid) DESC
+      const rows = await prisma.$queryRaw<{ table: string; rows: bigint | number | null; size: bigint | number | null }[]>`
+        SELECT table_name AS \`table\`, table_rows AS \`rows\`,
+          (data_length + index_length) AS size
+        FROM information_schema.tables
+        WHERE table_schema = DATABASE()
+        ORDER BY (data_length + index_length) DESC
         LIMIT 15`;
       tables = rows.map((r) => ({
         table: r.table,

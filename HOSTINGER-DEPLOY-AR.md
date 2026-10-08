@@ -1,41 +1,57 @@
-# نشر المنصة على Hostinger
+# نشر المنصة على Hostinger باستخدام MySQL
 
-## شرط قاعدة البيانات
+المشروع يستخدم Next.js وPrisma مع MySQL أو MariaDB، لذلك يمكن تشغيله على استضافة Hostinger التي توفر Node.js وقواعد MySQL دون VPS. لا تستخدم `localhost` إلا إذا كانت قاعدة MySQL فعلًا على نفس خادم التطبيق؛ انسخ اسم المضيف واسم قاعدة البيانات واسم المستخدم من hPanel.
 
-المشروع يستخدم PostgreSQL وPrisma. خطط Hostinger Web/Cloud العادية توفر MariaDB، ولا تستضيف PostgreSQL؛ PostgreSQL تحتاج VPS. لذلك هذا الإعداد موجّه إلى **Hostinger VPS** مع Node.js وPostgreSQL على الخادم نفسه. لا تستخدم `localhost` على خطة Web/Cloud أو خدمة Node.js المُدارة، لأنه سيشير إلى خادم التطبيق لا جهازك.
+## قبل التبديل: حفظ بيانات PostgreSQL القديمة
 
-## تجهيز VPS
+إذا كان التطبيق القديم ما زال يتصل بقاعدة PostgreSQL، سجّل الدخول إليه وافتح `/admin/system` ثم نزّل نسخة JSON من قاعدة البيانات. الملف يحتوي بيانات حساسة منها تجزئات كلمات المرور؛ احتفظ به محليًا وبمكان آمن، ولا ترفعه إلى GitHub أو ترسله في محادثة. لا توقف قاعدة PostgreSQL قبل التأكد من وجود النسخة. إذا لم يعد بالإمكان الوصول إليها، يلزم استعادة نسخة احتياطية لدى مزود PostgreSQL؛ تغيير موفر Prisma لا ينقل البيانات.
 
-1. اربط الدومين بعنوان VPS، وثبّت Node.js 22 وPostgreSQL على VPS، وأمّن PostgreSQL بكلمة مرور قوية، مع إبقاء منفذ قاعدة البيانات غير مكشوف للإنترنت.
-2. أنشئ مستخدمًا وقاعدة PostgreSQL للمشروع. استخدم اتصالًا محليًا مثل `127.0.0.1:5432`.
-3. انسخ `.env.example` إلى `.env` على الخادم، واملأ `DATABASE_URL` و`AUTH_SECRET` و`SITE_URL`. لا ترفع ملف `.env` إلى GitHub ولا تضعه ضمن ملفات النشر. أنشئ السر بواسطة `openssl rand -base64 32`.
-4. أضف متغيرات التكاملات الاختيارية (البريد، التخزين، Zoom، ومفاتيح أخرى) في بيئة الخدمة عند الحاجة.
+لأن مقرّراتك قد يكون لها عدة مدرسين، صدّر أيضًا روابط المدرسين الإضافيين من SQL editor لقاعدة PostgreSQL كملف CSV، باستخدام الاستعلام التالي، واحتفظ بالملف مع النسخة:
 
-## تنزيل وبناء التطبيق
+```sql
+SELECT "A" AS "courseId", "B" AS "instructorId"
+FROM "_CourseInstructors"
+ORDER BY "A", "B";
+```
 
-من مجلد التطبيق على VPS:
+## إعداد قاعدة البيانات
+
+1. أنشئ قاعدة MySQL ومستخدمًا من hPanel، ثم اربط المستخدم بقاعدة البيانات مع الصلاحيات المطلوبة.
+2. في إعدادات تطبيق Node.js، اضبط `DATABASE_URL` بصيغة:
+
+   ```text
+   mysql://DB_USER:DB_PASSWORD@DB_HOST:3306/DB_NAME
+   ```
+
+   استخدم القيم المعروضة في hPanel. إذا احتوت كلمة المرور على رموز خاصة مثل `@` أو `#` أو `/`، فشفّرها بصيغة URL قبل وضعها في الرابط.
+3. أضف `AUTH_SECRET` (أنشئه بأمر `openssl rand -base64 32`) و`SITE_URL=https://your-domain` إلى متغيرات التطبيق. لا ترفع ملف `.env` إلى GitHub.
+
+## إنشاء الجداول والنشر
+
+من طرفية SSH الخاصة بالحساب أو طرفية التطبيق في Hostinger، ومن مجلد المشروع:
 
 ```bash
-git clone https://github.com/IbrahimAlasaad/hadith-platform-hostinger.git
-cd hadith-platform
 npm ci
 npx prisma db push
 npm run build
-npm run start
 ```
 
-اضبط مدير العمليات (مثل Passenger/cPanel Node.js Selector أو systemd) لتشغيل `npm run start` من مجلد المشروع، واجعل `NODE_ENV=production` و`PORT` متاحين. اربط الدومين عبر reverse proxy إلى التطبيق، وفعّل HTTPS. لا تشغّل Next.js بوضع static export؛ صفحات الإدارة وواجهات API والإجراءات تحتاج Node.js.
+`prisma db push` ينشئ بنية MySQL المطلوبة، لكنه لا ينقل محتوى قاعدة PostgreSQL القديمة. بعد تجهيز الجداول، شغّل التطبيق بالطريقة المحددة في إعداد تطبيق Node.js لدى Hostinger، باستخدام `npm run start` وإعداد `PORT` الذي توفره الاستضافة.
 
-عند تحديث الكود، خذ نسخة احتياطية من قاعدة البيانات أولًا، ثم اسحب التغييرات وأعد البناء وأعد تشغيل التطبيق. بعد أول نشر، أنشئ حساب المدير والبذور وفق إجراء التهيئة المعتمد للمشروع.
+## نقل البيانات من PostgreSQL
 
-## المتغيرات
+بعد إنشاء الجداول، أنشئ حسابًا مؤقتًا كي تتمكن من فتح لوحة الإدارة ورفع النسخة. استخدم بريدًا مؤقتًا مختلفًا عن بريد مديرك القديم:
 
-- مطلوب: `DATABASE_URL`, `AUTH_SECRET`, `SITE_URL`.
-- اختياري بحسب الخدمات المستخدمة: `RESEND_API_KEY`, `MAIL_FROM`, `BLOB_READ_WRITE_TOKEN`, ومفاتيح Zoom وCron.
-- لا تستخدم متغيرات `POSTGRES_PRISMA_URL` أو `POSTGRES_URL_NON_POOLING`؛ التطبيق يعتمد `DATABASE_URL` فقط.
+```bash
+ADMIN_EMAIL=migration-bootstrap@example.com ADMIN_PASSWORD='USE-A-UNIQUE-LONG-PASSWORD' npm run seed
+```
 
-## ملاحظات
+سجّل الدخول بالحساب المؤقت، افتح `/admin/system`، وارفع ملف JSON القديم من قسم الاستعادة، ثم ارفع CSV روابط المدرسين الإضافيين من القسم المخصص له. الاستعادة تدمج السجلات وتتخطى التعارضات ولا تحذف السجلات الموجودة. راجع رسالتي النتائج، ثم سجّل الخروج واختبر دخول حساب المدير القديم. بعد التأكد من استعادة البيانات، احذف حساب التهيئة المؤقت من لوحة المستخدمين وغيّر كلمة مرور المدير القديم. خذ نسخة احتياطية من MySQL قبل الاستعادة.
 
-- Hostinger Node.js Web Apps متاحة على خطط Business/Cloud، لكن PostgreSQL على Hostinger متاحة على VPS؛ لذا يتطلب الجمع بين التطبيق وقاعدة PostgreSQL على Hostinger خطة VPS.
-- احتفظ بنسخة احتياطية خارج VPS. `prisma db push` يزامن بنية قاعدة البيانات ولا ينقل بيانات التطوير تلقائيًا.
-- ملفات `.env` و`.env.local` مستثناة من Git. تحقق من متغيرات البيئة في لوحة الاستضافة قبل البناء والتشغيل.
+## متغيرات البيئة
+
+- مطلوبة: `DATABASE_URL`, `AUTH_SECRET`, `SITE_URL`.
+- اختيارية حسب الخدمات المستخدمة: `RESEND_API_KEY`, `MAIL_FROM`, `BLOB_READ_WRITE_TOKEN`، ومفاتيح Zoom وCron.
+- تحقق من أن `DATABASE_URL` يبدأ بـ `mysql://` ويستخدم مضيف قاعدة البيانات الذي تعرضه Hostinger، وليس `postgresql://`.
+
+احتفظ بنسخة احتياطية خارج Hostinger. لا تشغّل أوامر حذف البيانات أثناء التهيئة؛ `prisma db push` هو أمر إنشاء/مزامنة البنية، ونسخ PostgreSQL لا تتحول تلقائيًا إلى MySQL.

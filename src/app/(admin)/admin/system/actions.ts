@@ -19,7 +19,7 @@ export async function queueBackup() {
  *
  * يستخدم DATABASE_URL نفسها التي يعتمد عليها Prisma schema والتطبيق، حتى لا
  * تُطبَّق المزامنة على قاعدةٍ مختلفة عن قاعدة تشغيل التطبيق. يُشغِّل Prisma
- * عبر npx ويُعيد التوجيه
+ * CLI ويُعيد التوجيه
  * برسالة نجاح/فشل تُعرض في /admin/system.
  */
 export async function syncDatabase() {
@@ -75,7 +75,7 @@ export async function syncDatabase() {
         (e as { stdout?: string; stderr?: string })?.stdout ||
         "";
       cliError = [raw, extra].filter(Boolean).join(" — ").slice(0, 2000);
-      // إذا كان الخطأ بسبب غياب @prisma/engines (Vercel lambda)، نتجاوزه إلى SQL
+      // إذا لم يتوفر Prisma CLI في حزمة الاستضافة، اطلب تشغيله من الطرفية.
       const isEnginesMissing = /Cannot find module '@prisma\/engines'|Cannot find module '.*engines'|MODULE_NOT_FOUND.*engines/i.test(
         cliError
       );
@@ -83,24 +83,11 @@ export async function syncDatabase() {
         // خطأ حقيقي غير متعلق بالـ engines — أعد رميه
         throw e;
       }
-      // وإلا نتابع إلى fallback SQL
-      output = `CLI فشل (${cliError.slice(0, 300)}) — التحويل إلى المزامنة عبر SQL…\n`;
+      output = `CLI فشل (${cliError.slice(0, 300)})`;
     }
 
-    // 2) إذا فشل CLI بسبب engines أو كاحتياط، نفّذ SQL المباشر (لا يحتاج engines)
     if (cliFailed) {
-      const { syncViaSQL } = await import("@/lib/db-sync-sql");
-      const res = await syncViaSQL();
-      output += `\nSQL sync: executed=${res.executed} skipped=${res.skipped}`;
-      if (res.errors.length > 0) {
-        output += `\nأخطاء SQL (تم تجاوز المكرر):\n${res.errors.slice(0, 5).join("\n")}`;
-        if (res.errors.length > 5) output += `\n... و ${res.errors.length - 5} أخرى`;
-      }
-      // إن بقيت أخطاء حقيقية غير "already exists"، نعتبرها فشلًا
-      const realErrors = res.errors.filter((m) => !/already exists|duplicate/i.test(m));
-      if (realErrors.length > 3) {
-        throw new Error(`SQL sync أخطاء حقيقية: ${realErrors.slice(0, 2).join(" | ").slice(0, 600)}`);
-      }
+      throw new Error(`PRISMA_CLI_UNAVAILABLE: ${cliError || "شغّل npx prisma db push من طرفية الاستضافة."}`);
     }
 
     try {

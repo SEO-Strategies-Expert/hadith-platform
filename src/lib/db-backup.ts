@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
-export const BACKUP_VERSION = 1;
+export const BACKUP_VERSION = 2;
 
 type ScalarField = { name: string; type: string };
 type ModelShape = { model: string; client: string; scalars: ScalarField[] };
@@ -54,7 +54,7 @@ export function backupModels(): ModelShape[] {
 
 /**
  * ترتيب النماذج بحيث تُدرَج الجداول الأب قبل الأبناء (احترام المفاتيح الأجنبية).
- * العلاقات الذاتية والحلقات تُتجاهَل بأمان — الاستعادة دمج (ON CONFLICT DO NOTHING).
+ * العلاقات الذاتية والحلقات تُتجاهَل بأمان — الاستعادة دمج مع تخطّي التعارضات.
  */
 export function backupOrder(): string[] {
   const models = dmmfModels().filter((m) => delegateFor(m.name));
@@ -93,6 +93,9 @@ export type BackupPayload = {
   database: string | null;
   order: string[];
   tables: Record<string, Record<string, unknown>[]>;
+  relations?: {
+    courseInstructors?: { courseId: string; instructorId: string }[];
+  };
 };
 
 /** تصدير كامل: كل الصفوف الخام لكل نموذج، بترتيب آمن للاستعادة. */
@@ -106,7 +109,20 @@ export async function exportDatabase(database: string | null): Promise<BackupPay
     // JSON ذهابًا وإيابًا لتطبيع Date/Decimal/BigInt إلى قيم قابلة للنقل.
     tables[name] = JSON.parse(JSON.stringify(rows, jsonReplacer)) as Record<string, unknown>[];
   }
-  return { version: BACKUP_VERSION, exportedAt: new Date().toISOString(), database, order, tables };
+  const courses = await prisma.course.findMany({
+    select: { id: true, instructors: { select: { id: true } } },
+  });
+  const courseInstructors = courses.flatMap((course) =>
+    course.instructors.map((instructor) => ({ courseId: course.id, instructorId: instructor.id }))
+  );
+  return {
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    database,
+    order,
+    tables,
+    relations: { courseInstructors },
+  };
 }
 
 export type RestoreResult = { model: string; rows: number; inserted: number; skipped?: boolean; error?: string };
@@ -116,7 +132,7 @@ export type RestoreResult = { model: string; rows: number; inserted: number; ski
  * لا تحذف شيئًا — آمنة على قاعدة فيها بيانات.
  */
 export async function importDatabase(payload: BackupPayload): Promise<{ results: RestoreResult[]; total: number }> {
-  if (!payload || payload.version !== BACKUP_VERSION || typeof payload.tables !== "object") {
+  if (!payload || ![1, BACKUP_VERSION].includes(payload.version) || typeof payload.tables !== "object") {
     throw new Error("BAD_BACKUP_FORMAT");
   }
   const shapes = new Map(backupModels().map((s) => [s.model, s]));
@@ -155,6 +171,37 @@ export async function importDatabase(payload: BackupPayload): Promise<{ results:
     }
     total += inserted;
     results.push({ model: name, rows: rows.length, inserted });
+  }
+
+  const courseInstructors = payload.relations?.courseInstructors ?? [];
+  const instructorsByCourse = new Map<string, Set<string>>();
+  for (const relation of courseInstructors) {
+    if (!relation?.courseId || !relation?.instructorId) continue;
+    const instructorIds = instructorsByCourse.get(relation.courseId) ?? new Set<string>();
+    instructorIds.add(relation.instructorId);
+    instructorsByCourse.set(relation.courseId, instructorIds);
+  }
+  let linkedInstructors = 0;
+  const relationErrors: string[] = [];
+  for (const [courseId, instructorIds] of instructorsByCourse) {
+    try {
+      await prisma.course.update({
+        where: { id: courseId },
+        data: { instructors: { connect: [...instructorIds].map((id) => ({ id })) } },
+      });
+      linkedInstructors += instructorIds.size;
+    } catch (e) {
+      relationErrors.push(e instanceof Error ? e.message.split("\n")[0].slice(0, 180) : "FAILED");
+    }
+  }
+  if (courseInstructors.length > 0) {
+    total += linkedInstructors;
+    results.push({
+      model: "CourseInstructors",
+      rows: courseInstructors.length,
+      inserted: linkedInstructors,
+      ...(relationErrors.length > 0 ? { error: relationErrors.slice(0, 3).join(" | ") } : {}),
+    });
   }
   return { results, total };
 }

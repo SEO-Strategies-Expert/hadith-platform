@@ -1,6 +1,6 @@
 // ==========================================================================
 // Prisma schema — الكلّية العليا للحديث النبوي — منصّة ولوحة التحكم
-// قاعدة البيانات: PostgreSQL محلي للتطوير (ويُضبط DATABASE_URL للإنتاج).
+// قاعدة البيانات: MySQL / MariaDB عبر DATABASE_URL.
 // ==========================================================================
 
 generator client {
@@ -8,7 +8,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider  = "mysql"
   url = env("DATABASE_URL")
 }
 
@@ -146,8 +146,8 @@ model ProgramStage {
   titleEn  String
   metaAr   String?
   metaEn   String?
-  descAr   String?
-  descEn   String?
+  descAr   String?  @db.LongText
+  descEn   String?  @db.LongText
   items    Json? // ["مقدّمة ابن الصلاح", ...] ثنائي؟ نخزّن {ar:[],en:[]}
   icon     String?
   moreHref String?
@@ -160,8 +160,8 @@ model ProgramStage {
 
 model Course {
   // --- تفاصيل المقرّر ونظام التعلّم ---
-  summaryAr            String?
-  summaryEn            String?
+  summaryAr            String?       @db.LongText
+  summaryEn            String?       @db.LongText
   hours                Int?
   startsOn             DateTime?
   published            Boolean       @default(false)
@@ -187,8 +187,8 @@ model Course {
   slug     String?       @unique // رابط SEO: «دورة-مصطلح-الحديث-التطبيقي» — يُولَّد من العنوان
   titleAr  String
   titleEn  String
-  descAr   String?
-  descEn   String?
+  descAr   String?       @db.LongText
+  descEn   String?       @db.LongText
   category String? // مفتاح فلترة
   metaAr   String? // "٦ لقاءات"
   metaEn   String?
@@ -208,10 +208,10 @@ model NewsItem {
   slug      String?  @unique
   titleAr   String
   titleEn   String
-  excerptAr String?
-  excerptEn String?
-  bodyAr    String?
-  bodyEn    String?
+  excerptAr String?  @db.LongText
+  excerptEn String?  @db.LongText
+  bodyAr    String?  @db.LongText
+  bodyEn    String?  @db.LongText
   imageUrl  String?
   tagAr     String?
   tagEn     String?
@@ -227,8 +227,8 @@ model Event {
   id       String   @id @default(cuid())
   titleAr  String
   titleEn  String
-  descAr   String?
-  descEn   String?
+  descAr   String?  @db.LongText
+  descEn   String?  @db.LongText
   whenAr   String?
   whenEn   String?
   tagAr    String?
@@ -320,8 +320,8 @@ model LibraryResource {
   nameEn   String
   url      String?
   category String?
-  descAr   String?
-  descEn   String?
+  descAr   String?  @db.LongText
+  descEn   String?  @db.LongText
   icon     String?
   tags     Json? // {ar:[],en:[]}
   featured Boolean @default(false)
@@ -349,11 +349,11 @@ model Page {
   heroKickerEn String?
   heroTitleAr  String?
   heroTitleEn  String?
-  heroIntroAr  String?
-  heroIntroEn  String?
+  heroIntroAr  String?    @db.LongText
+  heroIntroEn  String?    @db.LongText
   heroImage    String?
-  bodyHtmlAr   String? // محتوى <main> القابل للتحرير
-  bodyHtmlEn   String?
+  bodyHtmlAr   String?    @db.LongText // محتوى <main> القابل للتحرير
+  bodyHtmlEn   String?    @db.LongText
   seoTitleAr   String?
   seoTitleEn   String?
   seoDescAr    String?
@@ -376,8 +376,8 @@ model ContentCard {
   section  String
   titleAr  String
   titleEn  String
-  descAr   String?
-  descEn   String?
+  descAr   String?  @db.LongText
+  descEn   String?  @db.LongText
   tagAr    String?
   tagEn    String?
   metaAr   String? // سطر أسفل البطاقة
@@ -397,8 +397,8 @@ model Faq {
   section    String
   questionAr String
   questionEn String
-  answerAr   String
-  answerEn   String
+  answerAr   String   @db.LongText
+  answerEn   String   @db.LongText
   order      Int     @default(0)
   visible    Boolean @default(true)
 
@@ -412,8 +412,8 @@ model ProcessStep {
   section String
   titleAr String
   titleEn String
-  descAr  String?
-  descEn  String?
+  descAr  String?  @db.LongText
+  descEn  String?  @db.LongText
   order   Int     @default(0)
   visible Boolean @default(true)
 
@@ -466,10 +466,10 @@ model ContactMessage {
   name       String
   email      String
   department String?
-  message    String
+  message    String           @db.LongText
   lang       String           @default("ar")
   status     SubmissionStatus @default(NEW)
-  note       String?
+  note       String?          @db.LongText
   createdAt  DateTime         @default(now())
 
   @@index([status, createdAt])
@@ -483,11 +483,11 @@ model AdmissionApplication {
   phone      String?
   country    String?
   program    String?
-  background String?
+  background String?          @db.LongText
   feeOption  String? // full | reduced | free
   lang       String           @default("ar")
   status     SubmissionStatus @default(NEW)
-  note       String?
+  note       String?          @db.LongText
   createdAt  DateTime         @default(now())
 
   // --- المقابلة العلمية (الخطوة الثالثة من القبول) — تُحجز عبر Calendly ---
@@ -513,14 +513,14 @@ model ResearchSubmission {
   title       String
   paperType   String?
   field       String?
-  abstract    String?
+  abstract    String?          @db.LongText
   docPath     String? // مسار Blob خاصّ — يُنزَّل من اللوحة برابط موقَّع
   docName     String?
   pdfPath     String?
   pdfName     String?
   lang        String           @default("ar")
   status      SubmissionStatus @default(NEW)
-  note        String?
+  note        String?          @db.LongText
   createdAt   DateTime         @default(now())
 
   @@index([status, createdAt])
@@ -600,8 +600,8 @@ model Module {
   course   Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   titleAr  String
   titleEn  String
-  descAr   String?
-  descEn   String?
+  descAr   String?  @db.LongText
+  descEn   String?  @db.LongText
   order    Int     @default(0)
   visible  Boolean @default(true)
 
@@ -622,8 +622,8 @@ model Lesson {
   // VIDEO: رابط يوتيوب/فيميو غير مُدرَج، أو رابط استضافة لاحقًا
   videoUrl             String?
   // TEXT: متن الدرس (HTML)
-  bodyAr               String?
-  bodyEn               String?
+  bodyAr               String?    @db.LongText
+  bodyEn               String?    @db.LongText
   // LIVE/QUIZ: ارتباط اختياري بالكيان المقابل
   sessionId            String?
   quizId               String?
@@ -631,8 +631,8 @@ model Lesson {
   unlockAt             DateTime?
   dripDays             Int        @default(0)
   prerequisiteLessonId String?
-  transcriptAr         String?
-  transcriptEn         String?
+  transcriptAr         String?    @db.LongText
+  transcriptEn         String?    @db.LongText
   downloadable         Boolean    @default(false)
   thumbnailUrl         String?
   // معاينة مجّانيّة تُفتح لغير المسجَّلين (تسويق المقرّر)
@@ -742,8 +742,8 @@ model LiveSession {
   id      String  @id @default(cuid())
   titleAr String
   titleEn String
-  descAr  String?
-  descEn  String?
+  descAr  String?  @db.LongText
+  descEn  String?  @db.LongText
 
   // الارتباط: بمقرّر، أو بمرحلة، أو عامّ للكلّية كلّها (كلاهما فارغ)
   courseId String?
@@ -831,8 +831,8 @@ model Assignment {
   course        Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
   titleAr       String
   titleEn       String
-  descAr        String?
-  descEn        String?
+  descAr        String?   @db.LongText
+  descEn        String?   @db.LongText
   dueAt         DateTime?
   maxScore      Int       @default(100)
   rubric        Json?
@@ -853,13 +853,13 @@ model AssignmentSubmission {
   assignment   Assignment      @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   userId       String
   user         User            @relation("StudentWork", fields: [userId], references: [id], onDelete: Cascade)
-  text         String?
+  text         String?         @db.LongText
   fileUrl      String?
   fileName     String?
   state        AssignmentState @default(DRAFT)
   submittedAt  DateTime?
   score        Int?
-  feedback     String?
+  feedback     String?         @db.LongText
   gradedById   String?
   gradedBy     User?           @relation("GradedBy", fields: [gradedById], references: [id], onDelete: SetNull)
   gradedAt     DateTime?
@@ -883,8 +883,8 @@ model Quiz {
   course              Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   titleAr             String
   titleEn             String
-  descAr              String?
-  descEn              String?
+  descAr              String?   @db.LongText
+  descEn              String?   @db.LongText
   timeLimitMin        Int? // بلا قيمة = بلا توقيت
   passScore           Int       @default(60) // نسبة النجاح %
   attemptsAllowed     Int       @default(0) // 0 = بلا حدّ
@@ -906,10 +906,10 @@ model Question {
   quizId    String
   quiz      Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
   kind      QuestionKind @default(SINGLE)
-  textAr    String
-  textEn    String
-  explainAr String? // شرح الإجابة بعد التسليم
-  explainEn String?
+  textAr    String       @db.LongText
+  textEn    String       @db.LongText
+  explainAr String?      @db.LongText // شرح الإجابة بعد التسليم
+  explainEn String?      @db.LongText
   points    Int          @default(1)
   order     Int          @default(0)
 
@@ -923,8 +923,8 @@ model Choice {
   id         String   @id @default(cuid())
   questionId String
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  textAr     String
-  textEn     String
+  textAr     String   @db.LongText
+  textEn     String   @db.LongText
   correct    Boolean  @default(false)
   order      Int      @default(0)
 
@@ -977,10 +977,10 @@ model Certificate {
   serial      String  @unique // رقم التوثيق المطبوع على الوثيقة
   verifyCode  String  @unique // رمز التحقّق العلني القصير
   // للإجازات: نصّ السند والمُجيز
-  isnadAr     String?
-  isnadEn     String?
-  grantedByAr String?
-  grantedByEn String?
+  isnadAr     String? @db.LongText
+  isnadEn     String? @db.LongText
+  grantedByAr String? @db.LongText
+  grantedByEn String? @db.LongText
   formulaData Json? // الحقول الإضافية الخاصة بصيغة الوثيقة المختارة
 
   issuedAt   DateTime @default(now())
@@ -989,7 +989,7 @@ model Certificate {
   pdfUrl     String?
   designStyle String  @default("classic") // classic | waves | particles
   revoked    Boolean  @default(false)
-  revokeNote String?
+  revokeNote String?  @db.LongText
 
   @@index([userId, issuedAt])
   @@map("certificates")
@@ -1043,8 +1043,8 @@ model Notification {
   kind      String    @default("announcement")
   titleAr   String
   titleEn   String
-  bodyAr    String?
-  bodyEn    String?
+  bodyAr    String?   @db.LongText
+  bodyEn    String?   @db.LongText
   href      String?
   readAt    DateTime?
   createdAt DateTime  @default(now())
@@ -1064,8 +1064,8 @@ model Notification {
 model ForumTopic {
   id        String   @id @default(cuid())
   userId    String
-  title     String
-  body      String
+  title     String   @db.LongText
+  body      String   @db.LongText
   courseId  String?
   pinned    Boolean  @default(false)
   locked    Boolean  @default(false)
@@ -1084,7 +1084,7 @@ model ForumReply {
   topicId   String
   topic     ForumTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
   userId    String
-  body      String
+  body      String     @db.LongText
   createdAt DateTime   @default(now())
 
   @@index([topicId, createdAt])
@@ -1145,8 +1145,8 @@ model AcademicCalendarEntry {
   courseId  String?
   titleAr   String
   titleEn   String
-  descAr    String?
-  descEn    String?
+  descAr    String?  @db.LongText
+  descEn    String?  @db.LongText
   startsAt  DateTime
   endsAt    DateTime?
   kind      String    @default("event")
@@ -1160,10 +1160,10 @@ model AcademicCalendarEntry {
 model QuestionBankItem {
   id         String       @id @default(cuid())
   kind       QuestionKind @default(SINGLE)
-  textAr     String
-  textEn     String?
-  explainAr  String?
-  explainEn  String?
+  textAr     String       @db.LongText
+  textEn     String?      @db.LongText
+  explainAr  String?      @db.LongText
+  explainEn  String?      @db.LongText
   choices    Json?
   tags       Json?
   difficulty Int          @default(1)
@@ -1182,8 +1182,8 @@ model Announcement {
   cohortId    String?
   titleAr     String
   titleEn     String
-  bodyAr      String
-  bodyEn      String?
+  bodyAr      String    @db.LongText
+  bodyEn      String?   @db.LongText
   publishAt   DateTime  @default(now())
   expiresAt   DateTime?
   pinned      Boolean   @default(false)
@@ -1201,8 +1201,8 @@ model CourseMessage {
   courseId    String
   senderId    String
   recipientId String?
-  subject     String?
-  body        String
+  subject     String?   @db.LongText
+  body        String    @db.LongText
   readAt      DateTime?
   createdAt   DateTime  @default(now())
 
@@ -1215,7 +1215,7 @@ model StudentNote {
   id          String   @id @default(cuid())
   userId      String
   lessonId    String
-  body        String
+  body        String   @db.LongText
   positionSec Int?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -1258,7 +1258,7 @@ model SystemJob {
   attempts   Int       @default(0)
   runAfter   DateTime  @default(now())
   finishedAt DateTime?
-  error      String?
+  error      String?   @db.LongText
   createdAt  DateTime  @default(now())
 
   @@index([status, runAfter])
