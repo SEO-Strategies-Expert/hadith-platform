@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 
 export type Lang = "ar" | "en";
 
+export const SITE_BRAND_AR = "الكُلِّيَّةُ العُلْيَا لِلْحَدِيثِ النَّبَوِيِّ وَعُلُومِهِ وَعِلَلِهِ";
+
 export async function getHeaderNav() {
   return prisma.navLink.findMany({
     // Keep the university link out of the college header; the university identity is already represented by the accreditation control.

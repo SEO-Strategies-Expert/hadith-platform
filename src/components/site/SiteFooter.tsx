@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Lang } from "@/lib/site-data";
+import { SITE_BRAND_AR, type Lang } from "@/lib/site-data";
 import { getFooterNav, getSocialLinks, getSettingsMap } from "@/lib/site-data";
 import { siteHref } from "@/lib/site-links";
 import { currentUser } from "@/lib/guard";
@@ -25,9 +25,9 @@ export async function SiteFooter({ lang }: { lang: Lang }) {
   const isStudent = viewer?.role === "STUDENT";
   const t = T[lang];
   const brandName =
-    (lang === "ar" ? settings.get("site.shortAr") : settings.get("site.shortEn")) ||
-    (lang === "ar" ? settings.get("site.nameAr") : settings.get("site.nameEn")) ||
-    (lang === "ar" ? "الكلّية العليا للحديث النبوي" : "The Higher College of Prophetic Hadith");
+    (lang === "ar" ? settings.get("site.shortAr") || SITE_BRAND_AR : settings.get("site.shortEn")) ||
+    (lang === "en" ? settings.get("site.nameEn") : null) ||
+    (lang === "en" ? "The Higher College of Prophetic Hadith" : SITE_BRAND_AR);
   const tagline = lang === "ar" ? settings.get("site.taglineAr") : settings.get("site.taglineEn");
   const year = new Date().getFullYear();
 

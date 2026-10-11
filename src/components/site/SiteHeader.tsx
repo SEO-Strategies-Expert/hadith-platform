@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Lang } from "@/lib/site-data";
+import { SITE_BRAND_AR, type Lang } from "@/lib/site-data";
 import { getHeaderNav, getSocialLinks, getSettingsMap } from "@/lib/site-data";
 import { siteHref, counterpartPath } from "@/lib/site-links";
 import { auth } from "@/auth";
@@ -66,8 +66,8 @@ export async function SiteHeader({
   const brandFull =
     (lang === "ar" ? settings.get("site.nameAr") : settings.get("site.nameEn")) ||
     brandShortName ||
-    (lang === "ar" ? "الكلّية العليا للحديث النبوي" : "The Higher College of Prophetic Hadith");
-  const brandName = brandShortName || brandFull;
+    (lang === "ar" ? SITE_BRAND_AR : "The Higher College of Prophetic Hadith");
+  const brandName = lang === "ar" ? brandShortName || SITE_BRAND_AR : brandShortName || brandFull;
   const liveUrl = settings.get("header.liveUrl") || "#";
   const uniSocialUrl = settings.get("header.universitySocialUrl") || "#";
 

@@ -49,7 +49,7 @@
 
 /* اسم الكلّية في الهيدر بخطّ الثلث المستخدم في الهوية البصرية. */
 .brand-name.brand-name{
-  font-family:'Thuluth','ThuluthAlt','NaskhQ',serif!important;
+  font-family:'ThuluthAlt','NaskhQ',serif!important;
   font-weight:400;
   background:none!important;
   color:var(--gold-1)!important;
@@ -675,7 +675,7 @@ html[dir="rtl"] .arrow svg{transform:scaleX(-1)}
 .foot-brand .nm{font-size:21px;line-height:2}
 /* Keep the Arabic college name and emblem as a single desktop lockup. */
 .foot-brand .row{flex-wrap:nowrap}
-.foot-brand .nm.thuluth{white-space:nowrap;font-size:16px;letter-spacing:-.15px}
+.foot-brand .nm.thuluth{font-family:'ThuluthAlt','NaskhQ',serif!important;white-space:nowrap;font-size:16px;letter-spacing:-.15px}
 .foot-brand p{margin:0;font-size:14px;line-height:1.92;color:rgba(241,232,211,.7);max-width:44ch}
 .foot-col h5{margin:0 0 17px;font-size:15.5px;font-weight:800;color:var(--gold-1);position:relative;padding-bottom:11px}
 .foot-col h5::after{content:"";position:absolute;bottom:0;inset-inline-start:0;width:46px;height:2px;background:linear-gradient(90deg,var(--gold-1),transparent)}
