@@ -24,7 +24,10 @@ export async function SiteFooter({ lang }: { lang: Lang }) {
   ]);
   const isStudent = viewer?.role === "STUDENT";
   const t = T[lang];
-  const brandName = lang === "ar" ? settings.get("site.shortAr") : settings.get("site.shortEn");
+  const brandName =
+    (lang === "ar" ? settings.get("site.shortAr") : settings.get("site.shortEn")) ||
+    (lang === "ar" ? settings.get("site.nameAr") : settings.get("site.nameEn")) ||
+    (lang === "ar" ? "الكلّية العليا للحديث النبوي" : "The Higher College of Prophetic Hadith");
   const tagline = lang === "ar" ? settings.get("site.taglineAr") : settings.get("site.taglineEn");
   const year = new Date().getFullYear();
 
