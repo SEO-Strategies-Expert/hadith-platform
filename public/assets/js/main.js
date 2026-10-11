@@ -13,63 +13,91 @@
      1) الهيرو
      --------------------------------------------------------------- */
   (function heroSlider() {
-    var stage = document.getElementById('heroStage');
-    if (!stage) return;
+    var activeStage = null, stopActive = null;
 
-    var slides = [].slice.call(stage.querySelectorAll('.slide'));
-    var dotsBox = document.getElementById('heroDots');
-    var prev = document.getElementById('heroPrev');
-    var next = document.getElementById('heroNext');
-    if (slides.length < 2) return;
+    function init() {
+      if (activeStage && !activeStage.isConnected) {
+        stopActive && stopActive();
+        activeStage = null;
+        stopActive = null;
+      }
+      var stage = document.getElementById('heroStage');
+      if (!stage || stage === activeStage) return;
+      if (stage.dataset.sliderInitialized === 'true') {
+        activeStage = stage;
+        return;
+      }
 
-    var index = 0, timer = null, DELAY = 6800;
+      var slides = [].slice.call(stage.querySelectorAll('.slide'));
+      if (slides.length < 2) return;
+      stage.dataset.sliderInitialized = 'true';
 
-    slides.forEach(function (_, i) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.setAttribute('role', 'tab');
-      b.setAttribute('aria-label', 'الشريحة ' + toAr(i + 1));
-      b.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
-      b.addEventListener('click', function () { go(i, true); });
-      dotsBox.appendChild(b);
-    });
-    var dots = [].slice.call(dotsBox.children);
+      var dotsBox = document.getElementById('heroDots');
+      var prev = document.getElementById('heroPrev');
+      var next = document.getElementById('heroNext');
+      var index = Math.max(0, slides.findIndex(function (s) { return s.classList.contains('is-active'); }));
+      var timer = null, DELAY = 6800;
 
-    function go(i, manual) {
-      index = (i + slides.length) % slides.length;
-      slides.forEach(function (s, n) { s.classList.toggle('is-active', n === index); });
-      dots.forEach(function (d, n) { d.setAttribute('aria-selected', n === index ? 'true' : 'false'); });
-      if (manual) restart();
+      if (dotsBox) {
+        dotsBox.replaceChildren();
+        slides.forEach(function (_, i) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.setAttribute('role', 'tab');
+          b.setAttribute('aria-label', 'الشريحة ' + toAr(i + 1));
+          b.setAttribute('aria-selected', i === index ? 'true' : 'false');
+          b.addEventListener('click', function () { go(i, true); });
+          dotsBox.appendChild(b);
+        });
+      }
+      var dots = dotsBox ? [].slice.call(dotsBox.children) : [];
+
+      function go(i, manual) {
+        index = (i + slides.length) % slides.length;
+        slides.forEach(function (s, n) { s.classList.toggle('is-active', n === index); });
+        dots.forEach(function (d, n) { d.setAttribute('aria-selected', n === index ? 'true' : 'false'); });
+        if (manual) restart();
+      }
+      function start() { if (!reduce && !timer && !document.hidden) timer = setInterval(function () { go(index + 1); }, DELAY); }
+      function stop() { if (timer) { clearInterval(timer); timer = null; } }
+      function restart() { stop(); start(); }
+      activeStage = stage;
+      stopActive = stop;
+
+      prev && prev.addEventListener('click', function () { go(index - 1, true); });
+      next && next.addEventListener('click', function () { go(index + 1, true); });
+
+      stage.addEventListener('mouseenter', stop);
+      stage.addEventListener('mouseleave', start);
+      stage.addEventListener('focusin', stop);
+      stage.addEventListener('focusout', start);
+      document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
+
+      stage.setAttribute('tabindex', '0');
+      stage.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight') go(index + 1, true);
+        else if (e.key === 'ArrowLeft') go(index - 1, true);
+      });
+
+      var x0 = null;
+      stage.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; stop(); }, { passive: true });
+      stage.addEventListener('touchend', function (e) {
+        if (x0 === null) return;
+        var dx = e.changedTouches[0].clientX - x0;
+        if (Math.abs(dx) > 45) go(index + (dx > 0 ? 1 : -1), true);
+        x0 = null; start();
+      }, { passive: true });
+
+      start();
     }
-    function start() { if (!reduce && !timer) timer = setInterval(function () { go(index + 1); }, DELAY); }
-    function stop() { if (timer) { clearInterval(timer); timer = null; } }
-    function restart() { stop(); start(); }
 
-    prev && prev.addEventListener('click', function () { go(index - 1, true); });
-    next && next.addEventListener('click', function () { go(index + 1, true); });
-
-    stage.addEventListener('mouseenter', stop);
-    stage.addEventListener('mouseleave', start);
-    stage.addEventListener('focusin', stop);
-    stage.addEventListener('focusout', start);
-    document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
-
-    stage.setAttribute('tabindex', '0');
-    stage.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowRight') go(index + 1, true);
-      else if (e.key === 'ArrowLeft') go(index - 1, true);
-    });
-
-    var x0 = null;
-    stage.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; stop(); }, { passive: true });
-    stage.addEventListener('touchend', function (e) {
-      if (x0 === null) return;
-      var dx = e.changedTouches[0].clientX - x0;
-      if (Math.abs(dx) > 45) go(index + (dx > 0 ? 1 : -1), true);
-      x0 = null; start();
-    }, { passive: true });
-
-    start();
+    init();
+    // The root layout's script can load before client-side navigation reaches `/`.
+    // Watch for Next.js route content so the slider initializes when the hero appears.
+    if (document.body && window.MutationObserver) {
+      var observer = new MutationObserver(init);
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
   })();
 
   /* ---------------------------------------------------------------
