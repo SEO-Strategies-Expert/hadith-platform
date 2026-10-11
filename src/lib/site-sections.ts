@@ -900,6 +900,13 @@ export async function bindPageSections(
   const binders = BINDERS[slug] ?? [];
   const $ = cheerio.load(html, null, false);
 
+  if (slug === "faculty") {
+    const membersSection = $(".inner-section.cream.orn-cream").first();
+    if (membersSection.length && !membersSection.attr("id")) {
+      membersSection.attr("id", "faculty-members");
+    }
+  }
+
   for (const bind of binders) {
     try {
       await bind($, lang, params);

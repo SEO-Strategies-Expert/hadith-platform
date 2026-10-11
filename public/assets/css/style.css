@@ -350,8 +350,12 @@ html[dir="rtl"] .ticker-track{animation-name:tickerRtlArabic}
 }
 /* Keep the complete artwork visible on desktop screens; some source slides are
    taller than the hero and were being cropped by `object-fit: cover`. */
-@media(min-width:761px){.slide img{object-fit:contain;background:var(--navy-950)}.slide.is-active img{animation:none}}
-@media(min-width:761px){.hero-stage{width:100%;height:auto;aspect-ratio:1672/941;max-height:none}.hero-stage .slide img{width:100%;height:100%;object-fit:cover;background:var(--navy-950)}}
+@media(min-width:761px){
+  .hero-stage{width:100%;height:min(56.25vw,78vh);aspect-ratio:auto;max-height:78vh}
+  .hero-stage .slide img{width:100%;height:100%;object-fit:contain;object-position:center;background:var(--navy-950)}
+  .hero-stage .slide.is-active img{animation:none}
+}
+#faculty-members{scroll-margin-top:18px}
 /* Solid gold typography is easier to read than the metallic wave effect. */
 .gold-text{background:none!important;color:var(--gold-2)!important;-webkit-text-fill-color:currentColor!important;filter:none!important}
 

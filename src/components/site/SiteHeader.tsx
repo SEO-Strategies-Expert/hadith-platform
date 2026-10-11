@@ -60,13 +60,14 @@ export async function SiteHeader({
   ]);
   const t = T[lang];
   const isStudent = session?.user?.role === "STUDENT";
-  const brandName = lang === "ar" ? settings.get("site.shortAr") : settings.get("site.shortEn");
+  const brandShortName = lang === "ar" ? settings.get("site.shortAr") : settings.get("site.shortEn");
   // السقوط إلى الاسم المختصر ثم إلى نصّ ثابت: الاسم يدخل في قالب نصّي لـaria-label،
   // وقيمة غائبة كانت تُطبع حرفيًّا «undefined» فيقرأها قارئ الشاشة.
   const brandFull =
     (lang === "ar" ? settings.get("site.nameAr") : settings.get("site.nameEn")) ||
-    brandName ||
+    brandShortName ||
     (lang === "ar" ? "الكلّية العليا للحديث النبوي" : "The Higher College of Prophetic Hadith");
+  const brandName = brandShortName || brandFull;
   const liveUrl = settings.get("header.liveUrl") || "#";
   const uniSocialUrl = settings.get("header.universitySocialUrl") || "#";
 
@@ -207,11 +208,19 @@ export async function SiteHeader({
                     </Link>
                     {item.children.length > 0 && (
                       <div className="drop">
-                        {item.children.map((c) => (
-                          <Link key={c.id} href={siteHref(lang, c.href)} target={c.href.startsWith("http") ? "_blank" : undefined} rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}>
-                            {lang === "ar" ? c.labelAr : c.labelEn}
-                          </Link>
-                        ))}
+                        {item.children.map((c) => {
+                          const href = c.labelAr === "أعضاء هيئة التدريس" ? "faculty.html#faculty-members" : c.href;
+                          return (
+                            <Link
+                              key={c.id}
+                              href={siteHref(lang, href)}
+                              target={href.startsWith("http") ? "_blank" : undefined}
+                              rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                            >
+                              {lang === "ar" ? c.labelAr : c.labelEn}
+                            </Link>
+                          );
+                        })}
                       </div>
                     )}
                   </li>
