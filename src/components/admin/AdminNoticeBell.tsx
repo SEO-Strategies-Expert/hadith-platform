@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Bell, GraduationCap, Mail } from "lucide-react";
@@ -8,7 +8,7 @@ import { markNoticeRead } from "@/app/(admin)/admin/notifications/actions";
 
 export type AdminNoticeItem = {
   id: string;
-  kind: "enrollment" | "contact";
+  kind: "enrollment" | "contact" | "instructor-attendance";
   title: string;
   body: string;
   href: string;
@@ -16,14 +16,37 @@ export type AdminNoticeItem = {
   when: string;
 };
 
-export function AdminNoticeBell({ unread, items }: { unread: number; items: AdminNoticeItem[] }) {
+export function AdminNoticeBell({ unread: initialUnread, items: initialItems }: { unread: number; items: AdminNoticeItem[] }) {
+  const [feed, setFeed] = useState({ unread: initialUnread, items: initialItems });
+  const [serverItems, setServerItems] = useState(initialItems);
+  if (serverItems !== initialItems) {
+    setServerItems(initialItems);
+    setFeed({ unread: initialUnread, items: initialItems });
+  }
+  const { unread, items } = feed;
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const badge = unread > 99 ? "99+" : String(unread);
+  useEffect(() => {
+    const controller = new AbortController();
+    async function refresh() {
+      if (document.hidden) return;
+      try {
+        const response = await fetch("/api/admin/notices", { cache: "no-store", signal: controller.signal });
+        if (response.ok) setFeed(await response.json());
+      } catch { /* Keep the most recent feed during a temporary connection failure. */ }
+    }
+    const timer = setInterval(refresh, 30000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { controller.abort(); clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
+  }, []);
 
   async function openItem(item: AdminNoticeItem) {
     setOpen(false);
-    if (item.unread) await markNoticeRead(item.id);
+    if (item.unread) {
+      await markNoticeRead(item.id);
+      setFeed(old => ({ unread: Math.max(0, old.unread - 1), items: old.items.map(n => n.id === item.id ? { ...n, unread: false } : n) }));
+    }
     router.push(item.href);
     router.refresh();
   }

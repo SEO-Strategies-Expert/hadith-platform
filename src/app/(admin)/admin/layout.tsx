@@ -36,7 +36,7 @@ export default async function AdminLayout({
         unread: feed.unread,
         items: feed.items.map((item) => ({
           id: item.id,
-          kind: item.kind === "contact" ? "contact" : "enrollment",
+          kind: item.kind === "contact" ? "contact" : item.kind === "instructor-attendance" ? "instructor-attendance" : "enrollment",
           title: item.titleAr,
           body: item.bodyAr ?? "",
           href: item.href || "/admin/notifications",

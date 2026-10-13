@@ -14,18 +14,25 @@ const T={
 
 export async function StudentDashboard({lang}:{lang:Lang}){
  const user=await currentUser(); if(!user?.id) redirect(lang==="en"?"/en/student-login.html":"/student-login.html"); const t=T[lang];
- const [profile,application,courses,sessions,certificates,payments]=await Promise.all([
+ const [profile,application,courses,sessions,certificates,payments,assignments,attendance,grades,notices]=await Promise.all([
   prisma.user.findUnique({where:{id:user.id}}),
   user.email?prisma.admissionApplication.findFirst({where:{email:user.email},orderBy:{createdAt:"desc"},select:{status:true,program:true}}):null,
   prisma.enrollment.count({where:{userId:user.id,status:{in:["ACTIVE","COMPLETED"]}}}),
   prisma.liveSession.count({where:{visible:true,startsAt:{gte:new Date()},OR:[{course:{enrollments:{some:{userId:user.id}}}},{stage:{stageEnrollments:{some:{userId:user.id}}}},{isPublic:true}]}}),
   prisma.certificate.count({where:{userId:user.id,revoked:false}}),
   prisma.payment.count({where:{userId:user.id}}),
+  prisma.assignment.count({where:{visible:true,course:{enrollments:{some:{userId:user.id,status:{in:["ACTIVE","COMPLETED"]}}}}}}),
+  prisma.attendance.count({where:{userId:user.id,present:true}}),
+  prisma.assignmentSubmission.count({where:{userId:user.id,state:"GRADED"}}),
+  prisma.notification.findMany({where:{userId:user.id},orderBy:{createdAt:"desc"},take:10}),
  ]);
  if(!profile) redirect(lang==="en"?"/en/student-login.html":"/student-login.html");
  const nav=[
   {href:`${studentHref(lang)}/courses`,label:t.courses,count:courses,Icon:BookOpen},{href:`${studentHref(lang)}/sessions`,label:t.sessions,count:sessions,Icon:CalendarDays},
   {href:`${studentHref(lang)}/certificates`,label:t.certificates,count:certificates,Icon:ScrollText},{href:`${studentHref(lang)}/payments`,label:t.payments,count:payments,Icon:CreditCard},
+  {href:`${studentHref(lang)}/assignments`,label:lang==="ar"?"واجباتي":"My assignments",count:assignments,Icon:BookOpen},
+  {href:`${studentHref(lang)}/attendance`,label:lang==="ar"?"الحضور والغياب":"Attendance",count:attendance,Icon:CalendarDays},
+  {href:`${studentHref(lang)}/grades`,label:lang==="ar"?"سجل درجاتي":"My grades",count:grades,Icon:ScrollText},
  ];
  return <main id="main" className="student-dashboard-modern">
   <section className="student-dash-top" id="student-profile"><div className="container">
@@ -38,6 +45,7 @@ export async function StudentDashboard({lang}:{lang:Lang}){
    </div>
   </div></section>
   <div className="student-dashboard-content">
+   {notices.length>0 && <section className="container info-card"><h2>{lang==="ar"?"إشعاراتي":"My notifications"}</h2>{notices.map(n=><article key={n.id}><h3>{lang==="ar"?n.titleAr:n.titleEn}</h3><p>{lang==="ar"?n.bodyAr:n.bodyEn}</p>{n.href?.startsWith("/") && <Link href={n.href}>{lang==="ar"?"فتح":"Open"}</Link>}</article>)}</section>}
    <section className="student-dashboard-welcome-card container">
     <div><span>{t.overview}</span><h2>{t.subtitle}</h2><p>{lang === "ar" ? "استخدم القائمة الجانبية للوصول إلى مقرّراتك ومجالسك وشهاداتك ومدفوعاتك." : "Use the sidebar to access your courses, sessions, certificates, and payments."}</p></div>
     <div className="student-dashboard-welcome-mark">✦</div>

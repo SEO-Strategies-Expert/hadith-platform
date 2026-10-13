@@ -32,6 +32,8 @@ function SessionRow({ s }: { s: Row }) {
         >
           التفاصيل والحضور ({s._count.attendance}) <ArrowLeft size={14} />
         </Link>
+        <StartSessionCard zoomStartUrl={s.zoomStartUrl} joinUrl={s.joinUrl} passcode={s.passcode} />
+        <Link href="/instructor/attendance" className="rounded-lg border p-3">✓ تسجيل الحضور والانصراف</Link>
       </div>
     </div>
   );

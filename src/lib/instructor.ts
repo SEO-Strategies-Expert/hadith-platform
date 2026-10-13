@@ -158,7 +158,9 @@ export async function getCourseStudents(scholarId: string, courseId: string) {
 // ---------------------------------------------------------------------------
 
 /** المجلس يبقى «قادمًا» ساعةً بعد بدايته حتى لا يختفي من أمام المحاضر أثناء انعقاده. */
-const PAST_GRACE_MS = 60 * 60_000;
+function sessionEndsAt(s: { startsAt: Date; endsAt: Date | null; durationMin: number }) {
+  return (s.endsAt ?? new Date(s.startsAt.getTime() + s.durationMin * 60000)).getTime();
+}
 
 /**
  * مجالس المحاضر مقسومةً قادمة/منتهية، وكل صفٍّ معلَّم بـ«مباشر الآن؟».
@@ -168,7 +170,7 @@ const PAST_GRACE_MS = 60 * 60_000;
  */
 export async function getInstructorSessions(scholarId: string) {
   const sessions = await prisma.liveSession.findMany({
-    where: { instructorId: scholarId },
+    where: { OR: [{ instructorId: scholarId }, { instructorId: null, course: ownedCourseFilter(scholarId) }] },
     orderBy: { startsAt: "asc" },
     include: {
       course: { select: { id: true, titleAr: true } },
@@ -178,10 +180,10 @@ export async function getInstructorSessions(scholarId: string) {
   });
 
   const rows = sessions.map((s) => ({ ...s, live: isLiveNow(s) }));
-  const cutoff = Date.now() - PAST_GRACE_MS;
+  const cutoff = Date.now();
   return {
-    upcoming: rows.filter((s) => s.startsAt.getTime() >= cutoff),
-    past: rows.filter((s) => s.startsAt.getTime() < cutoff).reverse(),
+    upcoming: rows.filter((s) => sessionEndsAt(s) >= cutoff),
+    past: rows.filter((s) => sessionEndsAt(s) < cutoff).reverse(),
   };
 }
 
@@ -191,11 +193,12 @@ export async function getInstructorSessions(scholarId: string) {
  */
 export async function getInstructorSession(scholarId: string, sessionId: string) {
   const session = await prisma.liveSession.findFirst({
-    where: { id: sessionId, instructorId: scholarId },
+    where: { id: sessionId, OR: [{ instructorId: scholarId }, { instructorId: null, course: ownedCourseFilter(scholarId) }] },
     include: {
       course: { select: { id: true, titleAr: true } },
       stage: { select: { titleAr: true } },
       attendance: {
+        where: { user: { role: "STUDENT" } },
         orderBy: { joinedAt: "asc" },
         include: { user: { select: { id: true, name: true, email: true, studentNo: true } } },
       },
@@ -206,17 +209,19 @@ export async function getInstructorSession(scholarId: string, sessionId: string)
   return {
     ...session,
     live: isLiveNow(session),
-    ended: session.startsAt.getTime() < Date.now() - PAST_GRACE_MS,
+    ended: sessionEndsAt(session) < Date.now(),
   };
 }
 
 /** المجلس القادم الأقرب — لبطاقة الصفحة الرئيسة. */
 export async function getNextSession(scholarId: string) {
-  return prisma.liveSession.findFirst({
-    where: { instructorId: scholarId, startsAt: { gte: new Date(Date.now() - 60 * 60_000) } },
+  const sessions = await prisma.liveSession.findMany({
+    where: { OR: [{ instructorId: scholarId }, { instructorId: null, course: ownedCourseFilter(scholarId) }], startsAt: { gte: new Date(Date.now() - 24 * 60 * 60_000) } },
     orderBy: { startsAt: "asc" },
     include: { course: { select: { titleAr: true } } },
+    take: 100,
   });
+  return sessions.find((s) => sessionEndsAt(s) >= Date.now()) ?? null;
 }
 
 // ---------------------------------------------------------------------------

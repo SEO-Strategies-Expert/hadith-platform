@@ -112,7 +112,7 @@ export async function StudentCourses({ lang, userId }: { lang: Lang; userId: str
 
 export async function StudentSessions({ lang, userId }: { lang: Lang; userId: string }) {
   const t = T[lang];
-  const sessions = await getUpcomingSessions(userId);
+  const sessions = await getUpcomingSessions(userId, 50);
   const now = Date.now();
 
   return (
@@ -120,6 +120,7 @@ export async function StudentSessions({ lang, userId }: { lang: Lang; userId: st
       <div className="container">
         <header className="section-cap reveal">
           <h2 className="thuluth">{t.sessions}</h2>
+          <Link className="btn btn-gold" href={lang === "ar" ? "/student/attendance" : "/en/student/attendance"}>{lang === "ar" ? "✓ جدول المحاضرات وتسجيل الحضور والغياب" : "Timetable & attendance"}</Link>
         </header>
 
         {sessions.length === 0 ? (

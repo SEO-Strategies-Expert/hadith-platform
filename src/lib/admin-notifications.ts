@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 
 /** إشعارات لوحة الإدارة: تسجيل طالب في مقرر، أو رسالة من صفحة التواصل. */
 
-const NOTICE_KINDS = ["enrollment", "contact"] as const;
+const NOTICE_KINDS = ["enrollment", "contact", "instructor-attendance"] as const;
 export type AdminNoticeKind = (typeof NOTICE_KINDS)[number];
 
 export async function notifyStaff(input: {
@@ -124,13 +124,14 @@ export async function syncAdminNotices(userId: string) {
 
 export function adminNoticeWhere(
   userId: string,
-  filter: "all" | "enrollment" | "contact" | "unread" = "all"
+  filter: "all" | "enrollment" | "contact" | "instructor-attendance" | "unread" = "all"
 ) {
   const enrollment = { kind: "enrollment", href: { startsWith: "/admin/enrollments/" } };
   const contact = { kind: "contact", href: { startsWith: "/admin/inbox/contact/" } };
+  const attendance = { kind: "instructor-attendance", href: { startsWith: "/admin/sessions/" } };
   return {
     userId,
-    OR: filter === "enrollment" ? [enrollment] : filter === "contact" ? [contact] : [enrollment, contact],
+    OR: filter === "enrollment" ? [enrollment] : filter === "contact" ? [contact] : filter === "instructor-attendance" ? [attendance] : [enrollment, contact, attendance],
     ...(filter === "unread" ? { readAt: null } : {}),
   };
 }

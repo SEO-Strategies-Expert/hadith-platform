@@ -31,7 +31,7 @@ export default async function EditSessionPage({
   const { id } = await params;
   const { zoom } = await searchParams;
 
-  const session = await prisma.liveSession.findUnique({ where: { id } });
+  const session = await prisma.liveSession.findUnique({ where: { id }, include: { attendance: { include: { user: { select: { name: true, role: true } } }, orderBy: { joinedAt: "asc" } } } });
   if (!session) notFound();
 
   const fields = await withRelationOptions(sessionFields);
@@ -116,6 +116,7 @@ export default async function EditSessionPage({
           </p>
         </Card>
       </div>
+      <Card className="mt-5 p-5"><h2 className="mb-3 font-bold">حضور المعلمين والطلاب</h2><div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr><th>الاسم</th><th>الصفة</th><th>الحالة</th><th>الحضور</th><th>الانصراف</th><th>الدقائق</th></tr></thead><tbody>{session.attendance.map(a=><tr key={a.id}><td>{a.user.name}</td><td>{a.user.role === "INSTRUCTOR" ? "معلم" : "طالب"}</td><td>{a.present ? "حاضر" : "غائب"}</td><td>{formatDateTime(a.joinedAt)}</td><td>{a.leftAt ? formatDateTime(a.leftAt) : "—"}</td><td>{a.minutes}</td></tr>)}</tbody></table>{!session.attendance.length && <p>لم يسجل أحد الحضور بعد.</p>}</div></Card>
     </div>
   );
 }

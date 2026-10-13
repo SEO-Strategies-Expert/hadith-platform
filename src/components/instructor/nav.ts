@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { LayoutDashboard, Layers, Radio, GraduationCap } from "lucide-react";
+import { LayoutDashboard, Layers, Radio, GraduationCap, UserRound, ClipboardCheck, BookOpen } from "lucide-react";
 
 /**
  * تنقّل لوحة الأكاديميين — أربعة مداخل لا أكثر.
@@ -15,6 +15,9 @@ export type InstructorNavItem = {
 export const instructorNav: InstructorNavItem[] = [
   { label: "لوحتي", href: "/instructor", icon: LayoutDashboard },
   { label: "مقرّراتي", href: "/instructor/courses", icon: Layers },
-  { label: "مجالسي", href: "/instructor/sessions", icon: Radio },
+  { label: "جدول المحاضرات والزوم", href: "/instructor/sessions", icon: Radio },
   { label: "طلابي", href: "/instructor/students", icon: GraduationCap },
+  { label: "ملفي وسيرتي الذاتية", href: "/instructor/profile", icon: UserRound },
+  { label: "الحضور والدوام", href: "/instructor/attendance", icon: ClipboardCheck },
+  { label: "سجل الدرجات", href: "/instructor/grades", icon: BookOpen },
 ];

@@ -110,7 +110,7 @@ async function syncAttendance(sessionId: string, meetingId: string) {
     const existing = await prisma.attendance.findUnique({
       where: { userId_sessionId: { userId, sessionId } },
     });
-    if (existing?.source === "manual") continue;
+    if (existing && ["manual", "instructor-self", "student-self"].includes(existing.source)) continue;
 
     const data = {
       joinedAt: new Date(p.joinedAt),

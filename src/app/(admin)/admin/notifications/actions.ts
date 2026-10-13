@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/guard";
 import { adminNoticeWhere } from "@/lib/admin-notifications";
 
-const KINDS = ["enrollment", "contact"] as const;
+const KINDS = ["enrollment", "contact", "instructor-attendance"] as const;
 
 export async function markNoticeRead(id: string) {
   const me = await requireUser();

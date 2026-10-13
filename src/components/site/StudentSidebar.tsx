@@ -19,15 +19,21 @@ export async function StudentSidebar({ lang }: { lang: Lang }) {
   const t = T[lang];
   const pathname = (await headers()).get("x-pathname") || (lang === "en" ? "/en/student" : "/student");
   const dashboardPath = studentHref(lang);
-  const [courses, sessions, certificates, payments] = await Promise.all([
+  const [courses, sessions, certificates, payments, assignments, attendance, grades] = await Promise.all([
     prisma.enrollment.count({ where: { userId: user.id, status: { in: ["ACTIVE", "COMPLETED"] } } }),
     prisma.liveSession.count({ where: { visible: true, startsAt: { gte: new Date() }, OR: [{ course: { enrollments: { some: { userId: user.id } } } }, { stage: { stageEnrollments: { some: { userId: user.id } } } }, { isPublic: true }] } }),
     prisma.certificate.count({ where: { userId: user.id, revoked: false } }),
     prisma.payment.count({ where: { userId: user.id } }),
+    prisma.assignment.count({ where: { visible: true, course: { enrollments: { some: { userId: user.id, status: { in: ["ACTIVE", "COMPLETED"] } } } } } }),
+    prisma.attendance.count({ where: { userId: user.id, present: true } }),
+    prisma.assignmentSubmission.count({ where: { userId: user.id, state: "GRADED" } }),
   ]);
   const items = [
     { href: `${studentHref(lang)}/courses`, label: t.courses, count: courses, Icon: BookOpen },
     { href: `${studentHref(lang)}/sessions`, label: t.sessions, count: sessions, Icon: CalendarDays },
+    { href: `${studentHref(lang)}/assignments`, label: lang === "ar" ? "واجباتي" : "My assignments", count: assignments, Icon: BookOpen },
+    { href: `${studentHref(lang)}/attendance`, label: lang === "ar" ? "الحضور والغياب والجدول" : "Attendance & timetable", count: attendance, Icon: CalendarDays },
+    { href: `${studentHref(lang)}/grades`, label: lang === "ar" ? "سجل درجاتي" : "My grades", count: grades, Icon: ScrollText },
     { href: `${studentHref(lang)}/certificates`, label: t.certificates, count: certificates, Icon: ScrollText },
     { href: `${studentHref(lang)}/payments`, label: t.payments, count: payments, Icon: CreditCard },
   ];

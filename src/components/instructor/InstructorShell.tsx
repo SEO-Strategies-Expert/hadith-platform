@@ -125,6 +125,7 @@ export function InstructorShell({
                       </span>
                     </div>
                     {/* المدير يعود إلى لوحته من هنا بدل تخمين الرابط. */}
+                    <Link href="/instructor/profile" className="block px-4 py-3 text-[13.5px] font-semibold text-navy-800">ملفي الشخصي وسيرتي الذاتية</Link>
                     {user.role === "ADMIN" && (
                       <Link
                         href="/admin"

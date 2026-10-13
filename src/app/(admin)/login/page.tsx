@@ -4,7 +4,7 @@ import { LoginForm } from "@/components/LoginForm";
 
 export default async function LoginPage() {
   const session = await auth();
-  if (session?.user) redirect("/admin");
+  if (session?.user) redirect(session.user.role === "INSTRUCTOR" ? "/instructor" : session.user.role === "STUDENT" ? "/student" : "/admin");
 
   return (
     <div className="grid min-h-screen place-items-center bg-navy-950 p-4">
@@ -25,7 +25,7 @@ export default async function LoginPage() {
         </div>
 
         <p className="mt-5 text-center text-[12px] text-white/40">
-          الوصول للمصرّح لهم فقط — مدير أو محرّر.
+          دخول الإدارة وأعضاء هيئة التدريس.
         </p>
       </div>
     </div>

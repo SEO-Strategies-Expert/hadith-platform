@@ -184,14 +184,14 @@ export function isLiveNow(session: { startsAt: Date; endsAt: Date | null; durati
  */
 export async function getUpcomingSessions(userId: string, take = 8) {
   const [enrollments, stages] = await Promise.all([
-    prisma.enrollment.findMany({ where: { userId }, select: { courseId: true } }),
-    prisma.stageEnrollment.findMany({ where: { userId }, select: { stageId: true } }),
+    prisma.enrollment.findMany({ where: { userId, status: { in: ["ACTIVE", "COMPLETED"] } }, select: { courseId: true } }),
+    prisma.stageEnrollment.findMany({ where: { userId, status: { in: ["ACTIVE", "COMPLETED"] } }, select: { stageId: true } }),
   ]);
 
-  return prisma.liveSession.findMany({
+  const sessions = await prisma.liveSession.findMany({
     where: {
       visible: true,
-      startsAt: { gte: new Date(Date.now() - 60 * 60_000) }, // يبقى ساعةً بعد بدايته
+      startsAt: { gte: new Date(Date.now() - 24 * 60 * 60_000) },
       OR: [
         { courseId: { in: enrollments.map((e) => e.courseId) } },
         { stageId: { in: stages.map((s) => s.stageId) } },
@@ -199,9 +199,10 @@ export async function getUpcomingSessions(userId: string, take = 8) {
       ],
     },
     orderBy: { startsAt: "asc" },
-    take,
+    take: take + 100,
     include: { course: true, instructor: true },
   });
+  return sessions.filter((s) => (s.endsAt ?? new Date(s.startsAt.getTime() + s.durationMin * 60000)).getTime() >= Date.now()).slice(0, take);
 }
 
 /** المجالس العامّة القادمة — لتقويم الموقع بلا تسجيل دخول. */

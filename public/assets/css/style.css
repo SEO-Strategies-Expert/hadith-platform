@@ -1569,3 +1569,25 @@ html{scroll-padding-top:150px}
   --gold-hi:#FAE7B3;  --gold-1:#F6D474;   --gold:#D9A12E;
   --gold-2:#E6B84E;   --gold-3:#B28426;   --gold-4:#8F6A1E;
 }
+
+/* الهوية والصور كاملةً على الهاتف والكمبيوتر. */
+.menubar .brand-emblem{width:88px;height:88px}
+.foot-brand img{width:88px;height:88px;flex:none}
+.menubar .accreditation-link{height:auto;min-height:58px;padding:8px 12px;gap:10px}
+.menubar .accreditation-link .thuluth{display:block;font-size:18px;line-height:1.4}
+.accreditation-logo{width:44px;height:44px}
+.accreditation-logo img{width:38px;height:38px}
+.hero-stage .slide img{object-fit:contain;object-position:center;animation:none;transform:none}
+.person-photo img,.pcard-media img,.scard-media img,.news-lead-media img,.news-list img,
+.profile-card .portrait img,.image-card .thumb img,.split-media img,.news-mini img,.news-feature .lead img{
+  object-fit:contain!important;object-position:center!important;filter:none!important;transform:none!important;
+}
+.person:hover .person-photo img,.pcard:hover .pcard-media img,.scard:hover .scard-media img{transform:none}
+.person-photo::after,.profile-card .portrait::after{pointer-events:none}
+@media(max-width:760px){
+  .menubar .brand-emblem{width:68px;height:68px}
+  .menubar .accreditation-link{min-height:52px;padding:6px 9px}
+  .menubar .accreditation-link .thuluth{font-size:16px}
+  .foot-brand img{width:72px;height:72px}
+}
+@media(max-width:1020px){.mainnav.open .drop{display:block!important}}

@@ -11,6 +11,7 @@ const filters = [
   { key: "all", label: "الكل" },
   { key: "enrollment", label: "تسجيل المقررات" },
   { key: "contact", label: "رسائل التواصل" },
+  { key: "instructor-attendance", label: "حضور المعلمين" },
   { key: "unread", label: "غير المقروء" },
 ] as const;
 
@@ -71,7 +72,7 @@ export default async function AdminNotificationsPage({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <b className="text-[14.5px] text-navy-900">{item.titleAr}</b>
-                      <Badge tone={contact ? "blue" : "green"}>{contact ? "تواصل" : "تسجيل"}</Badge>
+                      <Badge tone={contact ? "blue" : "green"}>{contact ? "تواصل" : item.kind === "instructor-attendance" ? "حضور معلم" : "تسجيل"}</Badge>
                       {!item.readAt && <Badge tone="gold">جديد</Badge>}
                     </div>
                     <p className="mt-1 text-[13px] leading-6 text-ink-soft">{item.bodyAr}</p>

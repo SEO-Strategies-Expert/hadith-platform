@@ -203,7 +203,7 @@ const bindFacultyRail: Binder = async ($, lang) => {
       const spec = clean((lang === "ar" ? s.specAr : s.specEn) ?? "");
       return (
         `<li class="person reveal">` +
-        `<div class="person-photo"><img src="${esc(photo)}" alt="" loading="lazy" width="520" height="650"></div>` +
+        `<div class="person-photo"><a href="/faculty/${encodeURIComponent(s.id)}" aria-label="${esc(lang === "ar" ? s.nameAr : s.nameEn)}" style="display:block;height:100%"><img src="${esc(photo)}" alt="" loading="lazy" width="520" height="650"></a></div>` +
         `<div class="person-body">` +
         `<span class="person-rank">${esc(rank)}</span>` +
         `<span class="person-spec">${esc(spec)}</span>` +
@@ -423,12 +423,12 @@ const bindProfileGrid: Binder = async ($, lang) => {
         const bio = (lang === "ar" ? s.bioAr : s.bioEn) || (lang === "ar" ? s.specAr : s.specEn) || "";
         return (
           `<article class="profile-card reveal">` +
-          `<div class="portrait"><img src="${esc(mediaUrl(s.photoUrl, fallbackImage(i)))}" alt="${esc(name)}" loading="lazy">` +
+          `<div class="portrait"><a href="/faculty/${encodeURIComponent(s.id)}" style="display:block;height:100%"><img src="${esc(mediaUrl(s.photoUrl, fallbackImage(i)))}" alt="${esc(name)}" loading="lazy"></a>` +
           (rank ? `<span class="profile-role">${esc(rank)}</span>` : "") +
           `</div>` +
-          `<div class="body"><h3>${esc(name)}</h3>` +
+          `<div class="body"><h3><a href="/faculty/${encodeURIComponent(s.id)}">${esc(name)}</a></h3>` +
           (bio ? `<p>${esc(bio)}</p>` : "") +
-          `</div></article>`
+          `<a class="btn btn-outline-ink" href="/faculty/${encodeURIComponent(s.id)}">${lang === "ar" ? "الملف الشخصي ودخول المعلم" : "Profile & teacher sign-in"}</a></div></article>`
         );
       })
       .join("")

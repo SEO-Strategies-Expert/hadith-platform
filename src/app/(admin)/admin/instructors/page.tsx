@@ -52,6 +52,8 @@ export default async function InstructorsPage() {
   }));
 
   const unlinked = instructors.filter((u) => !u.scholarId).length;
+  const hours = await prisma.attendance.groupBy({ by: ["userId"], where: { user: { role: "INSTRUCTOR" }, present: true }, _sum: { minutes: true }, _count: { id: true } });
+  const attendanceByUser = new Map(hours.map(r => [r.userId, { minutes: r._sum.minutes || 0, sessions: r._count.id }]));
 
   return (
     <div>
@@ -89,6 +91,7 @@ export default async function InstructorsPage() {
                   <th className="px-4 py-3 font-bold">الحساب</th>
                   <th className="px-4 py-3 font-bold">الحالة</th>
                   <th className="px-4 py-3 font-bold">ملفّ الهيئة المرتبط</th>
+                  <th className="px-4 py-3 font-bold">الحضور والدوام المسجل</th>
                   <th className="px-4 py-3 font-bold">الربط</th>
                 </tr>
               </thead>
@@ -123,6 +126,7 @@ export default async function InstructorsPage() {
                         <Badge tone="red">بلا ربط — لوحته فارغة</Badge>
                       )}
                     </td>
+                    <td className="px-4 py-4">{attendanceByUser.get(u.id)?.sessions || 0} محاضرة — {Math.floor((attendanceByUser.get(u.id)?.minutes || 0) / 60)} ساعة و{(attendanceByUser.get(u.id)?.minutes || 0) % 60} دقيقة</td>
                     <td className="px-4 py-4">
                       <div className="space-y-2">
                         <AssignForm
