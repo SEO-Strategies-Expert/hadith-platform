@@ -1584,7 +1584,8 @@ html{scroll-padding-top:150px}
 .person:hover .person-photo img,.pcard:hover .pcard-media img,.scard:hover .scard-media img{transform:none}
 .person-photo::after,.profile-card .portrait::after{pointer-events:none}
 @media(max-width:760px){
-  .menubar .brand-emblem{width:68px;height:68px}
+  .menubar .brand-emblem{width:78px;height:78px}
+  .menubar .brand-name{font-size:clamp(20px,5.2vw,24px);line-height:1.65}
   .menubar .accreditation-link{min-height:52px;padding:6px 9px}
   .menubar .accreditation-link .thuluth{font-size:16px}
   .foot-brand img{width:72px;height:72px}

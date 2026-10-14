@@ -47,7 +47,7 @@ export default async function SiteLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&family=Changa:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Mada:wght@400;600;700&family=Noto+Kufi+Arabic:wght@400;600;700&family=Noto+Sans+Arabic:wght@400;600;700&family=Readex+Pro:wght@400;600;700&family=Reem+Kufi:wght@400;600;700&family=Scheherazade+New:wght@400;700&family=Tajawal:wght@400;500;700&display=swap" />
-        <link rel="stylesheet" href="/assets/css/style.css?v=20261014-carousel-full-width" />
+        <link rel="stylesheet" href="/assets/css/style.css?v=20261014-mobile-brand-size" />
         <link rel="stylesheet" href="/assets/css/inner-pages.css" />
         {lang === "en" && <link rel="stylesheet" href="/assets/css/en.css" />}
       </head>
