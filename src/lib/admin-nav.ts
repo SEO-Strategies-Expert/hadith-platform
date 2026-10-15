@@ -87,6 +87,7 @@ export const adminNav: NavSection[] = [
     title: "الطلاب والشؤون الأكاديمية",
     items: [
       { label: "حسابات الطلاب", href: "/admin/students", icon: GraduationCap },
+      { label: "سجل درجات الطلاب", href: "/admin/grades", icon: BookMarked },
       { label: "تسجيل الطلاب بالمقررات", href: "/admin/enrollments", icon: UserCheck },
       { label: "الشُعب والمجموعات", href: "/admin/cohorts", icon: Users },
       { label: "الفصول الدراسية", href: "/admin/academic-terms", icon: BookOpen },

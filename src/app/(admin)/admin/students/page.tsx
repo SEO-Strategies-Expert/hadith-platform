@@ -4,26 +4,27 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { deleteStudent } from "./actions";
+import { Pagination } from "@/components/admin/Pagination";
+import { requireUser } from "@/lib/guard";
 
 export default async function StudentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ name?: string; studentNo?: string; program?: string }>;
+  searchParams: Promise<{ name?: string; studentNo?: string; program?: string; page?: string }>;
 }) {
+  await requireUser();
   const params = await searchParams;
   const name = params.name?.trim() ?? "";
   const studentNo = params.studentNo?.trim() ?? "";
   const program = params.program?.trim() ?? "";
-  const [students, programRows] = await Promise.all([
-    prisma.user.findMany({
-      where: {
-        role: "STUDENT",
-        ...(name ? { name: { contains: name } } : {}),
-        ...(studentNo ? { studentNo: { contains: studentNo } } : {}),
-        ...(program ? { program } : {}),
-      },
-      orderBy: { createdAt: "desc" },
-    }),
+  const where = {
+    role: "STUDENT" as const,
+    ...(name ? { name: { contains: name } } : {}),
+    ...(studentNo ? { studentNo: { contains: studentNo } } : {}),
+    ...(program ? { program } : {}),
+  };
+  const [total, programRows] = await Promise.all([
+    prisma.user.count({ where }),
     prisma.user.findMany({
       where: { role: "STUDENT", program: { not: null } },
       select: { program: true },
@@ -31,6 +32,10 @@ export default async function StudentsPage({
       orderBy: { program: "asc" },
     }),
   ]);
+  const pageSize = 25;
+  const requestedPage = Number(params.page);
+  const page = Math.min(Math.max(1, Math.ceil(total / pageSize)), Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1);
+  const students = await prisma.user.findMany({ where, orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip: (page - 1) * pageSize, take: pageSize });
   const programs = programRows.map((row) => row.program).filter((value): value is string => Boolean(value));
 
   return (
@@ -42,6 +47,7 @@ export default async function StudentsPage({
       />
 
       <div className="mb-4 flex flex-wrap gap-2">
+        <Link href="/admin/grades" className="rounded-lg border border-black/10 bg-white px-3.5 py-2 text-[12.5px] font-bold text-navy-700">سجل درجات الطلاب</Link>
         <Link href="/admin/students/import" className="rounded-lg border border-black/10 bg-white px-3.5 py-2 text-[12.5px] font-bold text-navy-700">استيراد CSV</Link>
         <Link href="/api/admin/students/export" className="rounded-lg border border-black/10 bg-white px-3.5 py-2 text-[12.5px] font-bold text-navy-700">تصدير CSV</Link>
         <Link
@@ -125,6 +131,7 @@ export default async function StudentsPage({
             </table>
           </div>
         )}
+        <Pagination basePath="/admin/students" page={page} total={total} pageSize={pageSize} filters={{ ...(name ? { name } : {}), ...(studentNo ? { studentNo } : {}), ...(program ? { program } : {}) }} />
       </Card>
     </div>
   );
