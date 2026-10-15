@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Pencil } from "lucide-react";
+import { Pencil, IdCard } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
 import { DeleteButton } from "@/components/admin/DeleteButton";
@@ -123,6 +123,7 @@ export default async function StudentsPage({
                           <Pencil size={16} />
                         </Link>
                         <DeleteButton action={deleteStudent.bind(null, s.id)} />
+                        <Link href={`/admin/students/${s.id}/card`} className="grid h-9 w-9 place-items-center rounded-lg text-navy-700 hover:bg-black/5" title="البطاقة الجامعية / تنزيل PDF" aria-label={`بطاقة ${s.name}`}><IdCard size={18} /></Link>
                       </div>
                     </td>
                   </tr>

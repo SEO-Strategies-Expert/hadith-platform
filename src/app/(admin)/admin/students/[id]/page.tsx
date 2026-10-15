@@ -16,7 +16,7 @@ export default async function EditStudentPage({
 
   return (
     <div>
-      <PageHeader title="تعديل بيانات طالب" desc={student.email} />
+      <PageHeader title="تعديل بيانات طالب" desc={student.email} action={{ href: `/admin/students/${id}/card`, label: "البطاقة الجامعية / PDF" }} />
       <Card className="max-w-2xl p-6">
         <ActionForm action={updateStudent.bind(null, id)} cancelHref="/admin/students">
           <StudentFields record={student} />

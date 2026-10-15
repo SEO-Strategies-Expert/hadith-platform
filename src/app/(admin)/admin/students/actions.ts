@@ -84,6 +84,7 @@ export async function updateStudent(
   });
   revalidatePath("/admin/students");
   revalidatePath("/student/id-card");
+  revalidatePath(`/admin/students/${id}/card`);
   revalidatePath("/en/student/id-card");
   revalidatePath("/student");
   revalidatePath("/en/student");
