@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { headers } from "next/headers";
-import { BookOpen, CalendarDays, CreditCard, LogOut, ScrollText, Sparkles, UserRound } from "lucide-react";
+import { BookOpen, CalendarDays, CreditCard, IdCard, LogOut, ScrollText, Sparkles, UserRound } from "lucide-react";
 import { currentUser } from "@/lib/guard";
 import { prisma } from "@/lib/prisma";
 import type { Lang } from "@/lib/site-data";
@@ -34,6 +34,7 @@ export async function StudentSidebar({ lang }: { lang: Lang }) {
     { href: `${studentHref(lang)}/assignments`, label: lang === "ar" ? "واجباتي" : "My assignments", count: assignments, Icon: BookOpen },
     { href: `${studentHref(lang)}/attendance`, label: lang === "ar" ? "الحضور والغياب والجدول" : "Attendance & timetable", count: attendance, Icon: CalendarDays },
     { href: `${studentHref(lang)}/grades`, label: lang === "ar" ? "سجل درجاتي" : "My grades", count: grades, Icon: ScrollText },
+    { href: `${studentHref(lang)}/id-card`, label: lang === "ar" ? "بطاقتي الجامعية" : "Student ID card", Icon: IdCard },
     { href: `${studentHref(lang)}/certificates`, label: t.certificates, count: certificates, Icon: ScrollText },
     { href: `${studentHref(lang)}/payments`, label: t.payments, count: payments, Icon: CreditCard },
   ];

@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BookOpen, CalendarDays, CreditCard, LogOut, ScrollText, UserRound } from "lucide-react";
+import { BookOpen, CalendarDays, CreditCard, IdCard, LogOut, ScrollText, UserRound } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { currentUser } from "@/lib/guard";
 import type { Lang } from "@/lib/site-data";
 import { studentLogout } from "@/app/(site)/student-actions";
 import { studentHref } from "@/components/site/StudentPortalKit";
+import { ensureUniversityNumber } from "@/lib/student-card";
 
 const T={
  ar:{portal:"بوابة الطالب",welcome:"مرحبًا",subtitle:"كل ما تحتاجه للدراسة في مكان واحد",courses:"المقررات",sessions:"المجالس القادمة",certificates:"الشهادات والإجازات",payments:"المدفوعات",profile:"الملف الشخصي",logout:"خروج",card:"البطاقة الجامعية",active:"طالب فعّال",inactive:"غير مفعّل",studentNo:"الرقم الجامعي",program:"البرنامج",country:"الدولة",email:"البريد",application:"طلب الالتحاق",noApplication:"لا يوجد طلب مرتبط",accepted:"مقبول",navigate:"تنقّل سريع",overview:"نظرة عامة"},
@@ -27,18 +28,20 @@ export async function StudentDashboard({lang}:{lang:Lang}){
   prisma.notification.findMany({where:{userId:user.id},orderBy:{createdAt:"desc"},take:10}),
  ]);
  if(!profile) redirect(lang==="en"?"/en/student-login.html":"/student-login.html");
+ const universityNumber=await ensureUniversityNumber(user.id);
  const nav=[
   {href:`${studentHref(lang)}/courses`,label:t.courses,count:courses,Icon:BookOpen},{href:`${studentHref(lang)}/sessions`,label:t.sessions,count:sessions,Icon:CalendarDays},
   {href:`${studentHref(lang)}/certificates`,label:t.certificates,count:certificates,Icon:ScrollText},{href:`${studentHref(lang)}/payments`,label:t.payments,count:payments,Icon:CreditCard},
   {href:`${studentHref(lang)}/assignments`,label:lang==="ar"?"واجباتي":"My assignments",count:assignments,Icon:BookOpen},
   {href:`${studentHref(lang)}/attendance`,label:lang==="ar"?"الحضور والغياب":"Attendance",count:attendance,Icon:CalendarDays},
   {href:`${studentHref(lang)}/grades`,label:lang==="ar"?"سجل درجاتي":"My grades",count:grades,Icon:ScrollText},
+  {href:`${studentHref(lang)}/id-card`,label:lang==="ar"?"بطاقتي الجامعية":"Student ID card",count:null,Icon:IdCard},
  ];
  return <main id="main" className="student-dashboard-modern">
   <section className="student-dash-top" id="student-profile"><div className="container">
    <div className="student-dash-welcome"><div><span>{t.portal}</span><h1>{t.welcome}، {profile.name}</h1><p>{t.subtitle}</p></div><form action={studentLogout.bind(null,lang)}><button type="submit"><LogOut size={16}/>{t.logout}</button></form></div>
    <div className="student-dash-grid">
-    <div className="student-id-compact"><div className="student-id-head"><img src="/assets/img/logo-official.png" alt=""/><span>{t.card}<b>{profile.status==="ACTIVE"?t.active:t.inactive}</b></span></div><div className="student-id-name">{profile.name}<small dir="ltr">{profile.studentNo??"—"}</small></div><div className="student-id-foot"><span>{profile.program??"—"}</span><span>{profile.country??"—"}</span></div></div>
+    <div className="student-id-compact"><div className="student-id-head"><img src="/assets/img/logo-official.png" alt=""/><span>{t.card}<b>{profile.status==="ACTIVE"?t.active:t.inactive}</b></span></div><div className="student-id-name">{profile.name}<small dir="ltr">{universityNumber??profile.studentNo??"—"}</small></div><div className="student-id-foot"><span>{profile.program??"—"}</span><Link href={`${studentHref(lang)}/id-card`}>{lang==="ar"?"عرض وتنزيل البطاقة ←":"View and download card →"}</Link></div></div>
     <div className="student-quick-area"><div className="student-quick-grid">{nav.map(({href,label,count,Icon})=><Link key={href} href={href}><span><Icon size={20}/></span><b>{count}</b><small>{label}</small></Link>)}</div>
      <div className="student-mini-profile"><div><UserRound size={17}/><span><b>{t.email}</b><small dir="ltr">{profile.email}</small></span></div><div><span><b>{t.application}</b><small>{application?.program??t.noApplication}</small></span><em>{application?.status==="DONE"?t.accepted:application?.status??"—"}</em></div></div>
     </div>
