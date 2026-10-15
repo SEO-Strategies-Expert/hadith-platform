@@ -27,6 +27,7 @@ import {
   ScrollText,
   Wallet,
   UserCog,
+  FlaskConical,
 } from "lucide-react";
 
 export type NavItem = {
@@ -102,6 +103,7 @@ export const adminNav: NavSection[] = [
       { label: "المستخدمون والأدوار", href: "/admin/users", icon: Users, adminOnly: true },
       { label: "الإعدادات العامة", href: "/admin/settings", icon: Settings },
       { label: "الأمان والتشغيل", href: "/admin/system", icon: Settings, adminOnly: true },
+      { label: "بيانات العرض التجريبية", href: "/admin/demo-data", icon: FlaskConical, adminOnly: true },
       { label: "تحسين محركات البحث", href: "/admin/seo", icon: Search },
     ],
   },
