@@ -15,6 +15,7 @@ const base = {
   phone: z.string().optional(),
   country: z.string().optional(),
   program: z.string().optional(),
+  avatarUrl: z.string().trim().max(191, "رابط الصورة طويل جدًا").optional(),
 };
 
 const optional = (v?: string) => (v && v.trim() !== "" ? v.trim() : null);
@@ -42,6 +43,7 @@ export async function createStudent(
       phone: optional(parsed.data.phone),
       country: optional(parsed.data.country),
       program: optional(parsed.data.program),
+      avatarUrl: optional(parsed.data.avatarUrl),
       passwordHash: await bcrypt.hash(parsed.data.password, 10),
     },
   });
@@ -74,12 +76,17 @@ export async function updateStudent(
       phone: optional(parsed.data.phone),
       country: optional(parsed.data.country),
       program: optional(parsed.data.program),
+      ...(parsed.data.avatarUrl !== undefined ? { avatarUrl: optional(parsed.data.avatarUrl) } : {}),
       ...(parsed.data.password && parsed.data.password.length >= 6
         ? { passwordHash: await bcrypt.hash(parsed.data.password, 10) }
         : {}),
     },
   });
   revalidatePath("/admin/students");
+  revalidatePath("/student/id-card");
+  revalidatePath("/en/student/id-card");
+  revalidatePath("/student");
+  revalidatePath("/en/student");
   redirect("/admin/students");
 }
 

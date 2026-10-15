@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Download, ImageDown, LoaderCircle } from "lucide-react";
 import styles from "./StudentIdCard.module.css";
+import { mediaUrl } from "@/lib/site-format";
 
 type Props = {
   name: string;
@@ -28,6 +29,8 @@ export function StudentIdCardDownloads({ name, number, program, country, photo, 
         import("html2canvas"),
         import("jspdf"),
       ]);
+      await document.fonts.ready;
+      await Promise.all(Array.from(cardRef.current.querySelectorAll("img")).map(image => image.decode()));
       const canvas = await html2canvas(cardRef.current, { scale: 2, useCORS: true, backgroundColor: null });
       const fileName = `student-id-${number}`;
       if (format === "image") {
@@ -59,7 +62,7 @@ export function StudentIdCardDownloads({ name, number, program, country, photo, 
         <b className={styles.status}>{status}</b>
       </header>
       <div className={styles.content}>
-        <div className={styles.photo}>{photo ? <img src={photo} alt="" crossOrigin="anonymous" /> : <span>{name.trim().charAt(0) || "ط"}</span>}</div>
+        <div className={styles.photo}>{photo ? <img src={mediaUrl(photo)} alt="صورة الطالب" crossOrigin="anonymous" /> : <span>{name.trim().charAt(0) || "ط"}</span>}</div>
         <div className={styles.fields}>
           <small>اسم الطالب</small><h1>{name}</h1>
           <small>الرقم الجامعي</small><b className={styles.number} dir="ltr">{number}</b>

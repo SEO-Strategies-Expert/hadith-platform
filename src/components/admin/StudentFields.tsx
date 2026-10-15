@@ -1,4 +1,5 @@
 import { Field, Select } from "@/components/admin/ui";
+import { ImagePickerField } from "@/components/admin/ImagePickerField";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -34,6 +35,7 @@ export function StudentFields({ record }: { record?: any }) {
       <Field label="رقم الهاتف" name="phone" dir="ltr" defaultValue={record?.phone} />
       <Field label="الدولة" name="country" defaultValue={record?.country} />
       <Field label="البرنامج" name="program" defaultValue={record?.program} />
+      <div className="sm:col-span-2"><ImagePickerField label="صورة الطالب للبطاقة الجامعية" name="avatarUrl" defaultValue={record?.avatarUrl} hint="تظهر هذه الصورة في البطاقة وفي ملفات PDF والصورة عند تنزيلها." /></div>
     </div>
   );
 }
