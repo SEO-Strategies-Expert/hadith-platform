@@ -3,7 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { teacherSessionWhere } from "@/lib/session-access";
 import { AttendanceControls } from "@/components/site/AttendanceControls";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
-import { formatDateTime } from "@/components/admin/datetime";
+import { formatDateTime, toLocalInput } from "@/components/admin/datetime";
+import { StudentAttendanceEditor } from "@/components/instructor/StudentAttendanceEditor";
 
 export default async function Page() {
   const me = await requireInstructor();
@@ -20,7 +21,7 @@ export default async function Page() {
       orderBy: { startsAt: "desc" }, take: 200,
       include: {
         attendance: { where: { user: { role: "STUDENT" } }, include: { user: { select: { id: true, name: true, studentNo: true } } } },
-        course: { select: { titleAr: true, enrollments: {
+        course: { select: { titleAr: true, instructorId: true, instructors: { select: { id: true } }, enrollments: {
           where: { status: { in: ["ACTIVE", "COMPLETED"] }, user: { role: "STUDENT" } },
           select: { enrolledAt: true, user: { select: { id: true, name: true, studentNo: true } } },
         } } },
@@ -45,6 +46,7 @@ export default async function Page() {
         {studentSessions.map(session => {
           const end = session.endsAt ?? new Date(session.startsAt.getTime() + session.durationMin * 60_000);
           const ended = now > end;
+          const canManage = session.course && (session.course.instructorId === me.scholarId || session.course.instructors.some(instructor => instructor.id === me.scholarId));
           const records = new Map(session.attendance.map(record => [record.userId, record]));
           const students = new Map(session.attendance.map(record => [record.userId, record.user]));
           for (const enrollment of session.course?.enrollments ?? []) {
@@ -65,7 +67,7 @@ export default async function Page() {
               {!rows.length ? <EmptyState label="لا يوجد طلاب مسجلون أو سجلات حضور لهذه المحاضرة بعد." /> : (
                 <div className="overflow-x-auto rounded-b-2xl">
                   <table className="w-full min-w-[680px] text-right text-[13px]">
-                    <thead className="bg-slate-50 text-[12px] text-ink-soft"><tr>{["الطالب", "الحالة", "وقت الحضور", "وقت الانصراف", "الدقائق"].map(title => <th key={title} scope="col" className="px-4 py-3 font-bold">{title}</th>)}</tr></thead>
+                    <thead className="bg-slate-50 text-[12px] text-ink-soft"><tr>{["الطالب", "الحالة", "وقت الحضور", "وقت الانصراف", "الدقائق", ...(canManage ? ["إدارة الحضور"] : [])].map(title => <th key={title} scope="col" className="px-4 py-3 font-bold">{title}</th>)}</tr></thead>
                     <tbody>{rows.map(student => {
                       const record = records.get(student.id);
                       return <tr key={student.id} className="border-t border-black/5 hover:bg-slate-50/70">
@@ -74,6 +76,18 @@ export default async function Page() {
                         <td className="px-4 py-3 text-[12px] text-ink-soft">{record?.present ? formatDateTime(record.joinedAt) : "—"}</td>
                         <td className="px-4 py-3 text-[12px] text-ink-soft">{record?.present ? formatDateTime(record.leftAt) : "—"}</td>
                         <td className="px-4 py-3 font-bold text-navy-900">{record?.minutes ?? "—"}</td>
+                        {canManage && <td className="px-4 py-3 align-top"><StudentAttendanceEditor
+                          sessionId={session.id}
+                          userId={student.id}
+                          studentName={student.name}
+                          record={{
+                            exists: !!record,
+                            present: record?.present ?? true,
+                            joinedAt: toLocalInput(record?.present ? record.joinedAt : session.startsAt) ?? "",
+                            leftAt: toLocalInput(record?.present ? record.leftAt : end) ?? "",
+                            note: record?.note ?? "",
+                          }}
+                        /></td>}
                       </tr>;
                     })}</tbody>
                   </table>
