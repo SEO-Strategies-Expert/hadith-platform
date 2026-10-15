@@ -14,7 +14,7 @@ function cell(kind: string | undefined, value: any) {
     return value ? <Badge tone="green">نعم</Badge> : <Badge tone="gray">لا</Badge>;
   if (kind === "badge") return value ? <Badge tone="gold">{value}</Badge> : "—";
   if (kind === "image")
-    return value ? <span className="text-[11.5px] text-ink-soft" dir="ltr">{String(value).split("/").pop()}</span> : "—";
+    return value ? <div className="flex min-w-40 items-center gap-2"><img src={String(value)} alt="معاينة الصورة" className="h-12 w-16 shrink-0 rounded-md border border-black/10 bg-slate-50 object-contain" /><span className="max-w-48 truncate text-[11px] text-ink-soft" dir="ltr">{String(value).split("/").pop()}</span></div> : "—";
   if (kind === "url") {
     return value && value !== "#" ? <a href={String(value)} target="_blank" rel="noreferrer" className="block max-w-[26rem] truncate text-[12px] text-blue-700 underline-offset-2 hover:underline" dir="ltr" title={String(value)}>{String(value)}</a> : <span className="text-ink-soft">غير محدّد</span>;
   }

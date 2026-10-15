@@ -9,7 +9,18 @@ export default async function PagesListPage({
   searchParams: Promise<{ saved?: string }>;
 }) {
   const { saved } = await searchParams;
-  const pages = await prisma.page.findMany({ orderBy: { slug: "asc" } });
+  const [pages, firstSlide] = await Promise.all([
+    prisma.page.findMany({ orderBy: { slug: "asc" } }),
+    prisma.heroSlide.findFirst({ where: { visible: true }, orderBy: { order: "asc" }, select: { imageAr: true } }),
+  ]);
+
+  const imageFor = (page: (typeof pages)[number]) => {
+    if (page.slug === "index" && firstSlide?.imageAr) return firstSlide.imageAr;
+    if (page.heroImage) return page.heroImage;
+    const imageTag = page.bodyHtmlAr?.match(/<img\b[^>]*>/i)?.[0];
+    const bodyImage = imageTag?.match(/\bsrc\s*=\s*["']([^"']+)["']/i)?.[1];
+    return bodyImage || page.ogImage;
+  };
 
   return (
     <div>
@@ -29,6 +40,7 @@ export default async function PagesListPage({
                 <tr className="border-b border-black/5 text-[12px] text-ink-soft">
                   <th className="px-4 py-3 font-bold">المعرّف</th>
                   <th className="px-4 py-3 font-bold">العنوان</th>
+                  <th className="px-4 py-3 font-bold">معاينة الصورة</th>
                   <th className="px-4 py-3 font-bold">القالب</th>
                   <th className="px-4 py-3 font-bold">الحالة</th>
                   <th className="px-4 py-3 font-bold">تحرير</th>
@@ -39,6 +51,7 @@ export default async function PagesListPage({
                   <tr key={p.id} className="border-b border-black/5 last:border-0 hover:bg-cream-50">
                     <td className="px-4 py-3 text-ink-soft" dir="ltr">{p.slug}</td>
                     <td className="px-4 py-3 font-bold text-navy-900">{p.titleAr}</td>
+                    <td className="px-4 py-3">{imageFor(p) ? <img src={imageFor(p)!} alt={`صورة ${p.titleAr}`} className="h-14 w-24 rounded-lg border border-black/10 bg-slate-50 object-contain" /> : <span className="text-[11px] text-ink-soft">لا توجد صورة</span>}</td>
                     <td className="px-4 py-3"><Badge tone="blue">{p.template}</Badge></td>
                     <td className="px-4 py-3">
                       {p.status === "PUBLISHED" ? <Badge tone="green">منشورة</Badge> : <Badge tone="gray">مسودّة</Badge>}
