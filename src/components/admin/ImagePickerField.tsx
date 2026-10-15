@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Upload, Loader2, X } from "lucide-react";
+import { mediaUrl } from "@/lib/site-format";
 
 export function ImagePickerField({
   label,
@@ -49,7 +50,7 @@ export function ImagePickerField({
         {url ? (
           <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-black/10 bg-cream-50">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={url} alt="" className="h-full w-full object-cover" />
+            <img src={mediaUrl(url)} alt="" className="h-full w-full object-contain" />
             <button
               type="button"
               onClick={() => setUrl("")}

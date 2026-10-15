@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FileText, Heading2, Image as ImageIcon, List, Loader2, Type, Upload } from "lucide-react";
+import { mediaUrl } from "@/lib/site-format";
 
 type EditableText = { id: number; value: string; kind: "heading" | "paragraph" | "list" | "text" };
 type EditableImage = { id: number; src: string; label: string };
@@ -110,7 +111,7 @@ export function RichTextEditor({ name, label, value, dir = "rtl" }: { name: stri
     {images.length > 0 && <section className="mt-5 rounded-2xl border border-black/8 bg-white p-3 sm:p-4">
       <div className="mb-3 flex items-center gap-2"><ImageIcon size={17} className="text-gold-3" /><div><h5 className="text-[13px] font-extrabold text-navy-900">صور هذا المحتوى</h5><p className="text-[11px] text-ink-soft">معاينة الصور الموجودة في الصفحة؛ غيّر الصورة التي تريدها فقط.</p></div></div>
       <div className="grid gap-3 sm:grid-cols-2">{images.map((image) => <div key={image.id} className="flex min-w-0 gap-3 rounded-xl border border-black/8 bg-slate-50 p-2.5">
-        <div className="grid h-20 w-28 shrink-0 place-items-center overflow-hidden rounded-lg border border-black/10 bg-white text-[11px] text-ink-soft">{image.src ? <img src={image.src} alt={image.label} className="h-full w-full object-contain" /> : "بلا صورة"}</div>
+        <div className="grid h-20 w-28 shrink-0 place-items-center overflow-hidden rounded-lg border border-black/10 bg-white text-[11px] text-ink-soft">{image.src.trim() ? <img src={mediaUrl(image.src)} alt={image.label} className="h-full w-full object-contain" /> : "بلا صورة"}</div>
         <div className="min-w-0 flex-1"><p className="mb-1 truncate text-[11.5px] font-bold text-navy-800" title={image.label}>{image.label}</p>
           <input type="text" value={image.src} onChange={(event) => changeImage(image.id, event.target.value)} dir="ltr" aria-label={`رابط ${image.label}`} className="w-full rounded-lg border border-black/10 bg-white px-2 py-1.5 text-[11px] outline-none focus:border-gold" />
           <button type="button" disabled={uploadingImage !== null} onClick={() => { setSelectedImage(image.id); fileRef.current?.click(); }} className="mt-1.5 inline-flex items-center gap-1 rounded-md border border-black/10 bg-white px-2 py-1 text-[10.5px] font-bold text-navy-800 disabled:opacity-60">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/admin/ui";
+import { mediaUrl } from "@/lib/site-format";
 
 export default async function PagesListPage({
   searchParams,
@@ -15,11 +16,11 @@ export default async function PagesListPage({
   ]);
 
   const imageFor = (page: (typeof pages)[number]) => {
-    if (page.slug === "index" && firstSlide?.imageAr) return firstSlide.imageAr;
-    if (page.heroImage) return page.heroImage;
+    if (page.slug === "index" && firstSlide?.imageAr) return mediaUrl(firstSlide.imageAr);
+    if (page.heroImage) return mediaUrl(page.heroImage);
     const imageTag = page.bodyHtmlAr?.match(/<img\b[^>]*>/i)?.[0];
     const bodyImage = imageTag?.match(/\bsrc\s*=\s*["']([^"']+)["']/i)?.[1];
-    return bodyImage || page.ogImage;
+    return mediaUrl(bodyImage || page.ogImage);
   };
 
   return (
