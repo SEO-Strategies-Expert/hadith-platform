@@ -92,7 +92,7 @@ export default async function QuizzesPage({ searchParams }: { searchParams?: Pro
                   return (
                     <tr key={q.id} className="border-b border-black/5 last:border-0 hover:bg-cream-50">
                       <td className="px-4 py-3">
-                        <div className="font-bold text-navy-900">{q.titleAr}</div>
+                        <div className="font-bold text-navy-900">{q.titleAr}{q.isFinal && <span className="ms-2 rounded-full bg-gold/15 px-2 py-0.5 text-[11px] font-bold text-gold-4">اختبار نهائي</span>}</div>
                         <div className="text-[12px] text-ink-soft" dir="ltr">
                           {q.titleEn}
                         </div>

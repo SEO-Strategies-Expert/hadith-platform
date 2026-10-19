@@ -25,10 +25,13 @@ export default async function InstructorCoursesPage() {
         title="مقرّراتي"
         desc="المقرّرات المسنَدة إليك. أدر وحدات كل مقرّر ودروسه وملفاته من «المواد»."
       />
+      <div className="mb-4">
+        <Link href="/instructor/courses/new" className="inline-flex items-center gap-1.5 rounded-lg bg-gold px-4 py-2 text-[13px] font-bold text-navy-900 hover:opacity-90">+ إضافة مقرّر جديد</Link>
+      </div>
 
       <Card>
         {courses.length === 0 ? (
-          <EmptyState label="لا مقرّرات مسنَدة إليك بعد." />
+          <EmptyState label="لا مقرّرات لديك بعد — أضف مقرّرك الأول من الزر أعلاه." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-right text-[13.5px]">

@@ -1,5 +1,6 @@
 "use server";
 
+import { pendingLessonsBeforeFinal } from "@/lib/final-exam";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -47,7 +48,7 @@ export async function startQuizAttempt(quizId: string): Promise<void> {
 
   const quiz = await prisma.quiz.findUnique({
     where: { id: quizId },
-    select: { id: true, courseId: true, visible: true, attemptsAllowed: true, retakeCooldownHours: true, questionPoolSize: true, availableAt: true, closesAt: true },
+    select: { id: true, courseId: true, visible: true, isFinal: true, attemptsAllowed: true, retakeCooldownHours: true, questionPoolSize: true, availableAt: true, closesAt: true },
   });
   // اختبارٌ مخفيّ أو بلا مقرّر لا يُبدأ: الوصول مشروطٌ بالتسجيل في مقرّرٍ بعينه،
   // فبلا مقرّر لا يوجد شرطٌ يمكن التحقّق منه — ونفشل مغلقين لا مفتوحين.
@@ -55,6 +56,8 @@ export async function startQuizAttempt(quizId: string): Promise<void> {
   const now = new Date();
   if ((quiz.availableAt && quiz.availableAt > now) || (quiz.closesAt && quiz.closesAt <= now)) return;
   if (!(await isEnrolled(user.id, quiz.courseId))) return;
+  // الاختبار النهائي لا يُبدأ قبل إكمال دروس المقرّر.
+  if (quiz.isFinal && (await pendingLessonsBeforeFinal(user.id, quiz.courseId)) > 0) return;
 
   // محاولةٌ مفتوحة قائمة؟ لا نفتح ثانية — وإلّا التفّ الطالب على المهلة بإعادة البدء.
   const open = await prisma.quizAttempt.findFirst({

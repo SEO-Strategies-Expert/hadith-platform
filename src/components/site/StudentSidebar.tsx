@@ -32,7 +32,7 @@ export async function StudentSidebar({ lang }: { lang: Lang }) {
     { href: `${studentHref(lang)}/courses`, label: t.courses, count: courses, Icon: BookOpen },
     { href: `${studentHref(lang)}/sessions`, label: t.sessions, count: sessions, Icon: CalendarDays },
     { href: `${studentHref(lang)}/assignments`, label: lang === "ar" ? "واجباتي" : "My assignments", count: assignments, Icon: BookOpen },
-    { href: `${studentHref(lang)}/attendance`, label: lang === "ar" ? "الحضور والغياب والجدول" : "Attendance & timetable", count: attendance, Icon: CalendarDays },
+    { href: `${studentHref(lang)}/attendance`, label: lang === "ar" ? "جدول المحاضرات والحضور" : "Timetable & attendance", count: attendance, Icon: CalendarDays },
     { href: `${studentHref(lang)}/grades`, label: lang === "ar" ? "سجل درجاتي" : "My grades", count: grades, Icon: ScrollText },
     { href: `${studentHref(lang)}/id-card`, label: lang === "ar" ? "بطاقتي الجامعية" : "Student ID card", Icon: IdCard },
     { href: `${studentHref(lang)}/certificates`, label: t.certificates, count: certificates, Icon: ScrollText },

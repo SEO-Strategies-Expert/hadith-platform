@@ -9,6 +9,7 @@
  *     في حمولة RSC.
  *  ٣) **الوقت**: يُحسب من `startedAt` على الخادم؛ مؤقّت المتصفّح عرضٌ لا حكم.
  */
+import { pendingLessonsBeforeFinal } from "@/lib/final-exam";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -125,6 +126,7 @@ export async function StudentQuizView({ lang, quizId }: { lang: Lang; quizId: st
       availableAt: true,
       closesAt: true,
       shuffle: true,
+      isFinal: true,
       course: { select: { id: true, titleAr: true, titleEn: true, visible: true } },
     },
   });
@@ -148,13 +150,14 @@ export async function StudentQuizView({ lang, quizId }: { lang: Lang; quizId: st
   const usedCount = attempts.filter((a) => a.submittedAt).length;
   const remaining = quiz.attemptsAllowed > 0 ? Math.max(0, quiz.attemptsAllowed - usedCount) : null;
   const lastDone = attempts.find((a) => a.submittedAt) ?? null;
+  const pendingFinal = quiz.isFinal ? await pendingLessonsBeforeFinal(user.id, quiz.courseId) : 0;
 
   return (
     <main id="main">
       <section className="page-hero orn-navy">
         <div className="container">
           <div className="page-hero-copy reveal">
-            <p className="page-kicker">{t.kicker}</p>
+            <p className="page-kicker">{quiz.isFinal ? (lang === "ar" ? "الاختبار النهائي للمادة" : "Final exam") : t.kicker}</p>
             <h1 className="page-title thuluth gold-text">{title(lang, quiz.titleAr, quiz.titleEn)}</h1>
             <div className="page-meta">
               <span>
@@ -201,6 +204,14 @@ export async function StudentQuizView({ lang, quizId }: { lang: Lang; quizId: st
           {questionCount === 0 ? (
             <div className="callout reveal">
               <p>{t.empty}</p>
+            </div>
+          ) : pendingFinal > 0 && !open ? (
+            <div className="callout reveal">
+              <p>
+                {lang === "ar"
+                  ? `🔒 هذا هو الاختبار النهائي للمادة، ويُفتح بعد إكمال جميع الدروس. المتبقّي لك: ${num(pendingFinal, lang)} درس.`
+                  : `🔒 This is the course final exam. It unlocks after you complete all lessons. Remaining: ${pendingFinal}.`}
+              </p>
             </div>
           ) : open ? (
             <OpenAttempt

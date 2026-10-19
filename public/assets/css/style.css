@@ -1591,3 +1591,26 @@ html{scroll-padding-top:150px}
   .foot-brand img{width:72px;height:72px}
 }
 @media(max-width:1020px){.mainnav.open .drop{display:block!important}}
+
+/* ==========================================================================
+   طلب الكلية (2026-10): شعار أكبر، خط «الاعتماد» أوضح، وصور كاملة غير مقصوصة
+   على الهاتف واللابتوب. الكتلة في آخر الملف لتغلب القواعد السابقة.
+   ========================================================================== */
+.menubar .brand-emblem{width:104px!important;height:104px!important;object-fit:contain}
+.menubar .brand-name{font-size:clamp(15px,1.25vw,21px)!important;line-height:1.7!important}
+.menubar .accreditation-link{min-height:64px!important;padding:8px 14px!important;gap:12px!important}
+.menubar .accreditation-link .thuluth{display:block!important;font-size:21px!important;font-weight:900;line-height:1.4!important}
+.menubar .accreditation-logo{width:54px!important;height:54px!important}
+.menubar .accreditation-logo img{width:48px!important;height:48px!important;object-fit:contain}
+/* صور الهيرو: نسبة الإطار = نسبة الصورة، والصورة تُعرض كاملة */
+.hero-stage{aspect-ratio:1916/821!important;height:auto!important;max-height:none!important;background:var(--navy-950,#0b1a2b)}
+.hero-stage .slide img,.slide img{object-fit:contain!important;object-position:center!important}
+.portal-visual>img{object-fit:contain!important;background:var(--cream-100,#f7f3eb)}
+@media(max-width:760px){
+  .menubar .brand-emblem{width:86px!important;height:86px!important}
+  .menubar .brand-name{font-size:clamp(19px,5.4vw,25px)!important;white-space:normal!important}
+  .menubar .accreditation-link{min-height:56px!important;padding:6px 10px!important;min-width:auto!important}
+  .menubar .accreditation-link .thuluth{display:block!important;font-size:18px!important}
+  .menubar .accreditation-logo{width:46px!important;height:46px!important}
+  .menubar .accreditation-logo img{width:40px!important;height:40px!important}
+}

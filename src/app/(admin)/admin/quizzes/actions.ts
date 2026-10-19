@@ -78,6 +78,7 @@ function buildQuiz(formData: FormData) {
       closesAt: fromLocalInput(String(formData.get("closesAt") ?? "")),
       shuffle: formData.get("shuffle") === "on",
       visible: formData.get("visible") === "on",
+      isFinal: formData.get("isFinal") === "on",
     },
   };
 }

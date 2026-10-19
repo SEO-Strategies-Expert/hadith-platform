@@ -894,6 +894,8 @@ model Quiz {
   closesAt            DateTime?
   shuffle             Boolean   @default(true)
   visible             Boolean   @default(true)
+  // اختبار نهائي للمادة: لا يُفتح إلا بعد إكمال كل دروس المقرّر
+  isFinal             Boolean   @default(false)
 
   questions Question[]
   attempts  QuizAttempt[]

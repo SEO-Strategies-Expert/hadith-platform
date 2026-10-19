@@ -13,6 +13,7 @@
 import { prisma } from "@/lib/prisma";
 import { ApiError } from "@/lib/api-auth";
 import { isEnrolled } from "@/lib/lms";
+import { pendingLessonsBeforeFinal } from "@/lib/final-exam";
 import {
   attemptDeadline,
   isAttemptExpired,
@@ -41,6 +42,7 @@ export async function loadQuizForStudent(userId: string, quizId: string) {
       passScore: true,
       attemptsAllowed: true,
       shuffle: true,
+      isFinal: true,
       course: { select: { id: true, titleAr: true, titleEn: true, visible: true } },
     },
   });
@@ -51,6 +53,9 @@ export async function loadQuizForStudent(userId: string, quizId: string) {
   if (!(await isEnrolled(userId, quiz.courseId))) {
     // ٤٠٤ لا ٤٠٣ — لا نؤكّد وجود اختبارٍ لمن ليس من أهله.
     throw new ApiError(404, "الاختبار غير موجود أو لست مسجَّلًا في مقرّره");
+  }
+  if (quiz.isFinal && (await pendingLessonsBeforeFinal(userId, quiz.courseId)) > 0) {
+    throw new ApiError(403, "الاختبار النهائي يُفتح بعد إكمال جميع دروس المقرّر");
   }
   return quiz;
 }

@@ -61,6 +61,7 @@ export const quizFields: FieldDef[] = [
   { name: "availableAt", label: "موعد فتح الاختبار", type: "datetime", half: true, nullable: true },
   { name: "closesAt", label: "موعد إغلاق الاختبار", type: "datetime", half: true, nullable: true },
   { name: "shuffle", label: "خلط ترتيب الأسئلة لكل محاولة", type: "bool", half: true },
+  { name: "isFinal", label: "اختبار نهائي للمادة (يُفتح بعد إكمال كل دروس المقرّر)", type: "bool", half: true },
   { name: "visible", label: "ظاهر للطلاب", type: "bool" },
 ];
 
